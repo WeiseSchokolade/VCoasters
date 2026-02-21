@@ -1,0 +1,98 @@
+package de.schoko.editortestmod.client.lines;
+
+import de.schoko.editortestmod.client.core.EditorContext;
+import de.schoko.editortestmod.client.core.TargetTester;
+import de.schoko.editortestmod.client.core.View;
+import de.schoko.editortestmod.client.gizmo.LineTranslationGizmo;
+import de.schoko.editortestmod.core.EditorObject;
+import de.schoko.editortestmod.core.Line;
+import de.schoko.editortestmod.core.RenderContext;
+import imgui.ImGuiIO;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.InteractionHand;
+import org.joml.Vector3f;
+
+import java.util.Optional;
+
+public class LineEditorView extends View {
+	private Line selectedLine;
+	private LineTranslationGizmo gizmo;
+
+	@Override
+	public boolean handleAttack() {
+		LineManager lineManager = getContext().getLineManager();
+		return TargetTester.consumeClosestTarget(
+			TargetTester.consumer(lineManager.getLines().size(), (i, from, to) -> lineManager.getLines().get(i).getRenderer().clip(from, to), i -> {
+				Line line = lineManager.getLines().get(i);
+				Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND);
+				selectedLine = line;
+				gizmo = new LineTranslationGizmo(selectedLine);
+			}),
+			TargetTester.consumer(gizmo != null ? 6 : 0, (i, from, to) -> gizmo.getHitboxes()[i].clip(from, to), i -> {
+				gizmo.setDraggedAxis(LineTranslationGizmo.TRANSLATION_AXIS[i]);
+			})
+		);
+	}
+
+	@Override
+	public boolean handleDraggedAttack() {
+		LineManager lineManager = getContext().getLineManager();
+		return TargetTester.consumeClosestTarget(
+			new TargetTester.ConsumingTargetProvider<>(lineManager.getLines().size(), (i, from, to) -> lineManager.getLines().get(i).getRenderer().clip(from, to), i -> {
+
+			}),
+			new TargetTester.ConsumingTargetProvider<>(gizmo != null ? 6 : 0, (i, from, to) -> gizmo.getHitboxes()[i].clip(from, to), i -> {
+				//gizmo.setDraggedAxis(TranslationGizmo.TRANSLATION_AXIS[i]);
+			})
+		);
+	}
+
+	@Override
+	public void leftMouseReleased() {
+		if (gizmo != null) gizmo.release();
+	}
+
+	@Override
+	public void load(EditorContext editorContext) {
+		editorContext.getLineManager().addLine(new Line("0",
+			new Vector3f(5, 5, 5),
+			new Vector3f(8, 7, 6)
+		));
+		editorContext.getLineManager().addLine(new Line("1",
+			new Vector3f(8, 7, 6),
+			new Vector3f(10, 6, 3)
+		));
+		editorContext.getLineManager().getLines().getFirst().setOutputLine(editorContext.getLineManager().getLines().getLast());
+	}
+
+	@Override
+	public void upload(RenderContext renderContext) {
+		LineManager lineManager = getContext().getLineManager();
+		EditorObject target;
+		if (getContext().editorActive()) {
+			Optional<EditorObject> optionalTarget = TargetTester.getClosestTarget(
+				TargetTester.provider(
+					lineManager.getLines().size(),
+					(i, from, to) -> lineManager.getLines().get(i).getRenderer().clip(from, to),
+					i -> lineManager.getLines().get(i)),
+				TargetTester.provider(gizmo != null ? 6 : 0,
+					(i, from, to) -> gizmo.getHitboxes()[i].clip(from, to),
+					i -> (EditorObject) gizmo.getHitboxes()[i]));
+			target = optionalTarget.orElse(null);
+		} else {
+			target = null;
+		}
+
+		lineManager.getLines().forEach(line -> {
+			line.getRenderer().upload(renderContext, target, selectedLine);
+		});
+		if (selectedLine != null && gizmo != null) {
+			gizmo.draw(renderContext, target);
+		}
+	}
+
+	@Override
+	public void render(ImGuiIO io) {
+
+	}
+}

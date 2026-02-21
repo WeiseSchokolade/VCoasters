@@ -1,0 +1,12 @@
+{
+  "sources": [    {    {
+      "type": "directory",
+      "source": "editortestmod:logo",
+      "prefix": "logo/"
+    },    {
+      "type": "directory",
+      "source": "editortestmod:numbers",
+      "prefix": "numbers/"
+    }
+  ]
+}

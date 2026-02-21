@@ -1,0 +1,42 @@
+{
+	"schemaVersion": 1,
+	"id": "editortestmod",
+	"version": "${version}",
+	"name": "EditorTestMod",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"accessWidener": "editortestmod.accessWidener",
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/editortestmod/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+          "de.schoko.editortestmod.EditorTestMod"
+		],
+		"client": [
+			"de.schoko.editortestmod.client.EditorTestModClient"
+		]
+	},
+	"mixins": [
+		"editortestmod.mixins.json",
+		{
+			"config": "editortestmod.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

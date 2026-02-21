@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "de.schoko.editortestmod.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "GameRendererMixin",
+    "GuiMixin",
+    "KeyboardInputMixin",
+    "LevelRendererMixin",
+    "MinecraftMixin",
+    "MouseHandlerMixin",
+    "SpectatorGuiMixin",
+    "imgui.GameRendererMixin",
+    "imgui.MinecraftMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "AABBMixin"
+  ]
+}

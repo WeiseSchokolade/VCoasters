@@ -2,9 +2,6 @@ package de.schoko.editortestmod.packets;
 
 import de.schoko.editortestmod.EditorTestMod;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
@@ -19,7 +16,9 @@ public class Networking {
 	}
 
 	public static void register() {
-		PayloadTypeRegistry.playS2C().register(LoadTrackS2C.TYPE, LoadTrackS2C.CODEC);
-		PayloadTypeRegistry.playC2S().register(ApplyTrackChangesC2S.TYPE, ApplyTrackChangesC2S.CODEC);
+		PayloadTypeRegistry.playS2C().register(OpenEditorToTrackS2C.TYPE, OpenEditorToTrackS2C.CODEC);
+		PayloadTypeRegistry.playC2S().register(SaveDataC2S.TYPE, SaveDataC2S.CODEC);
+		PayloadTypeRegistry.playC2S().register(ApplyLineChangesC2S.TYPE, ApplyLineChangesC2S.CODEC);
+		PayloadTypeRegistry.playC2S().register(ApplyTrackMetaChangesC2S.TYPE, ApplyTrackMetaChangesC2S.CODEC);
 	}
 }

@@ -6,7 +6,7 @@ import com.mojang.serialization.DataResult;
 import de.schoko.editortestmod.codecs.EditorCodecs;
 import de.schoko.editortestmod.codecs.TrackCodecs;
 import de.schoko.editortestmod.core.Line;
-import de.schoko.editortestmod.packets.LoadTrackS2C;
+import de.schoko.editortestmod.packets.OpenEditorToTrackS2C;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandSourceStack;
@@ -29,7 +29,7 @@ public final class TrackManagerCommands {
 	public static void register() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, commandBuildContext, selection) -> {
 			dispatcher.register(
-				Commands.literal("editor:load")
+				Commands.literal("editor:open")
 					.requires(EditorTestMod::canUse)
 					.then(
 						Commands.argument("identifier", IdentifierArgument.id()).suggests(StorageDataAccessor.SUGGEST_STORAGE)
@@ -50,10 +50,10 @@ public final class TrackManagerCommands {
 									EditorTestMod.instance.getTrackManager().addTrack(track);
 									ServerPlayer player = ctx.getSource().getPlayer();
 									if (player != null) {
-										ServerPlayNetworking.send(player, new LoadTrackS2C(track));
+										ServerPlayNetworking.send(player, new OpenEditorToTrackS2C(track));
 									}
 								} catch (Exception e) {
-									EditorTestMod.LOGGER.error("Couldn't load track " + identifier, e);
+									EditorTestMod.LOGGER.error("Couldn't open track " + identifier, e);
 									return fail(ctx, "An error occurred trying to execute that command");
 								}
 								return 1;
@@ -61,33 +61,28 @@ public final class TrackManagerCommands {
 					)
 			);
 			dispatcher.register(
-				Commands.literal("editor:save")
+				Commands.literal("editor:create")
 					.requires(EditorTestMod::canUse)
 					.then(
 						Commands.argument("identifier", IdentifierArgument.id()).suggests(StorageDataAccessor.SUGGEST_STORAGE)
 							.executes(ctx -> {
 								Identifier identifier = ctx.getArgument("identifier", Identifier.class);
 								CompoundTag data = ctx.getSource().getServer().getCommandStorage().get(identifier);
-								if (data.isEmpty()) {
-									ctx.getSource().sendFailure(Component.literal("Track " + identifier + " not found!"));
-									return 0;
+								if (!data.isEmpty()) {
+									Optional<Integer> dataVersion = data.getInt("data_version");
+									if (dataVersion.isPresent()) return fail(ctx, "Track " + identifier + " already exists!");
 								}
-								Track track = EditorTestMod.instance.getTrackManager().getTrack(identifier.toString());
-
-								if (EXPORT_VELOCITIES) {
-									track.setAcceleration(1, 1.0 / 20); // TODO: Move values into some kind of config
-								} else {
-									track.resetAcceleration();
+								ServerPlayer player = ctx.getSource().getPlayer();
+								if (player == null) {
+									return fail(ctx, "Only players can create tracks!");
 								}
-
-								DataResult<Tag> result = TrackCodecs.CURRENT.encodeStart(NbtOps.INSTANCE, track);
-								ctx.getSource().getServer().getCommandStorage().set(identifier, (CompoundTag) result.getOrThrow());
-								ctx.getSource().sendSuccess(() -> Component.literal("Saved " + identifier), true);
-
+								Track track = new Track(identifier.toString());
+								EditorTestMod.instance.getTrackManager().addTrack(track);
+								ServerPlayNetworking.send(player, new OpenEditorToTrackS2C(track));
 								return 1;
 							})
-					)
-			);
+						)
+				);
 			dispatcher.register(
 				Commands.literal("editor:tptoline")
 					.requires(stack -> stack.isPlayer() && EditorTestMod.canUse(stack))

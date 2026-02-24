@@ -1,6 +1,7 @@
 package de.schoko.editortestmod.client.lines;
 
-import de.schoko.editortestmod.client.core.EditorContext;
+import de.schoko.editortestmod.Track;
+import de.schoko.editortestmod.client.EditorScreen;
 import de.schoko.editortestmod.client.core.TargetTester;
 import de.schoko.editortestmod.client.core.View;
 import de.schoko.editortestmod.client.gizmo.LineTranslationGizmo;
@@ -18,12 +19,16 @@ public class LineEditorView extends View {
 	private Line selectedLine;
 	private LineTranslationGizmo gizmo;
 
+	public LineEditorView(EditorScreen screen) {
+		super(screen);
+	}
+
 	@Override
 	public boolean handleAttack() {
-		LineManager lineManager = getContext().getLineManager();
+		Track track = getScreen().getTrack();
 		return TargetTester.consumeClosestTarget(
-			TargetTester.consumer(lineManager.getLines().size(), (i, from, to) -> lineManager.getLines().get(i).getRenderer().clip(from, to), i -> {
-				Line line = lineManager.getLines().get(i);
+			TargetTester.consumer(track.getLines().size(), (i, from, to) -> track.getLines().get(i).getRenderer().clip(from, to), i -> {
+				Line line = track.getLines().get(i);
 				Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND);
 				selectedLine = line;
 				gizmo = new LineTranslationGizmo(selectedLine);
@@ -36,9 +41,9 @@ public class LineEditorView extends View {
 
 	@Override
 	public boolean handleDraggedAttack() {
-		LineManager lineManager = getContext().getLineManager();
+		Track track = getScreen().getTrack();
 		return TargetTester.consumeClosestTarget(
-			new TargetTester.ConsumingTargetProvider<>(lineManager.getLines().size(), (i, from, to) -> lineManager.getLines().get(i).getRenderer().clip(from, to), i -> {
+			new TargetTester.ConsumingTargetProvider<>(track.getLines().size(), (i, from, to) -> track.getLines().get(i).getRenderer().clip(from, to), i -> {
 
 			}),
 			new TargetTester.ConsumingTargetProvider<>(gizmo != null ? 6 : 0, (i, from, to) -> gizmo.getHitboxes()[i].clip(from, to), i -> {
@@ -53,35 +58,31 @@ public class LineEditorView extends View {
 	}
 
 	@Override
-	public void load(EditorContext editorContext) {
-		editorContext.getLineManager().addLine(new Line("0",
+	public void load() {
+		getScreen().getTrack().getLines().add(new Line("0",
 			new Vector3f(5, 5, 5),
 			new Vector3f(8, 7, 6)
 		));
-		editorContext.getLineManager().addLine(new Line("1",
+		getScreen().getTrack().getLines().add(new Line("1",
 			new Vector3f(8, 7, 6),
 			new Vector3f(10, 6, 3)
 		));
-		editorContext.getLineManager().getLines().getFirst().setOutputLine(editorContext.getLineManager().getLines().getLast());
+		getScreen().getTrack().getLines().getFirst().setOutputLine(getScreen().getTrack().getLines().getLast());
 	}
 
 	@Override
-	public void upload(RenderContext renderContext) {
-		LineManager lineManager = getContext().getLineManager();
+	public void render(RenderContext renderContext) {
+		Track lineManager = getScreen().getTrack();
 		EditorObject target;
-		if (getContext().editorActive()) {
-			Optional<EditorObject> optionalTarget = TargetTester.getClosestTarget(
-				TargetTester.provider(
-					lineManager.getLines().size(),
-					(i, from, to) -> lineManager.getLines().get(i).getRenderer().clip(from, to),
-					i -> lineManager.getLines().get(i)),
-				TargetTester.provider(gizmo != null ? 6 : 0,
-					(i, from, to) -> gizmo.getHitboxes()[i].clip(from, to),
-					i -> (EditorObject) gizmo.getHitboxes()[i]));
-			target = optionalTarget.orElse(null);
-		} else {
-			target = null;
-		}
+		Optional<EditorObject> optionalTarget = TargetTester.getClosestTarget(
+			TargetTester.provider(
+				lineManager.getLines().size(),
+				(i, from, to) -> lineManager.getLines().get(i).getRenderer().clip(from, to),
+				i -> lineManager.getLines().get(i)),
+			TargetTester.provider(gizmo != null ? 6 : 0,
+				(i, from, to) -> gizmo.getHitboxes()[i].clip(from, to),
+				i -> (EditorObject) gizmo.getHitboxes()[i]));
+		target = optionalTarget.orElse(null);
 
 		lineManager.getLines().forEach(line -> {
 			line.getRenderer().upload(renderContext, target, selectedLine);
@@ -93,6 +94,11 @@ public class LineEditorView extends View {
 
 	@Override
 	public void render(ImGuiIO io) {
+
+	}
+
+	@Override
+	public void endClientTick() {
 
 	}
 }

@@ -1,6 +1,6 @@
 package de.schoko.editortestmod.client.points;
 
-import de.schoko.editortestmod.client.core.EditorContext;
+import de.schoko.editortestmod.client.EditorScreen;
 import de.schoko.editortestmod.client.core.TargetTester;
 import de.schoko.editortestmod.client.core.View;
 import de.schoko.editortestmod.client.gizmo.PointTranslationGizmo;
@@ -16,12 +16,13 @@ public class TestView extends View {
 	private Point selectedPoint;
 	private PointTranslationGizmo gizmo;
 
-	public TestView(PointManager pointManager) {
+	public TestView(EditorScreen screen, PointManager pointManager) {
+		super(screen);
 		this.pointManager = pointManager;
 	}
 
 	@Override
-	public void load(EditorContext editorContext) {
+	public void load() {
 
 	}
 
@@ -58,7 +59,7 @@ public class TestView extends View {
 	}
 
 	@Override
-	public void upload(RenderContext renderContext) {
+	public void render(RenderContext renderContext) {
 		Point targetedPoint = pointManager.getTargetedPoint();
 		pointManager.getBoxes().forEach(point -> {
 			AABB aabb = point.getAABB();
@@ -80,6 +81,11 @@ public class TestView extends View {
 
 	@Override
 	public void render(ImGuiIO io) {
+
+	}
+
+	@Override
+	public void endClientTick() {
 
 	}
 }

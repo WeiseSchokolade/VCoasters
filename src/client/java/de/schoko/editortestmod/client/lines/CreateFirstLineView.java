@@ -1,8 +1,9 @@
 package de.schoko.editortestmod.client.lines;
 
+import de.schoko.editortestmod.client.EditorDataScreen;
+import de.schoko.editortestmod.client.EditorScreen;
 import de.schoko.editortestmod.client.EditorTestModClient;
 import de.schoko.editortestmod.client.core.Colors;
-import de.schoko.editortestmod.client.core.EditorContext;
 import de.schoko.editortestmod.client.core.TargetTester;
 import de.schoko.editortestmod.client.core.View;
 import de.schoko.editortestmod.client.editor.EditorAction;
@@ -11,6 +12,7 @@ import de.schoko.editortestmod.client.editor.EditorStyle;
 import de.schoko.editortestmod.client.points.LineEndPointView;
 import de.schoko.editortestmod.core.Line;
 import de.schoko.editortestmod.core.RenderContext;
+import imgui.ImGui;
 import imgui.ImGuiIO;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -20,23 +22,17 @@ public class CreateFirstLineView extends View {
 	private Vector3f a;
 	private Vector3f b;
 
-	@Override
-	public void load(EditorContext editorContext) {
-		EditorState.followerCarGetter = () -> null;
-		EditorState.isPreviewing = true;
-
-		EditorAction.cancelNewLinePreviewProvider = () -> {};
-		EditorAction.createNewLinePreviewProvider = () -> {
-			Line line = new Line(Line.getNewRandomId(), a, b);
-			line.getRenderer().setDirty(true);
-			getContext().getLineManager().addLine(line);
-			EditorState.isPreviewing = false;
-			getContext().setView(new LineEndPointView());
-		};
+	public CreateFirstLineView(EditorScreen screen) {
+		super(screen);
 	}
 
 	@Override
-	public void upload(RenderContext renderContext) {
+	public void load() {
+		EditorState.isPreviewing = true;
+	}
+
+	@Override
+	public void render(RenderContext renderContext) {
 		Vec3 direction = TargetTester.getPlayerViewDirection();
 		Vec3 eyePosition = TargetTester.getEyePosition();
 		Vec3 off = direction.cross(new Vec3(0, 1, 0)).normalize();
@@ -54,7 +50,16 @@ public class CreateFirstLineView extends View {
 
 	@Override
 	public void render(ImGuiIO io) {
-
+		if (ImGui.begin("Preview")) {
+			if (ImGui.button("Create")) {
+				Line line = new Line(Line.getNewRandomId(), a, b);
+				line.getRenderer().setDirty(true);
+				getScreen().getTrack().getLines().add(line);
+				EditorState.isPreviewing = false;
+				getScreen().setView(new LineEndPointView(getScreen()));
+			}
+		}
+		ImGui.end();
 	}
 
 	@Override
@@ -70,6 +75,11 @@ public class CreateFirstLineView extends View {
 
 	@Override
 	public void leftMouseReleased() {
+
+	}
+
+	@Override
+	public void endClientTick() {
 
 	}
 }

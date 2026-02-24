@@ -1,13 +1,15 @@
 package de.schoko.editortestmod.client;
 
-import de.schoko.editortestmod.client.editor.EditorState;
 import de.schoko.editortestmod.core.InterpolatedPoint;
 import de.schoko.editortestmod.core.Line;
+import de.schoko.editortestmod.core.LinePhysicsType;
 import de.schoko.editortestmod.core.RenderContext;
 
 import java.util.Arrays;
 
 public class RideCar {
+	private static final int LINE_LENGTH_MODIFIER = 10000;
+
 	private int cart1TravelledDist;
 	private int cart1Velocity;
 
@@ -15,23 +17,27 @@ public class RideCar {
 
 	private Line cart1Line;
 	private Line cart4Line;
+	private final int segmentAmount;
+	private final FollowerCar followerCar;
 
 	private Line[] lines;
 	private InterpolatedPoint[] points;
 
 	private InterpolatedPoint[] oldPoints;
 	private long lastTime;
+	private long lastUpdate;
 
-	public RideCar(Line line) {
+	public RideCar(Line line, int segmentAmount, FollowerCar followerCar) {
 		cart1Line = line;
 		cart4Line = line;
-		this.lines = new Line[8];
-		this.points = new InterpolatedPoint[8];
+		this.segmentAmount = segmentAmount;
+		this.followerCar = followerCar;
+		this.lines = new Line[segmentAmount];
+		this.points = new InterpolatedPoint[segmentAmount];
 		this.oldPoints = this.points;
 	}
 
 	public void render(RenderContext context) {
-		FollowerCar followerCar = EditorState.followerCarGetter.get();
 		if (oldPoints == null) return;
 		float t = Math.clamp((System.currentTimeMillis() - lastTime) * 0.05f, 0, 1);
 		lastTime = System.currentTimeMillis();
@@ -50,55 +56,76 @@ public class RideCar {
 		switch (line.getPhysicsType()) {
 			case null:
 			case REGULAR:
-			case TRANSFER:
-				acceleration = (int) (line.getAcceleration() * 10000);
+				acceleration = (int) Math.round(line.getAcceleration() * LINE_LENGTH_MODIFIER);
 				break;
 			case LIFT:
 				int targetSpeed = 500;
 				if (cart1Velocity <= targetSpeed) {
-					acceleration = 50;
+					acceleration = LinePhysicsType.LIFT.getAccelerationForce();
 					if (cart1Velocity + acceleration > targetSpeed) {
 						acceleration = targetSpeed - cart1Velocity;
 					}
-				} else acceleration = (int) (line.getAcceleration() * 10000);
+				} else acceleration = (int) Math.round(line.getAcceleration() * LINE_LENGTH_MODIFIER);
 				break;
 			case BRAKE:
 				int maxSpeed = 1000;
 				if (cart1Velocity > maxSpeed) {
-					acceleration = -500;
+					acceleration = -LinePhysicsType.BRAKE.getAccelerationForce();
 					if (cart1Velocity + acceleration < maxSpeed) {
 						acceleration = maxSpeed - cart1Velocity;
 					}
-				} else acceleration = (int) (line.getAcceleration() * 10000);
+				} else acceleration = (int) Math.round(line.getAcceleration() * LINE_LENGTH_MODIFIER);
+				break;
+			case STATION:
+				targetSpeed = (line.isFullStop() ? 0 : 500);
+				if (cart1Velocity <= targetSpeed) {
+					acceleration = LinePhysicsType.STATION.getAccelerationForce();
+					if (cart1Velocity + acceleration > targetSpeed) {
+						acceleration = targetSpeed - cart1Velocity;
+					}
+				}
+				if (cart1Velocity > targetSpeed && line.isFullStop()) {
+					acceleration = -LinePhysicsType.STATION.getAccelerationForce();
+					if (cart1Velocity + acceleration < targetSpeed) {
+						acceleration = targetSpeed - cart1Velocity;
+					}
+				}
+				break;
 		}
+		if (cart1Velocity != 0) acceleration -= (cart1Velocity * followerCar.getScreen().getTrack().getFriction()) / LINE_LENGTH_MODIFIER;
+		//acceleration += ((int) -Math.signum(cart1Velocity)) * Math.abs((cart1Velocity * followerCar.getScreen().getTrack().getFriction()) / LINE_LENGTH_MODIFIER);
 		return acceleration;
 	}
 
 	public void update() {
+		long delta = System.currentTimeMillis() - lastUpdate;
+		if (delta < 50) {
+			return;
+		} else if (delta > 15000) {
+			lastUpdate = System.currentTimeMillis();
+			return;
+		}
+		lastUpdate += 50;
+
 		int currentDistanceAlongTrack = cart1TravelledDist;
 		currentDistanceAlongTrack += cart1Velocity;
 
-		int acceleration = 0;
-		if (lines[0] != null) for (Line line : lines) {
-			acceleration += getAcceleration(line);
-		}
-		cart1Velocity += acceleration / lines.length;
 
-		int lineLength = (int) (cart1Line.getLength() * 10000);
+		int lineLength = Math.round(cart1Line.getLength() * LINE_LENGTH_MODIFIER);
 
 		// Assert range
 		if (currentDistanceAlongTrack > lineLength) {
 			if (cart1Line.getOutputLine() != null) {
 				cart1Line = cart1Line.getOutputLine();
 				currentDistanceAlongTrack -= lineLength;
-				lineLength = (int) (cart1Line.getLength() * 10000);
+				lineLength = Math.round(cart1Line.getLength() * LINE_LENGTH_MODIFIER);
 			} else {
 				currentDistanceAlongTrack = lineLength;
 			}
 		} else if (currentDistanceAlongTrack < 0) {
 			if (cart1Line.getInputLine() != null) {
 				cart1Line = cart1Line.getInputLine();
-				lineLength = (int) (cart1Line.getLength() * 10000);
+				lineLength = Math.round(cart1Line.getLength() * LINE_LENGTH_MODIFIER);
 				currentDistanceAlongTrack += lineLength;
 			} else {
 				currentDistanceAlongTrack = 0;
@@ -114,12 +141,16 @@ public class RideCar {
 		points[0] = interpolate(currentLine, currentDistanceAlongTrack, lineLength);
 		lines[0] = currentLine;
 
-		for (int i = 1; i < 8; i++) {
-			currentDistanceAlongTrack -= 15000;
+		int acceleration = 0;
+		int totalAcceleration = getAcceleration(currentLine);
+		boolean calculateTotalAcceleration = currentLine.getPhysicsType() != LinePhysicsType.STATION;
+
+		for (int i = 1; i < points.length; i++) {
+			currentDistanceAlongTrack -= (int) (1.5 * LINE_LENGTH_MODIFIER);
 			while (currentDistanceAlongTrack < 0) {
 				if (currentLine.getInputLine() != null) {
 					currentLine = currentLine.getInputLine();
-					lineLength = (int) (currentLine.getLength() * 10000);
+					lineLength = Math.round(currentLine.getLength() * LINE_LENGTH_MODIFIER);
 					currentDistanceAlongTrack += lineLength;
 				} else {
 					currentDistanceAlongTrack = 0;
@@ -127,12 +158,18 @@ public class RideCar {
 			}
 			lines[i] = currentLine;
 			points[i] = interpolate(currentLine, currentDistanceAlongTrack, lineLength);
+			if (calculateTotalAcceleration) acceleration = getAcceleration(currentLine);
+			totalAcceleration += acceleration;
 		}
+
+		acceleration = totalAcceleration;
+		acceleration /= points.length;
+		cart1Velocity += acceleration;
 	}
 
 	private InterpolatedPoint interpolate(Line currentLine, int dst, int line_length) {
 		int t = dst;
-		t *= 10000;
+		t *= LINE_LENGTH_MODIFIER;
 		t /= line_length;
 		t /= 10;
 

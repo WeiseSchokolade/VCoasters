@@ -1,26 +1,28 @@
 package de.schoko.editortestmod.client.core;
 
 import de.florianreuth.imguiexample.imgui.RenderInterface;
+import de.schoko.editortestmod.client.EditorScreen;
 import de.schoko.editortestmod.core.RenderContext;
 
 public abstract class View implements RenderInterface {
-	private EditorContext context;
+	private final EditorScreen screen;
 
-	public abstract void load(EditorContext editorContext);
+	public View(EditorScreen screen) {
+		this.screen = screen;
+	}
 
-	public abstract void upload(RenderContext renderContext);
+	public abstract void load();
+
+	public abstract void render(RenderContext renderContext);
 
 	public abstract boolean handleAttack();
 	public abstract boolean handleDraggedAttack();
 
 	public abstract void leftMouseReleased();
 
-	public void setContext(EditorContext context) {
-		this.context = context;
+	public EditorScreen getScreen() {
+		return screen;
 	}
 
-	public EditorContext getContext() {
-		return context;
-	}
-
+	public abstract void endClientTick();
 }

@@ -41,6 +41,7 @@ public class RenderContextImpl implements RenderContext {
 		RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
 			.withLocation(Identifier.fromNamespaceAndPath(EditorTestMod.MOD_ID, "pipeline/debug_filled_box_through_walls"))
 			.withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
+			.withDepthWrite(true)
 			.withDepthTestFunction(DepthTestFunction.LESS_DEPTH_TEST)
 			.build()
 	);

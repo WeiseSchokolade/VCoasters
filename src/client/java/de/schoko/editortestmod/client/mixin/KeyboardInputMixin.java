@@ -1,6 +1,7 @@
 package de.schoko.editortestmod.client.mixin;
 
 import de.schoko.editortestmod.client.EditorTestModClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.KeyboardInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

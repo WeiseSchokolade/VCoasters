@@ -26,23 +26,24 @@ import java.util.List;
 
 public class FollowerCar {
 	private Line currentLine;
+	private final EditorScreen screen;
 	private float distanceTravelled;
 	private float speed;
 	private long lastUpdate;
 
 	private boolean renderModel;
-	private ItemModel model;
 
 	private InterpolatedPoint point;
-	private Vector3f offset;
-	private Vector3f pivot;
+	private final Vector3f offset;
+	private final Vector3f pivot;
 
-	public FollowerCar(Line line) {
+	public FollowerCar(Line line, EditorScreen screen) {
 		this.currentLine = line;
+		this.screen = screen;
 		speed = 0f;
 		lastUpdate = System.currentTimeMillis();
-		offset = new Vector3f();
-		pivot = new Vector3f();
+		offset = screen.getTrack().getCartModel().getOffset();
+		pivot = screen.getTrack().getCartModel().getPivot();
 	}
 
 	public void tick() {
@@ -89,11 +90,12 @@ public class FollowerCar {
 		Vec3 camera = context.worldState().cameraRenderState.pos;
 		stack.translate(-camera.x, -camera.y, -camera.z);
 		stack.translate(point.x(), point.y(), point.z());
-		stack.last().rotateAround(Axis.YP.rotation(-point.yaw()), pivot.x, pivot.y, pivot.z);
-		stack.last().rotateAround(Axis.XP.rotation(point.pitch()), pivot.x, pivot.y, pivot.z);
-		stack.last().rotateAround(Axis.ZP.rotation(point.roll()), pivot.x, pivot.y, pivot.z);
 		stack.translate(offset.x, offset.y(), offset.z());
+		stack.last().rotateAround(Axis.YP.rotation(-point.yaw() + screen.getTrack().getCartModel().getYawOffset()), pivot.x, pivot.y, pivot.z);
+		stack.last().rotateAround(Axis.XP.rotation(point.pitch() + screen.getTrack().getCartModel().getPitchOffset()), pivot.x, pivot.y, pivot.z);
+		stack.last().rotateAround(Axis.ZP.rotation(point.roll() + screen.getTrack().getCartModel().getRollOffset()), pivot.x, pivot.y, pivot.z);
 		List<BakedQuad> quads = null;
+		ItemModel model = screen.getItemModel();
 		if (model instanceof BlockModelWrapper wrapper) quads = wrapper.quads;
 		else if (model instanceof MissingItemModel missing) quads = missing.quads;
 		if (quads != null) ItemRenderer.renderItem(ItemDisplayContext.NONE, stack, Minecraft.getInstance().renderBuffers().bufferSource(), 255, 0, new int[0], quads, RenderTypes.solidMovingBlock(), ItemStackRenderState.FoilType.NONE);
@@ -117,25 +119,12 @@ public class FollowerCar {
 		EditorState.renderModel = renderModel;
 	}
 
-	public void setModel(ItemModel model) {
-		this.model = model;
-		EditorState.followerCarModel = model;
+	public boolean isRenderModel() {
+		return renderModel;
 	}
 
 	public void toggleRenderModel() {
 		this.renderModel = !renderModel;
-	}
-
-	public void setModel(Identifier identifier) {
-		setModel(Minecraft.getInstance().getModelManager().getItemModel(identifier));
-	}
-
-	public void setModelOffset(Vector3f offset) {
-		this.offset = offset;
-	}
-
-	public void setPivot(Vector3f pivot) {
-		this.pivot = pivot;
 	}
 
 	public void setSpeed(float speed) {
@@ -148,5 +137,13 @@ public class FollowerCar {
 
 	public void setCurrentLine(Line currentLine) {
 		this.currentLine = currentLine;
+	}
+
+	public float getSpeed() {
+		return speed;
+	}
+
+	public EditorScreen getScreen() {
+		return screen;
 	}
 }

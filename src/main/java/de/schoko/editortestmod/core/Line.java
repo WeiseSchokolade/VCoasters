@@ -13,6 +13,7 @@ public class Line implements EditorObject {
 	private final String id;
 	private final EndPoint a;
 	private final EndPoint b;
+	private String label;
 	private Line outputLine;
 	private String outputLineId;
 	private Line inputLine;
@@ -21,6 +22,8 @@ public class Line implements EditorObject {
 	private double acceleration;
 	private boolean accelerationCalculated;
 	private LinePhysicsType physicsType;
+
+	private transient boolean fullStop;
 
 	public Line(Vector3f a, Vector3f b) {
 		this(getNewRandomId(), a, b);
@@ -45,6 +48,7 @@ public class Line implements EditorObject {
 	public void mergeData(Line line) {
 		this.a.set(line.a);
 		this.b.set(line.b);
+		this.label = line.getLabel();
 		this.onReachFunction = line.onReachFunction;
 		this.physicsType = line.physicsType;
 		if (!Objects.equals(this.outputLineId, line.outputLineId)) {
@@ -89,8 +93,13 @@ public class Line implements EditorObject {
 			this.outputLine.markRendererAsDirty();
 		}
 		this.outputLine = line;
-		if (this.outputLine == null) return;
+		if (this.outputLine == null) {
+			this.outputLineId = null;
+			return;
+		}
+		this.outputLineId = this.outputLine.getId();
 		if (this.outputLine.inputLine != null && this.outputLine.inputLine != this) {
+			this.outputLine.inputLine.outputLineId = null;
 			this.outputLine.inputLine.outputLine = null;
 		}
 		this.outputLine.inputLine = this;
@@ -152,6 +161,10 @@ public class Line implements EditorObject {
 		return b.pos().distance(a.pos());
 	}
 
+	public float getLengthSquared() {
+		return b.pos().distanceSquared(a.pos());
+	}
+
 	public Renderer<Line> getRenderer() {
 		if (renderer == null) renderer = rendererGetter.apply(this);
 		return renderer;
@@ -174,6 +187,7 @@ public class Line implements EditorObject {
 	}
 
 	public void setOnReachFunction(String onReachFunction) {
+		if (!Objects.equals(this.onReachFunction, onReachFunction)) markRendererAsDirty();
 		this.onReachFunction = onReachFunction;
 	}
 
@@ -203,6 +217,7 @@ public class Line implements EditorObject {
 	}
 
 	public void setPhysicsType(LinePhysicsType physicsType) {
+		if (this.physicsType != physicsType) markRendererAsDirty();
 		this.physicsType = physicsType;
 	}
 
@@ -216,5 +231,22 @@ public class Line implements EditorObject {
 
 	public double dY() {
 		return b.y() - a.y();
+	}
+
+	public boolean isFullStop() {
+		return fullStop;
+	}
+
+	public void setFullStop(boolean fullStop) {
+		this.fullStop = fullStop;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		if (!Objects.equals(this.label, label)) markRendererAsDirty();
+		this.label = label;
 	}
 }

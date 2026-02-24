@@ -18,8 +18,9 @@ public class LineRenderer extends Renderer<Line> {
 	@Override
 	public void upload(RenderContext context, EditorObject target, EditorObject selected) {
 		Vector4f baseColor = switch (getObject().getPhysicsType()) {
-			case LIFT -> new Vector4f(0.3f, 0.3f, 0.3f, 1.0f);
-			case BRAKE -> new Vector4f(0.7f, 0.7f, 0.3f, 1.0f);
+			case LIFT -> new Vector4f(0.2f, 0.2f, 0.2f, 1.0f);
+			case BRAKE -> new Vector4f(0.8f, 0.8f, 0.2f, 1.0f);
+			case STATION -> new Vector4f(0.8f, 0.2f, 0.8f, 1.0f);
 			case null, default -> EditorStyle.LINE_COLOR;
 		};
 

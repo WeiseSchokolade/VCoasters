@@ -1,13 +1,10 @@
 package de.schoko.editortestmod.client.lines;
 
-import de.schoko.editortestmod.client.EditorDataScreen;
 import de.schoko.editortestmod.client.EditorScreen;
 import de.schoko.editortestmod.client.EditorTestModClient;
 import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.core.TargetTester;
 import de.schoko.editortestmod.client.core.View;
-import de.schoko.editortestmod.client.editor.EditorAction;
-import de.schoko.editortestmod.client.editor.EditorState;
 import de.schoko.editortestmod.client.editor.EditorStyle;
 import de.schoko.editortestmod.client.points.LineEndPointView;
 import de.schoko.editortestmod.core.Line;
@@ -28,7 +25,7 @@ public class CreateFirstLineView extends View {
 
 	@Override
 	public void load() {
-		EditorState.isPreviewing = true;
+
 	}
 
 	@Override
@@ -55,7 +52,6 @@ public class CreateFirstLineView extends View {
 				Line line = new Line(Line.getNewRandomId(), a, b);
 				line.getRenderer().setDirty(true);
 				getScreen().getTrack().getLines().add(line);
-				EditorState.isPreviewing = false;
 				getScreen().setView(new LineEndPointView(getScreen()));
 			}
 		}

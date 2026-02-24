@@ -45,6 +45,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 
 	private String itemModelId;
 	private ItemModel itemModel;
+	private boolean renderItemModel;
 	private boolean requestClosing;
 
 	public EditorScreen(Track editedTrack) {
@@ -59,6 +60,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 			itemModelId = editedTrack.getCartModel().getModelId();
 			itemModel = Minecraft.getInstance().getModelManager().getItemModel(Identifier.parse(itemModelId));
 		}
+		this.renderItemModel = true;
 	}
 
 	@Override
@@ -310,5 +312,13 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 
 	public ItemModel getItemModel() {
 		return itemModel;
+	}
+
+	public boolean shouldRenderItemModel() {
+		return renderItemModel;
+	}
+
+	public void setRenderItemModel(boolean renderItemModel) {
+		this.renderItemModel = renderItemModel;
 	}
 }

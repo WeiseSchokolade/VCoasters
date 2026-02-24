@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.core.RenderContextImpl;
-import de.schoko.editortestmod.client.editor.EditorState;
 import de.schoko.editortestmod.core.InterpolatedPoint;
 import de.schoko.editortestmod.core.Line;
 import de.schoko.editortestmod.core.RenderContext;
@@ -44,6 +43,7 @@ public class FollowerCar {
 		lastUpdate = System.currentTimeMillis();
 		offset = screen.getTrack().getCartModel().getOffset();
 		pivot = screen.getTrack().getCartModel().getPivot();
+		this.renderModel = screen.shouldRenderItemModel();
 	}
 
 	public void tick() {
@@ -116,7 +116,6 @@ public class FollowerCar {
 
 	public void setRenderModel(boolean renderModel) {
 		this.renderModel = renderModel;
-		EditorState.renderModel = renderModel;
 	}
 
 	public boolean isRenderModel() {

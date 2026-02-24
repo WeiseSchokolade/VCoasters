@@ -5,9 +5,7 @@ import de.schoko.editortestmod.client.*;
 import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.core.TargetTester;
 import de.schoko.editortestmod.client.core.View;
-import de.schoko.editortestmod.client.editor.EditorAction;
 import de.schoko.editortestmod.client.editor.EditorCommands;
-import de.schoko.editortestmod.client.editor.EditorState;
 import de.schoko.editortestmod.client.gizmo.*;
 import de.schoko.editortestmod.core.*;
 import imgui.ImGui;
@@ -28,6 +26,8 @@ public class LineEndPointView extends View {
 
 	private FollowerCar car;
 	private RideCar rideCar;
+	private boolean useEndpointRotationGizmo;
+	private boolean isPreviewing;
 
 	public LineEndPointView(EditorScreen screen) {
 		super(screen);
@@ -37,7 +37,7 @@ public class LineEndPointView extends View {
 		if (object != null) gizmo = switch (object) {
 			case Line line -> new LineTranslationGizmo(line);
 			case Point point -> new PointTranslationGizmo(point);
-			case EndPoint endPoint -> (EditorState.endpointRotationMode) ? new EndPointRotationGizmo(endPoint) : new EndPointTranslationGizmo(endPoint);
+			case EndPoint endPoint -> (useEndpointRotationGizmo) ? new EndPointRotationGizmo(endPoint) : new EndPointTranslationGizmo(endPoint);
 			default -> null;
 		};
 		if (getScreen().getSelectedObject() == object) return false;
@@ -58,7 +58,7 @@ public class LineEndPointView extends View {
 				if (previewPoint != null) cancelPreview();
 				EndPoint endpoint = (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint());
 				if (getScreen().getSelectedObject() == endpoint) {
-					EditorState.endpointRotationMode = !EditorState.endpointRotationMode;
+					useEndpointRotationGizmo = !useEndpointRotationGizmo;
 				}
 				select(endpoint);
 				successResponse.run();
@@ -92,9 +92,6 @@ public class LineEndPointView extends View {
 
 	@Override
 	public void load() {
-		EditorAction.createNewLinePreviewProvider = this::createPreviewed;
-		EditorAction.cancelNewLinePreviewProvider = this::cancelPreview;
-
 
 	}
 
@@ -150,7 +147,7 @@ public class LineEndPointView extends View {
 	@Override
 	public void render(ImGuiIO io) {
 		EditorObject object = getScreen().getSelectedObject();
-		if (EditorState.isPreviewing) {
+		if (isPreviewing) {
 			if (ImGui.begin("Line preview")) {
 				if (ImGui.button("Create")) {
 					this.createPreviewed();
@@ -213,7 +210,6 @@ public class LineEndPointView extends View {
 				ImGui.separatorText("Train");
 				if (ImGui.button("Summon")) {
 					car = new FollowerCar(line, getScreen());
-					car.setRenderModel(EditorState.renderModel);
 					rideCar = new RideCar(line, getScreen().getTrack().getCartModel().getSegmentAmount(), car);
 				}
 				if (line.getPhysicsType() == LinePhysicsType.STATION) {
@@ -274,13 +270,13 @@ public class LineEndPointView extends View {
 					endPoint.setRoll((float) Math.toRadians(floats[2]));
 				}
 
-				if (ImGui.radioButton("Translate", !EditorState.endpointRotationMode)) {
-					EditorState.endpointRotationMode = false;
+				if (ImGui.radioButton("Translate", !useEndpointRotationGizmo)) {
+					useEndpointRotationGizmo = false;
 					select(endPoint);
 				}
 				ImGui.sameLine();
-				if (ImGui.radioButton("Rotate", EditorState.endpointRotationMode)) {
-					EditorState.endpointRotationMode = true;
+				if (ImGui.radioButton("Rotate", useEndpointRotationGizmo)) {
+					useEndpointRotationGizmo = true;
 					select(endPoint);
 				}
 				if (ImGui.button("Reset rotation")) {
@@ -334,7 +330,6 @@ public class LineEndPointView extends View {
 				if (ImGui.button("Summon")) {
 					Line line = (endPoint.isOutputEndPoint() && endPoint.getLine().getOutputLine() != null ? endPoint.getLine().getOutputLine() : endPoint.getLine());
 					car = new FollowerCar(line, getScreen());
-					car.setRenderModel(EditorState.renderModel);
 					rideCar = new RideCar(line, getScreen().getTrack().getCartModel().getSegmentAmount(), car);
 				}
 			}
@@ -377,7 +372,7 @@ public class LineEndPointView extends View {
 		direction.normalize();
 		previewPoint = new LineExtensionPreviewPoint(line.getOutputEndPoint().pos().add(direction, direction), line, Colors.CYAN);
 		select(previewPoint);
-		EditorState.isPreviewing = true;
+		isPreviewing = true;
 	}
 
 	public void createPreviewed() {
@@ -391,14 +386,14 @@ public class LineEndPointView extends View {
 			newLine.getRenderer().setDirty(true);
 			select(newLine);
 		}
-		EditorState.isPreviewing = false;
+		isPreviewing = false;
 	}
 
 	public void cancelPreview() {
 		Line line = ((LineExtensionPreviewPoint) previewPoint).getLine();
 		select(line);
 		previewPoint = null;
-		EditorState.isPreviewing = false;
+		isPreviewing = false;
 	}
 
 	public void splitSelectedLineInCenter(Line line) {
@@ -424,7 +419,6 @@ public class LineEndPointView extends View {
 	public void spawnFollowerCar() {
 		if (getScreen().getSelectedObject() instanceof EndPoint endPoint) {
 			car = new FollowerCar(endPoint.getLine(), getScreen());
-			car.setRenderModel(EditorState.renderModel);
 			if (endPoint.isOutputEndPoint()) {
 				car.setDistanceTravelled(endPoint.getLine().getLength() - 0.00001f);
 			}

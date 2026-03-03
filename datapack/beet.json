@@ -1,0 +1,13 @@
+{
+    "name": "EditorTestMod",
+    "description": "Simulating rollercoasters!",
+    "data_pack": {
+        "load": ["src"],
+        "zipped": false
+    },
+    "pipeline": [
+        "generate_trains.generate",
+        "set_namespaces.generate"
+    ],
+    "output": "build"
+}

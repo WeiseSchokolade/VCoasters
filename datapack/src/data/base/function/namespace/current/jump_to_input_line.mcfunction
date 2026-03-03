@@ -1,0 +1,1 @@
+$data modify storage train:storage current_line set from storage track:storage lines[{id:$(input_line)}]

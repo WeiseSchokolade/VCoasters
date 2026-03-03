@@ -1,0 +1,1 @@
+kill @e[tag=train_cart_tag]

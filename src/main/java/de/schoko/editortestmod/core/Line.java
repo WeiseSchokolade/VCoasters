@@ -249,4 +249,10 @@ public class Line implements EditorObject {
 		if (!Objects.equals(this.label, label)) markRendererAsDirty();
 		this.label = label;
 	}
+
+	public void shift(float dx, float dy, float dz) {
+		a.setPos(a.getPos().add(dx, dy, dz, new Vector3f()));
+		b.setPos(b.getPos().add(dx, dy, dz, new Vector3f()));
+		markRendererAsDirty();
+	}
 }

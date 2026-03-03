@@ -14,6 +14,7 @@ import de.schoko.editortestmod.packets.ApplyTrackMetaChangesC2S;
 import de.schoko.editortestmod.packets.SaveDataC2S;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import imgui.type.ImString;
@@ -47,6 +48,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 	private ItemModel itemModel;
 	private boolean renderItemModel;
 	private boolean requestClosing;
+	private float[] trackTransformation;
 
 	public EditorScreen(Track editedTrack) {
 		super(Component.literal("Editor"));
@@ -65,6 +67,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 
 	@Override
 	public void render(ImGuiIO io) {
+		io.setWantCaptureKeyboard(!EditorTestModClient.isDraggingCamera());
 		mouseGrabbed = io.getWantCaptureMouse();
 		keyboardGrabbed = io.getWantCaptureKeyboard();
 		view.render(io);
@@ -141,6 +144,20 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 			}
 			if (ImGui.button("Bake velocities")) {
 				editedTrack.setAcceleration(editedTrack.getGravity(), 1.0 / editedTrack.getTicksInHertz());
+			}
+
+			ImBoolean bool = new ImBoolean(trackTransformation != null);
+			if (ImGui.checkbox("Track transformations", bool)) {
+				trackTransformation = new float[] {0, 0, 0};
+			}
+			if (bool.get()) {
+				ImGui.inputScalarN("##TrackTranslation", trackTransformation, trackTransformation.length);
+				ImGui.sameLine();
+				if (ImGui.button("Apply")) {
+					editedTrack.getLines().forEach(line -> line.shift(trackTransformation[0], trackTransformation[1], trackTransformation[2]));
+				}
+			} else {
+				trackTransformation = null;
 			}
 
 			ImGui.separatorText("Cart Model");

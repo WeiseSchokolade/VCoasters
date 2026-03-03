@@ -161,11 +161,15 @@ public class LineEndPointView extends View {
 		if (object instanceof Line line) {
 			if (ImGui.begin("Line")) {
 				if (ImGui.button("Add")) this.showPreview(line);
+				ImGui.sameLine();
 				if (ImGui.button("Split")) splitSelectedLineInCenter(line);
+				ImGui.sameLine();
 				if (ImGui.button("Delete")) deleteSelectedLine(line);
+				ImGui.sameLine();
 				if (ImGui.button("Deselect")) select(null);
 
 				if (ImGui.button("Select input")) select(line.getInputEndPoint());
+				ImGui.sameLine();
 				if (ImGui.button("Select output")) select(line.getOutputEndPoint());
 
 

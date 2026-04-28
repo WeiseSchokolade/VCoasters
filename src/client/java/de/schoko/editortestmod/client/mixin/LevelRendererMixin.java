@@ -22,10 +22,4 @@ public class LevelRendererMixin {
 			ci.cancel();
 		}
 	}
-
-	@Inject(at = @At("HEAD"), method = "extractLevel")
-	public void editortestmod$extractLevel(CallbackInfo ci, @Local(argsOnly = true, name = "camera") Camera camera) {
-		EditorTestModClient.setLastProjectionMatrix(camera.getViewRotationProjectionMatrix(new Matrix4f()));
-		EditorTestModClient.setLastCamera(camera);
-	}
 }

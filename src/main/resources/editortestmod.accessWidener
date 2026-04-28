@@ -1,9 +1,13 @@
-accessWidener v1 named
+accessWidener v1 official
 
 accessible field net/minecraft/client/gui/screens/Screen children Ljava/util/List;
 accessible field net/minecraft/client/gui/screens/Screen narratables Ljava/util/List;
 accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
-accessible field net/minecraft/client/renderer/item/BlockModelWrapper quads Ljava/util/List;
+accessible field net/minecraft/client/renderer/item/CuboidItemModelWrapper quads Lnet/minecraft/client/resources/model/geometry/QuadCollection;
 accessible field net/minecraft/client/renderer/item/MissingItemModel quads Ljava/util/List;
 accessible field net/minecraft/server/commands/data/StorageDataAccessor SUGGEST_STORAGE Lcom/mojang/brigadier/suggestion/SuggestionProvider;
 accessible field net/minecraft/client/gui/screens/ChatScreen commandSuggestions Lnet/minecraft/client/gui/components/CommandSuggestions;
+
+### Florianreuth imgui
+accessible field com/mojang/blaze3d/systems/GpuDevice backend Lcom/mojang/blaze3d/systems/GpuDeviceBackend;
+accessible class com/mojang/blaze3d/opengl/GlDevice

@@ -21,7 +21,7 @@ import imgui.type.ImString;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -200,10 +200,12 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		ImGui.end();
 	}
 
+
+
 	@Override
-	public void render(@NotNull GuiGraphics gui, int i, int j, float f) {
+	public void extractRenderState(@NotNull GuiGraphicsExtractor gui, int i, int j, float f) {
 		if (EditorTestModClient.isDraggingCamera()) return;
-		super.render(gui, i, j, f);
+		super.extractRenderState(gui, i, j, f);
 	}
 
 	@Override
@@ -318,7 +320,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+	public void extractBackground(GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
 
 	}
 

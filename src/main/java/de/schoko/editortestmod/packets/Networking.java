@@ -16,9 +16,9 @@ public class Networking {
 	}
 
 	public static void register() {
-		PayloadTypeRegistry.playS2C().register(OpenEditorToTrackS2C.TYPE, OpenEditorToTrackS2C.CODEC);
-		PayloadTypeRegistry.playC2S().register(SaveDataC2S.TYPE, SaveDataC2S.CODEC);
-		PayloadTypeRegistry.playC2S().register(ApplyLineChangesC2S.TYPE, ApplyLineChangesC2S.CODEC);
-		PayloadTypeRegistry.playC2S().register(ApplyTrackMetaChangesC2S.TYPE, ApplyTrackMetaChangesC2S.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(OpenEditorToTrackS2C.TYPE, OpenEditorToTrackS2C.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SaveDataC2S.TYPE, SaveDataC2S.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ApplyLineChangesC2S.TYPE, ApplyLineChangesC2S.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ApplyTrackMetaChangesC2S.TYPE, ApplyTrackMetaChangesC2S.CODEC);
 	}
 }

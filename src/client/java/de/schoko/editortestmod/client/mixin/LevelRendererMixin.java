@@ -6,7 +6,8 @@ import de.schoko.editortestmod.client.EditorTestModClient;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.state.LevelRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,9 +23,9 @@ public class LevelRendererMixin {
 		}
 	}
 
-	@Inject(at = @At("HEAD"), method = "renderLevel")
-	public void editortestmod$renderLevel(CallbackInfo ci, @Local(argsOnly = true, ordinal = 1) Matrix4f projection, @Local(argsOnly = true) Camera camera) {
-		EditorTestModClient.setLastProjectionMatrix(projection);
+	@Inject(at = @At("HEAD"), method = "extractLevel")
+	public void editortestmod$extractLevel(CallbackInfo ci, @Local(argsOnly = true, name = "camera") Camera camera) {
+		EditorTestModClient.setLastProjectionMatrix(camera.getViewRotationProjectionMatrix(new Matrix4f()));
 		EditorTestModClient.setLastCamera(camera);
 	}
 }

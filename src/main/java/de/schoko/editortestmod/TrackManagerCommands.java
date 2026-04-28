@@ -20,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.commands.data.StorageDataAccessor;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.lang.foreign.Arena;
 import java.util.Optional;
 
 public final class TrackManagerCommands {

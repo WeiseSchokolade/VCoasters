@@ -1,21 +1,24 @@
 package de.schoko.editortestmod.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.math.Axis;
 import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.core.RenderContextImpl;
 import de.schoko.editortestmod.core.InterpolatedPoint;
 import de.schoko.editortestmod.core.Line;
 import de.schoko.editortestmod.core.RenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
+import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.item.MissingItemModel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
@@ -84,21 +87,28 @@ public class FollowerCar {
 		}
 	}
 
-	public void renderItemModel(WorldRenderContext context, InterpolatedPoint point) {
-		PoseStack stack = context.matrices();
+	public void renderItemModel(LevelRenderContext context, InterpolatedPoint point) {
+		PoseStack stack = context.poseStack();
 		stack.pushPose();
-		Vec3 camera = context.worldState().cameraRenderState.pos;
+		Vec3 camera = context.levelState().cameraRenderState.pos;
 		stack.translate(-camera.x, -camera.y, -camera.z);
 		stack.translate(point.x(), point.y(), point.z());
 		stack.translate(offset.x, offset.y(), offset.z());
 		stack.last().rotateAround(Axis.YP.rotation(-point.yaw() + screen.getTrack().getCartModel().getYawOffset()), pivot.x, pivot.y, pivot.z);
 		stack.last().rotateAround(Axis.XP.rotation(point.pitch() + screen.getTrack().getCartModel().getPitchOffset()), pivot.x, pivot.y, pivot.z);
 		stack.last().rotateAround(Axis.ZP.rotation(point.roll() + screen.getTrack().getCartModel().getRollOffset()), pivot.x, pivot.y, pivot.z);
-		List<BakedQuad> quads = null;
+		List<net.minecraft.client.resources.model.geometry.BakedQuad> quads = null;
 		ItemModel model = screen.getItemModel();
-		if (model instanceof BlockModelWrapper wrapper) quads = wrapper.quads;
+		if (model instanceof CuboidItemModelWrapper wrapper) quads = wrapper.quads.getAll();
 		else if (model instanceof MissingItemModel missing) quads = missing.quads;
-		if (quads != null) ItemRenderer.renderItem(ItemDisplayContext.NONE, stack, Minecraft.getInstance().renderBuffers().bufferSource(), 255, 0, new int[0], quads, RenderTypes.solidMovingBlock(), ItemStackRenderState.FoilType.NONE);
+		if (quads != null) {
+			for (BakedQuad quad : quads) {
+				Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypes.solidMovingBlock()).putBakedQuad(stack.last(), quad, new QuadInstance());
+			}
+			//ItemDisplayContext.NONE, stack, Minecraft.getInstance().renderBuffers().bufferSource(), 255, 0, new int[0], quads, RenderTypes.solidMovingBlock(), ItemStackRenderState.FoilType.NONE.;
+
+			//context.gameRenderer().item
+		}
 		stack.popPose();
 	}
 

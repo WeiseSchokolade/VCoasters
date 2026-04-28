@@ -2,15 +2,15 @@ package de.schoko.editortestmod.client.core;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import de.schoko.editortestmod.EditorTestMod;
 import de.schoko.editortestmod.core.RenderContext;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -33,7 +33,8 @@ public class RenderContextImpl implements RenderContext {
 	public static final RenderPipeline LINE_BOXES = RenderPipelines.register(RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
 		.withLocation(Identifier.fromNamespaceAndPath(EditorTestMod.MOD_ID, "pipeline/debug_filled_box_through_walls"))
 		.withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.LINES)
-		.withDepthTestFunction(DepthTestFunction.LESS_DEPTH_TEST)
+		.withDepthStencilState(DepthStencilState.DEFAULT)
+		//.withDepthTestFunction(CompareOp.LESS_THAN)
 		.build()
 	);
 
@@ -41,8 +42,9 @@ public class RenderContextImpl implements RenderContext {
 		RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
 			.withLocation(Identifier.fromNamespaceAndPath(EditorTestMod.MOD_ID, "pipeline/debug_filled_box_through_walls"))
 			.withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
-			.withDepthWrite(true)
-			.withDepthTestFunction(DepthTestFunction.LESS_DEPTH_TEST)
+			.withDepthStencilState(DepthStencilState.DEFAULT)
+			//.withDepthWrite(true)
+			//.withDepthTestFunction(CompareOp.LESS_THAN)
 			.build()
 	);
 
@@ -56,20 +58,19 @@ public class RenderContextImpl implements RenderContext {
 	private RenderPipeline pipeline;
 	private BufferBuilder buffer;
 	private MappableRingBuffer vertexBuffer;
-	private final List<Consumer<WorldRenderContext>> standaloneCalls;
-	private WorldRenderContext context;
+	private final List<Consumer<LevelRenderContext>> standaloneCalls;
+	private LevelRenderContext context;
 
 	public RenderContextImpl() {
 		this.standaloneCalls = new ArrayList<>();
 	}
 
-	public void update(WorldRenderContext context, RenderPipeline pipeline) {
+	public void update(LevelRenderContext context, RenderPipeline pipeline) {
 		this.context = context;
-		matrices = context.matrices();
+		matrices = context.poseStack();
 		this.pipeline = pipeline;
-		Vec3 camera = context.worldState().cameraRenderState.pos;
+		Vec3 camera = context.levelState().cameraRenderState.pos;
 
-		assert matrices != null;
 		matrices.pushPose();
 		matrices.translate(-camera.x, -camera.y, -camera.z);
 
@@ -158,7 +159,7 @@ public class RenderContextImpl implements RenderContext {
 		}
 	}
 
-	public void registerStandaloneCall(Consumer<WorldRenderContext> renderCall) {
+	public void registerStandaloneCall(Consumer<LevelRenderContext> renderCall) {
 		this.standaloneCalls.add(renderCall);
 	}
 

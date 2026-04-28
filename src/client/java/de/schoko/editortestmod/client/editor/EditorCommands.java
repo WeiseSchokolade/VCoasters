@@ -1,23 +1,8 @@
 package de.schoko.editortestmod.client.editor;
 
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.context.CommandContext;
-import de.schoko.editortestmod.client.*;
-import de.schoko.editortestmod.core.EditorObject;
 import de.schoko.editortestmod.core.EndPoint;
 import de.schoko.editortestmod.core.Line;
-import de.schoko.editortestmod.core.LinePhysicsType;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
 import org.joml.Vector3f;
-
-import java.util.function.Function;
 
 public class EditorCommands {
 	public static Vector3f getAverageDirection(EndPoint endPoint) {

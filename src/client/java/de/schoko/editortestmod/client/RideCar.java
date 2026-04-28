@@ -136,7 +136,7 @@ public class RideCar {
 		Line currentLine = cart1Line;
 
 		if (stopInterpolation) return;
-		Arrays.setAll(oldPoints, value -> points[value]);
+		Arrays.setAll(oldPoints, val -> points[val]);
 
 		points[0] = interpolate(currentLine, currentDistanceAlongTrack, lineLength);
 		lines[0] = currentLine;

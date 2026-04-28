@@ -13,18 +13,15 @@ import de.schoko.editortestmod.core.Line;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.network.protocol.game.ServerboundChangeGameModePacket;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -54,9 +51,10 @@ public class EditorTestModClient implements ClientModInitializer {
 		Line.rendererGetter = LineRenderer::new;
 		EndPoint.rendererGetter = EndPointRenderer::new;
 
+
 		instance = this;
 		renderCtx = new RenderContextImpl();
-		WorldRenderEvents.BEFORE_TRANSLUCENT.register(context -> {
+		LevelRenderEvents.BEFORE_TRANSLUCENT_TERRAIN.register(context -> {
 			if (Minecraft.getInstance().screen instanceof EditorDataScreen screen) {
 				renderCtx.update(context, RenderContextImpl.FILLED_BOXES);
 				screen.render(renderCtx);
@@ -82,9 +80,9 @@ public class EditorTestModClient implements ClientModInitializer {
 			}
 		});
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(EditorTestMod.MOD_ID, "testelement"), (context, tickCounter) -> {
-			if (Minecraft.getInstance().screen instanceof EditorDataScreen) context.drawString(Minecraft.getInstance().font, "Editor Mode", 5, 5, 0xFFFFFFFF);
+			if (Minecraft.getInstance().screen instanceof EditorDataScreen) context.text(Minecraft.getInstance().font, "Editor Mode", 5, 5, 0xFFFFFFFF);
 			for (int i = 0; i < debugStrings.size(); i++) {
-				context.drawString(Minecraft.getInstance().font, debugStrings.get(i), 5, 25 + i * 15, 0xE0E0FFFF);
+				context.text(Minecraft.getInstance().font, debugStrings.get(i), 5, 25 + i * 15, 0xE0E0FFFF);
 			}
 			debugStrings.clear();
 		});

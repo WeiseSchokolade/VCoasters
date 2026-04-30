@@ -1,7 +1,7 @@
 from beet import Context, DataPack, DataPackNamespace, Function
 from config import trains, train_start_line_labels, train_segments, train_segment_dist
 
-train_functions = ["tick", "leave_line_at_output", "leave_line_at_input", "jump_to_input_line", "jump_to_output_line", "physics/get_physics_accel", "physics/station_accel", "physics/station_full_stop", "init"]
+train_functions = ["tick", "leave_line_at_output", "leave_line_at_input", "jump_to_input_line", "jump_to_output_line", "physics/get_physics_accel", "physics/station_accel", "physics/station_full_stop", "init", "on_halt"]
 
 def train_func(train_name: str, path: str) -> str:
     return f"namespace/{train_name}/{path}"

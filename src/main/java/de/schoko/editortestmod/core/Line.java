@@ -19,6 +19,7 @@ public class Line implements EditorObject {
 	private Line inputLine;
 	private Renderer<Line> renderer;
 	private String onReachFunction;
+	private String onHaltFunction;
 	private double acceleration;
 	private boolean accelerationCalculated;
 	private LinePhysicsType physicsType;
@@ -50,6 +51,7 @@ public class Line implements EditorObject {
 		this.b.set(line.b);
 		this.label = line.getLabel();
 		this.onReachFunction = line.onReachFunction;
+		this.onHaltFunction = line.onHaltFunction;
 		this.physicsType = line.physicsType;
 		if (!Objects.equals(this.outputLineId, line.outputLineId)) {
 			TrackLineManager.replaceOutput(this, line.outputLineId);
@@ -193,6 +195,15 @@ public class Line implements EditorObject {
 
 	public String getOnReachFunction() {
 		return onReachFunction;
+	}
+
+	public void setOnHaltFunction(String onHaltFunction) {
+		if (!Objects.equals(this.onHaltFunction, onHaltFunction)) markRendererAsDirty();
+		this.onHaltFunction = onHaltFunction;
+	}
+
+	public String getOnHaltFunction() {
+		return onHaltFunction;
 	}
 
 	public double getAcceleration() {

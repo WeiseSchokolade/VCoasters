@@ -50,6 +50,9 @@ dependencies {
 	include implementation("io.github.spair:imgui-java-natives-windows:${project.imgui_version}")
 	include implementation("io.github.spair:imgui-java-natives-linux:${project.imgui_version}")
 	include implementation("io.github.spair:imgui-java-natives-macos:${project.imgui_version}")
+
+	// Source: https://mvnrepository.com/artifact/io.github.ragavendhiran-s/linear-equation-solver
+	implementation("io.github.ragavendhiran-s:linear-equation-solver:1.0.0")
 }
 
 processResources {

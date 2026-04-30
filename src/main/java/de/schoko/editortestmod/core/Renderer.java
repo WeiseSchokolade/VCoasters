@@ -18,6 +18,7 @@ public abstract class Renderer<T extends EditorObject> {
 
 	public abstract void updateHitbox(T object);
 
+	// Returns: Intersection point, if any
 	public abstract Optional<Vec3> clip(Vec3 from, Vec3 to);
 
 	public T getObject() {

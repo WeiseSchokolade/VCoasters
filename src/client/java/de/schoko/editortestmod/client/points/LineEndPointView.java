@@ -208,8 +208,14 @@ public class LineEndPointView extends View {
 				ImGui.text("OnReachFunction: ");
 				ImGui.sameLine();
 				string.set(line.getOnReachFunction() == null ? "" : line.getOnReachFunction());
-				ImGui.inputText("##OnReachFunctionInput", string);
-				line.setOnReachFunction(string.get().isBlank() || string.get().equals("null") ? null : string.get());
+				if (ImGui.inputText("##OnReachFunctionInput", string))
+					line.setOnReachFunction(string.get().isBlank() || string.get().equals("null") ? null : string.get());
+
+				ImGui.text("OnHaltFunction: ");
+				ImGui.sameLine();
+				string.set(line.getOnHaltFunction() == null ? "" : line.getOnHaltFunction());
+				if (ImGui.inputText("##OnHaltFunctionInput", string))
+					line.setOnHaltFunction(string.get().isBlank() || string.get().equals("null") ? null : string.get());
 
 				ImGui.separatorText("Train");
 				if (ImGui.button("Summon")) {

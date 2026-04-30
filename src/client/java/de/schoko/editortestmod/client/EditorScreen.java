@@ -44,6 +44,8 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 
 	private boolean requestSaving;
 
+	private boolean newlyOpen;
+
 	private String itemModelId;
 	private ItemModel itemModel;
 	private boolean renderItemModel;
@@ -63,10 +65,15 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 			itemModel = Minecraft.getInstance().getModelManager().getItemModel(Identifier.parse(itemModelId));
 		}
 		this.renderItemModel = true;
+		this.newlyOpen = true;
 	}
 
 	@Override
 	public void render(ImGuiIO io) {
+		if (newlyOpen) {
+			newlyOpen = false;
+			io.clearEventsQueue();
+		}
 		io.setWantCaptureKeyboard(!EditorTestModClient.isDraggingCamera());
 		mouseGrabbed = io.getWantCaptureMouse();
 		keyboardGrabbed = io.getWantCaptureKeyboard();

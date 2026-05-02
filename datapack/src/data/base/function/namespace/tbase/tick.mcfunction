@@ -16,7 +16,7 @@ function base:namespace/tbase/physics/get_physics_accel
 
 execute store result score #should_calc_total train_math_score unless data storage train:storage current_line{physics_type:"STATION"}
 
-execute if score #should_calc_total train_math_score matches 0 if score #train_vel train_math_score matches 0 if score #acceleration train_math_score matches 0 run return run function base:namespace/tbase/on_halt
+execute if score #should_calc_total train_math_score matches 0 unless score #tbase.halting train_data_score matches -1 if score #train_vel train_math_score matches 0 if score #acceleration train_math_score matches 0 run return run function base:namespace/tbase/on_halt
 scoreboard players set #tbase.halting train_data_score 0
 function base:namespace/tick_train
 execute as @e[tag=train_cart_tag,tag=tbase] run function base:namespace/tick_entity

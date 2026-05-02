@@ -17,5 +17,4 @@ scoreboard players set #10000 train_math_score 10000
 execute store result score #friction train_data_score run data get storage track:storage friction
 
 data modify storage train:storage interpolated_point set value {Pos:[0d,0d,0d], Rotation: [0f, 0f], transformation: {left_rotation:{axis:[0f, 0f, 1f], angle: 0f}}}
-scoreboard players set #cart_amount train_data_score 8
 

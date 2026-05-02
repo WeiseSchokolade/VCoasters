@@ -11,6 +11,9 @@ def generate(ctx: Context):
     init_function = target.functions["namespace/init"]
     tick_function = target.functions["namespace/tick"]
     spawn_function = target.functions["namespace/spawn_entities"]
+    
+    init_function.append(f"scoreboard players set #cart_amount train_data_score {train_segments}")
+    
     for i in range(trains):
         train_name = f"t{i + 1}"
         for function_name in train_functions:
@@ -21,7 +24,8 @@ def generate(ctx: Context):
 data modify storage train:storage {train_name} set value {{id:"{train_name}",line:{{}}}}
 data modify storage train:storage {train_name}.line set from storage track:storage lines[{{label:"{train_start_line_labels[train_name]}"}}]
 scoreboard players set #{train_name}.vel train_data_score 0
-scoreboard players set #{train_name}.dist train_data_score 0""")
+scoreboard players set #{train_name}.dist train_data_score 0
+scoreboard players set #{train_name}.halting train_data_score -1""")
         
         for i in range(train_segments):
             spawn_function.lines.append(f'summon item_display ~ ~ ~ {{teleport_duration:2,Tags:["train_cart_tag","cart{i + 1}","{train_name}"]}}')    

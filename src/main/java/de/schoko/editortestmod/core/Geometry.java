@@ -1,5 +1,6 @@
 package de.schoko.editortestmod.core;
 
+import de.schoko.editortestmod.packets.OpenEditorToTrackS2C;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -32,6 +33,24 @@ public final class Geometry {
 		return offset;
 	}
 
+	// After https://stackoverflow.com/a/42752998
+	public static Optional<Double> rayTriangleIntersection(Vector3f rayOrigin, Vector3f rayDirection, Vector3f a, Vector3f b, Vector3f c) {
+		Vector3f e1 = b.sub(a, new Vector3f());
+		Vector3f e2 = c.sub(a, new Vector3f());
+		Vector3f n = e1.cross(e2, new Vector3f());
+		float det = -rayDirection.dot(n);
+		double invdet = 1.0 / det;
+		Vector3f ao = rayOrigin.sub(a, new Vector3f());
+		Vector3f dao = ao.cross(rayDirection, new Vector3f());
+		double u = e2.dot(dao) * invdet;
+		double v = -e1.dot(dao) * invdet;
+		double t = ao.dot(n) * invdet;
+		if (det >= 1e-6 && t >= 0.0 && u >= 0.0 && v >= 0.0 && u+v <= 1.0) {
+			return Optional.of(t);
+		}
+		return Optional.empty();
+	}
+
 	public static Optional<Double> getOffsetIntersectionDistanceAlongA(Vector3f aBase, Vector3f aDir, Vector3f bBase, Vector3f bDir) {
 		if (aDir.equals(bDir)) return Optional.empty();
 		Vector3f offsetBase = getIntersectionOffset(aBase, aDir, bBase, bDir).add(aBase);
@@ -42,6 +61,7 @@ public final class Geometry {
 		if (Double.isFinite(distanceAlongA)) {
 			return Optional.of(distanceAlongA);
 		} else return Optional.empty();
+		//return solve(aBase, aDir, bBase, bDir);
 	}
 
 	public static Vector3f getPointAlongLine(Vector3f base, float lambda, Vector3f dir) {

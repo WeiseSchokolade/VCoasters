@@ -1,11 +1,18 @@
 package de.schoko.editortestmod.core;
 
 import net.minecraft.world.phys.AABB;
+import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 
 public interface RenderContext {
+	void drawQuads(Iterable<QuadObtainer.Quad> quads, float r, float g, float b, float a);
+
+	default void drawQuads(Iterable<QuadObtainer.Quad> quads, Vector4f color) {
+		drawQuads(quads, color.x, color.y, color.z, color.w);
+	}
+
 	void drawAABox(double fromX, double fromY, double fromZ, double toX, double toY, double toZ, float r, float g, float b, float a);
 
 	default void drawAABox(double fromX, double fromY, double fromZ, double toX, double toY, double toZ, Vector4f color) {

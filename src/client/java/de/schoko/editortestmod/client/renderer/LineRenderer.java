@@ -3,15 +3,19 @@ package de.schoko.editortestmod.client.renderer;
 import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.editor.EditorStyle;
 import de.schoko.editortestmod.core.*;
-import net.minecraft.client.renderer.fog.environment.BlindnessFogEnvironment;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class LineRenderer extends Renderer<Line> {
+	public List<QuadObtainer.Quad> renderedQuads;
+
 	public LineRenderer(Line line) {
+		renderedQuads = new ArrayList<>();
 		super(line);
 	}
 
@@ -34,25 +38,37 @@ public class LineRenderer extends Renderer<Line> {
 
 	@Override
 	public Optional<Vec3> clip(Vec3 from, Vec3 to) {
-		Vector3f lineVector = getObject().getOutputEndPoint().pos().sub(getObject().getInputEndPoint().pos(), new Vector3f());
+		//Vector3f lineVector = getObject().getOutputEndPoint().pos().sub(getObject().getInputEndPoint().pos(), new Vector3f());
 		Vector3f bLineBase = from.toVector3f();
 		Vector3f bLineDir = to.toVector3f().sub((float) from.x, (float) from.y, (float) from.z);
-		double smallestDistance = Geometry.getSmallestDistance(getObject().getInputEndPoint().pos(), lineVector, bLineBase, bLineDir);
+
+		Optional<Double> first = renderedQuads.stream().map(quad -> quad.intersects(bLineBase, bLineDir))
+			.filter(Optional::isPresent)
+			.filter(aDouble -> aDouble.get() > 0.0 && aDouble.get() <= 1.0)
+			.map(Optional::get)
+			.sorted()
+			.findFirst();
+		if (first.isEmpty()) return Optional.empty();
+		return Optional.of(from.add(new Vec3(bLineDir.mul(first.get().floatValue()))));
+
+		/*double smallestDistance = Geometry.getSmallestDistance(getObject().getInputEndPoint().pos(), lineVector, bLineBase, bLineDir);
 		if (Math.abs(smallestDistance) > 0.1) return Optional.empty();
 		Optional<Double> possibleOffset = Geometry.getOffsetIntersectionDistanceAlongA(getObject().getInputEndPoint().pos(), lineVector, bLineBase, bLineDir);
 		if (possibleOffset.isEmpty()) return Optional.empty();
 		double offset = possibleOffset.get();
 		if (offset >= 0 & offset <= 1) {
+			//System.out.println(possibleOffset.get());
 			return Optional.of(new Vec3(lineVector.mul((float) offset).add(getObject().getInputEndPoint().pos())));
 		} else {
 			return Optional.empty();
-		}
+		}*/
 	}
 
 	@Override
 	public void updateHitbox(Line object) {
 		getObject().getInputEndPoint().getRenderer().updateHitbox(getObject().getInputEndPoint());
 		getObject().getOutputEndPoint().getRenderer().updateHitbox(getObject().getOutputEndPoint());
+		renderedQuads = QuadObtainer.boxLine(getObject().getInputEndPoint().pos(), getObject().getOutputEndPoint().pos(), EditorStyle.TRACK_LINE_WIDTH);
 	}
 
 	@Override

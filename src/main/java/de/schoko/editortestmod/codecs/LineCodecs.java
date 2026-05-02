@@ -226,14 +226,16 @@ public enum LineCodecs {;
 		Codec.STRING.optionalFieldOf("output_line").forGetter(line -> Optional.ofNullable(line.getOutputLineId())),
 		Codec.STRING.optionalFieldOf("input_line").forGetter(line -> Optional.ofNullable(line.getInputLineId())),
 		Codec.STRING.optionalFieldOf("physics_type").forGetter(line -> Optional.ofNullable(line.getPhysicsType() != null ? line.getPhysicsType().name() : null)),
+		Codec.BOOL.optionalFieldOf("fullstop").forGetter(line -> Optional.ofNullable(line.getPhysicsType() != null && line.getPhysicsType().supportsFullstop() ? line.isFullStop() : null)),
 		Codec.STRING.optionalFieldOf("on_reach").forGetter(line -> Optional.ofNullable(line.getOnReachFunction())),
 		Codec.STRING.optionalFieldOf("on_halt").forGetter(line -> Optional.ofNullable(line.getOnHaltFunction())),
 		Codec.FLOAT.optionalFieldOf("acceleration").forGetter(l -> l.isAccelerationCalculated() ? Optional.of((float) (l.getAcceleration() * 10000)) : Optional.empty())
 	).apply(instance, (id, delta,
-					   lengthIgnored, label, outputLineId, inputLineId, physicsType, onReachFunction, onHaltFunction, accelerationIgnored) -> {
+					   lengthIgnored, label, outputLineId, inputLineId, physicsType, fullStop, onReachFunction, onHaltFunction, accelerationIgnored) -> {
 		Line line = new Line(id, delta.getA(), delta.getB());
 		line.setLabel(label.orElse(null));
 		line.setPhysicsType(physicsType.isPresent() ? LinePhysicsType.valueOf(physicsType.get()) : null);
+		line.setFullStop(line.getPhysicsType() != null && line.getPhysicsType().supportsFullstop() && fullStop.isPresent() ? fullStop.get() : false);
 		line.setOnReachFunction(onReachFunction.orElse(null));
 		line.setOnHaltFunction(onHaltFunction.orElse(null));
 		line.setOutputLineId(outputLineId.orElse(null));

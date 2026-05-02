@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import de.schoko.editortestmod.EditorTestMod;
+import de.schoko.editortestmod.core.QuadObtainer;
 import de.schoko.editortestmod.core.RenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
@@ -168,6 +169,18 @@ public class RenderContextImpl implements RenderContext {
 		buffer.addVertex(pose, bX, bY, bZ).setColor(r, g, b, a);
 		buffer.addVertex(pose, cX, cY, cZ).setColor(r, g, b, a);
 		buffer.addVertex(pose, dX, dY, dZ).setColor(r, g, b, a);
+	}
+
+	@Override
+	public void drawQuads(Iterable<QuadObtainer.Quad> quads, float r, float g, float b, float a) {
+		Matrix4f pose = matrices.last().pose();
+		quads.forEach(quad -> drawQuad(pose,
+			quad.a().x, quad.a().y, quad.a().z,
+			quad.b().x, quad.b().y, quad.b().z,
+			quad.c().x, quad.c().y, quad.c().z,
+			quad.d().x, quad.d().y, quad.d().z,
+			r, g, b, a
+			));
 	}
 
 	private void drawAABox(float aX, float aY, float aZ, float bX, float bY, float bZ, float r, float g, float b, float a) {

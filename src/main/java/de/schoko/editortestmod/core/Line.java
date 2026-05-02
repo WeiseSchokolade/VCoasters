@@ -24,7 +24,7 @@ public class Line implements EditorObject {
 	private boolean accelerationCalculated;
 	private LinePhysicsType physicsType;
 
-	private transient boolean fullStop;
+	private boolean fullStop;
 
 	public Line(Vector3f a, Vector3f b) {
 		this(getNewRandomId(), a, b);
@@ -53,6 +53,7 @@ public class Line implements EditorObject {
 		this.onReachFunction = line.onReachFunction;
 		this.onHaltFunction = line.onHaltFunction;
 		this.physicsType = line.physicsType;
+		this.fullStop = line.fullStop;
 		if (!Objects.equals(this.outputLineId, line.outputLineId)) {
 			TrackLineManager.replaceOutput(this, line.outputLineId);
 		}
@@ -249,6 +250,7 @@ public class Line implements EditorObject {
 	}
 
 	public void setFullStop(boolean fullStop) {
+		if (this.fullStop != fullStop) markRendererAsDirty();
 		this.fullStop = fullStop;
 	}
 

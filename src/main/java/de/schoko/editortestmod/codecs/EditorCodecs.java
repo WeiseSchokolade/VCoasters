@@ -37,6 +37,7 @@ public class EditorCodecs {
 			case 6 -> TrackCodecs.V6.parse(NbtOps.INSTANCE, data).getOrThrow();
 			case 7 -> TrackCodecs.V7.parse(NbtOps.INSTANCE, data).getOrThrow();
 			case 8 -> TrackCodecs.V8.parse(NbtOps.INSTANCE, data).getOrThrow();
+			case 10 -> TrackCodecs.V10.parse(NbtOps.INSTANCE, data).getOrThrow();
 			default -> throw new IllegalArgumentException("Unknown track data version: " + dataVersion);
 		};
 		track.setId(identifier.toString());
@@ -45,7 +46,7 @@ public class EditorCodecs {
 
 	public static boolean isDataStorageVersionCompatible(int dataStorageVersion) {
 		return switch (dataStorageVersion) {
-			case 1, 4, 5, 6, 7, 8 -> true;
+			case 1, 4, 5, 6, 7, 8, 10 -> true;
 			default -> false;
 		};
 	}

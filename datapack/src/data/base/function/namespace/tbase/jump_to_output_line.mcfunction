@@ -1,1 +1,1 @@
-$data modify storage train:storage tbase.line set from storage track:storage lines[{id:$(output_line)}]
+$data modify storage train:storage tbase.line set from storage track:storage lines.$(output_line)

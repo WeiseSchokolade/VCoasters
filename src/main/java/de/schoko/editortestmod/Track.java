@@ -4,10 +4,7 @@ package de.schoko.editortestmod;
 import de.schoko.editortestmod.codecs.TrackCodecs;
 import de.schoko.editortestmod.core.Line;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class Track {
 	private int exportVersion;
@@ -26,7 +23,7 @@ public class Track {
 	private transient List<Line> removedLines;
 	private transient boolean dirty;
 
-	public Track(String id, int loadingVersion, int exportVersion, String trackName, String trackComment, double gravity, int friction, int ticksInHertz, List<Line> lines, Optional<CartModel> model) {
+	public Track(String id, int exportVersion, String trackName, String trackComment, double gravity, int friction, int ticksInHertz, Collection<Line> lines, Optional<CartModel> model) {
 		this.id = id;
 		this.exportVersion = exportVersion;
 		this.trackName = trackName;
@@ -40,7 +37,7 @@ public class Track {
 	}
 
 	public Track(String id) {
-		this(id, TrackCodecs.CURRENT_VERSION, 0, id, "", 0.5, 0, 20, List.of(), Optional.empty());
+		this(id, TrackCodecs.CURRENT_VERSION, id, "", 0.5, 0, 20, List.of(), Optional.empty());
 	}
 
 	public void mergeMetaFrom(Track track) {

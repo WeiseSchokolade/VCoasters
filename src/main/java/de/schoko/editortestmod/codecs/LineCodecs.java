@@ -242,5 +242,31 @@ public enum LineCodecs {;
 		return line;
 	}));
 
-	public static final Codec<Line> CURRENT = V8;
+	public static final Codec<Line> V10 = RecordCodecBuilder.create(instance -> instance.group(
+		Codec.STRING.fieldOf("id").forGetter(Line::getId),
+		V8DeltaChange.V8_CODEC.fieldOf("delta").forGetter(V8DeltaChange::new),
+		Codec.FLOAT.fieldOf("length").forGetter(line -> line.getLength() * 10000), // Increase to LINE_LENGTH_MODIFIER
+		Codec.STRING.optionalFieldOf("label").forGetter(line -> Optional.ofNullable(line.getLabel() != null && !line.getLabel().isBlank() ? line.getLabel() : null)),
+		Codec.STRING.optionalFieldOf("output_line_id").forGetter(line -> Optional.ofNullable(line.getOutputLineId())),
+		Codec.STRING.optionalFieldOf("output_line").forGetter(line -> Optional.ofNullable(line.getOutputLine() != null ? line.getOutputLine().getLabel() != null ? line.getOutputLine().getLabel() : line.getOutputLine().getId() : null)),
+		Codec.STRING.optionalFieldOf("input_line_id").forGetter(line -> Optional.ofNullable(line.getInputLineId())),
+		Codec.STRING.optionalFieldOf("input_line").forGetter(line -> Optional.ofNullable(line.getInputLine() != null ? line.getInputLine().getLabel() != null ? line.getInputLine().getLabel() : line.getInputLine().getId() : null)),
+		Codec.STRING.optionalFieldOf("physics_type").forGetter(line -> Optional.ofNullable(line.getPhysicsType() != null ? line.getPhysicsType().name() : null)),
+		Codec.BOOL.optionalFieldOf("fullstop").forGetter(line -> Optional.ofNullable(line.getPhysicsType() != null && line.getPhysicsType().supportsFullstop() ? line.isFullStop() : null)),
+		Codec.STRING.optionalFieldOf("on_reach").forGetter(line -> Optional.ofNullable(line.getOnReachFunction())),
+		Codec.STRING.optionalFieldOf("on_halt").forGetter(line -> Optional.ofNullable(line.getOnHaltFunction())),
+		Codec.FLOAT.optionalFieldOf("acceleration").forGetter(l -> l.isAccelerationCalculated() ? Optional.of((float) (l.getAcceleration() * 10000)) : Optional.empty())
+	).apply(instance, (id, delta,
+	                   lengthIgnored, label, outputLineId, outputLine, inputLineId, inputLine, physicsType, fullStop, onReachFunction, onHaltFunction, accelerationIgnored) -> {
+		Line line = new Line(id, delta.getA(), delta.getB());
+		line.setLabel(label.orElse(null));
+		line.setPhysicsType(physicsType.isPresent() ? LinePhysicsType.valueOf(physicsType.get()) : null);
+		line.setFullStop(line.getPhysicsType() != null && line.getPhysicsType().supportsFullstop() && fullStop.isPresent() ? fullStop.get() : false);
+		line.setOnReachFunction(onReachFunction.orElse(null));
+		line.setOnHaltFunction(onHaltFunction.orElse(null));
+		line.setOutputLineId(outputLineId.orElse(null));
+		return line;
+	}));
+
+	public static final Codec<Line> CURRENT = V10;
 }

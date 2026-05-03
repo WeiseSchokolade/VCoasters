@@ -1,9 +1,9 @@
-parent_namespace = "my"
-target_namespace = "mouse"
+parent_namespace = "em"
+target_namespace = "test"
 
-trains = 3
-train_start_line_labels = {"t1": "station1", "t2": "station2", "t3": "station3"}
-train_segments = 1
+trains = 2
+train_start_line_labels = {"t1": "station", "t2": "pre_station"}
+train_segments = 8
 train_segment_dist = 15000
 
 train_item_model_setup = 'item replace entity @s container.0 with stone[item_model="editortestmod:ner_front"]'
@@ -12,6 +12,6 @@ train_item_model_setup = 'item replace entity @s container.0 with stone[item_mod
 
 math_scoreboard = f"{parent_namespace}.{target_namespace}.math"
 data_scoreboard = f"{parent_namespace}.{target_namespace}.data"
-track_storage = f"minecraft:mouse"
+track_storage = f"minecraft:test"
 train_storage = f"{parent_namespace}:{target_namespace}"
 train_cart_tag = f"{parent_namespace}.{target_namespace}"

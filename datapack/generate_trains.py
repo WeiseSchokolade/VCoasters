@@ -22,7 +22,7 @@ def generate(ctx: Context):
         
         init_function.lines.append(f"""
 data modify storage train:storage {train_name} set value {{id:"{train_name}",line:{{}}}}
-data modify storage train:storage {train_name}.line set from storage track:storage lines[{{label:"{train_start_line_labels[train_name]}"}}]
+data modify storage train:storage {train_name}.line set from storage track:storage lines.{train_start_line_labels[train_name]}
 scoreboard players set #{train_name}.vel train_data_score 0
 scoreboard players set #{train_name}.dist train_data_score 0
 scoreboard players set #{train_name}.halting train_data_score -1""")

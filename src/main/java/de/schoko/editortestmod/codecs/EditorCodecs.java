@@ -30,16 +30,15 @@ public class EditorCodecs {
 
 
 	public static Track loadTrack(CompoundTag data, Identifier identifier, int dataVersion) {
-		Track track = switch (dataVersion) {
-			case 1 -> TrackCodecs.V1.parse(NbtOps.INSTANCE, data).getOrThrow();
-			case 4 -> TrackCodecs.V4.parse(NbtOps.INSTANCE, data).getOrThrow();
-			case 5 -> TrackCodecs.V5.parse(NbtOps.INSTANCE, data).getOrThrow();
-			case 6 -> TrackCodecs.V6.parse(NbtOps.INSTANCE, data).getOrThrow();
-			case 7 -> TrackCodecs.V7.parse(NbtOps.INSTANCE, data).getOrThrow();
-			case 8 -> TrackCodecs.V8.parse(NbtOps.INSTANCE, data).getOrThrow();
-			case 10 -> TrackCodecs.V10.parse(NbtOps.INSTANCE, data).getOrThrow();
-			default -> throw new IllegalArgumentException("Unknown track data version: " + dataVersion);
-		};
+		Codec<Track> codec;
+		if (dataVersion == TrackCodecs.CURRENT_VERSION) {
+			codec = TrackCodecs.CURRENT_CODEC;
+		} else {
+			codec = TrackCodecs.getNewCodec(dataVersion);
+			if (codec == null) throw new IllegalArgumentException("Unknown track data version: " + dataVersion);
+		}
+
+		Track track = codec.parse(NbtOps.INSTANCE, data).getOrThrow();
 		track.setId(identifier.toString());
 		return track;
 	}

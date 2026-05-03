@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public record OpenEditorToTrackS2C(Track track) implements CustomPacketPayload {
 	public static final Type<@NotNull OpenEditorToTrackS2C> TYPE = Networking.getType(OpenEditorToTrackS2C.class);
 	public static final StreamCodec<RegistryFriendlyByteBuf, OpenEditorToTrackS2C> CODEC = StreamCodec.composite(
-		ByteBufCodecs.fromCodec(TrackCodecs.CURRENT), OpenEditorToTrackS2C::track,
+		ByteBufCodecs.fromCodec(TrackCodecs.CURRENT_CODEC), OpenEditorToTrackS2C::track,
 		OpenEditorToTrackS2C::new
 	);
 

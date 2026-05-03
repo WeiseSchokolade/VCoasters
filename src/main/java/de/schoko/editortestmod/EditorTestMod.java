@@ -74,7 +74,7 @@ public class EditorTestMod implements ModInitializer {
 			Track track = EditorTestMod.instance.getTrackManager().getTrack(identifier.toString());
 			track.setAcceleration(track.getGravity(), 1.0 / track.getTicksInHertz());
 
-			DataResult<Tag> result = TrackCodecs.CURRENT.encodeStart(NbtOps.INSTANCE, track);
+			DataResult<Tag> result = TrackCodecs.CURRENT_CODEC.encodeStart(NbtOps.INSTANCE, track);
 			ctx.server().getCommandStorage().set(identifier, (CompoundTag) result.getOrThrow());
 			ctx.player().sendSystemMessage(Component.literal("Saved " + identifier));
 		});

@@ -1,105 +1,49 @@
 package de.schoko.editortestmod.codecs;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.schoko.editortestmod.CartModel;
 import de.schoko.editortestmod.Track;
-import de.schoko.editortestmod.core.Line;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public enum TrackCodecs {
 	;
 
-	public static final Codec<Track> V1 = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("id").forGetter(Track::getId),
-		Codec.INT.fieldOf("data_version").forGetter(track -> 1),
-		Codec.INT.fieldOf("export_version").forGetter(Track::increasedExportVersion),
-		Codec.STRING.fieldOf("track_name").forGetter(Track::getTrackName),
-		Codec.STRING.fieldOf("comment").forGetter(Track::getTrackComment),
-		LineCodecs.V1.listOf().fieldOf("lines").forGetter(Track::getLines)
-	).apply(instance, (id, dataVersion, exportVersion, trackName, comment, lines) -> new Track(id, exportVersion, trackName, comment, 1, 0, 20, lines, Optional.empty())));
+	private static Field<Track, Integer> getVersion(final int dataVersion) {
+		return Field.of(Codec.INT.fieldOf("data_version").forGetter((Track _) -> dataVersion));
+	}
 
-	public static final Codec<Track> V4 = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("id").forGetter(Track::getId),
-		Codec.INT.fieldOf("data_version").forGetter(track -> 4),
-		Codec.INT.fieldOf("export_version").forGetter(Track::increasedExportVersion),
-		Codec.STRING.fieldOf("track_name").forGetter(Track::getTrackName),
-		Codec.STRING.fieldOf("comment").forGetter(Track::getTrackComment),
-		LineCodecs.V4.listOf().fieldOf("lines").forGetter(Track::getLines)
-	).apply(instance, (id, dataVersion, exportVersion, trackName, comment, lines) -> new Track(id, exportVersion, trackName, comment, 1, 0, 20, lines, Optional.empty())));
+	public static Codec<Track> getNewCodec(int dataVersion) {
+		var v1 = CodecFieldBuilder.<Track>get()
+			.append(Field.of(Codec.STRING, "id", Track::getId))
+			.append(Field.of(Codec.INT, "export_version", Track::increasedExportVersion))
+			.append(Field.of(Codec.STRING, "track_name", Track::getTrackName))
+			.append(Field.of(Codec.STRING, "comment", Track::getTrackComment))
+			.append(Field.of(LineCodecs.V1.listOf(), "lines", Track::getLines));
+		if (dataVersion == 1) return v1.append(getVersion(1)).build((id, exportVersion, trackName, comment, lines, _) -> new Track(id, exportVersion, trackName, comment, 1, 0, 20, lines, Optional.empty()));
+		var v4 = v1.replace5(Field.of(LineCodecs.V4.listOf(), "lines", Track::getLines));
+		if (dataVersion == 4) return v4.append(getVersion(4)).build((id, exportVersion, trackName, comment, lines, _) -> new Track(id, exportVersion, trackName, comment, 1, 0, 20, lines, Optional.empty()));
+		var v5 = v4.replace5(Field.of(LineCodecs.V5.listOf(), "lines", Track::getLines));
+		if (dataVersion == 5) return v5.append(getVersion(5)).build((id, exportVersion, trackName, comment, lines, _) -> new Track(id, exportVersion, trackName, comment, 1, 0, 20, lines, Optional.empty()));
+		var v6 = v5
+			.append(Field.of(Codec.DOUBLE, "gravity", Track::getGravity))
+			.append(Field.of(Codec.INT, "ticks", Track::getTicksInHertz))
+			.append(Field.nullable(CartModelCodecs.V6, "cart_model", Track::getCartModel));
+		if (dataVersion == 6) return v6.append(getVersion(6)).build((id, exportVersion, trackName, comment, lines, gravity, ticks, cartModel, _) -> new Track(id, exportVersion, trackName, comment, gravity, 0, ticks, lines, cartModel));
+		var v7 = v6
+			.append(Field.of(Codec.INT, "friction", Track::getFriction));
+		if (dataVersion == 7) return v7.append(getVersion(7)).build((id, exportVersion, trackName, comment, lines, gravity, ticks, cartModel, friction, _) -> new Track(id, exportVersion, trackName, comment, gravity, friction, ticks, lines, cartModel));
+		var v8 = v7
+			.replace5(Field.of(LineCodecs.V8.listOf(), "lines", Track::getLines));
+		if (dataVersion == 8) return v8.append(getVersion(8)).build((id, exportVersion, trackName, comment, lines ,gravity, ticks, cartModel, friction, _) -> new Track(id, exportVersion, trackName, comment, gravity, friction, ticks, lines, cartModel));
+		var v10 = v8
+			.replace5(Field.of(Codec.unboundedMap(Codec.STRING, LineCodecs.V10), "lines", track ->
+				track.getLines().stream().collect(Collectors.toMap(line -> line.getLabel() != null ? line.getLabel() : line.getId(), line -> line))));
+		if (dataVersion == 10) return v10.append(getVersion(10)).build((id, exportVersion, trackName, comment, lines ,gravity, ticks, cartModel, friction, _) -> new Track(id, exportVersion, trackName, comment, gravity, friction, ticks, lines.values(), cartModel));
 
-	public static final Codec<Track> V5 = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("id").forGetter(Track::getId),
-		Codec.INT.fieldOf("data_version").forGetter(track -> 5),
-		Codec.INT.fieldOf("export_version").forGetter(Track::increasedExportVersion),
-		Codec.STRING.fieldOf("track_name").forGetter(Track::getTrackName),
-		Codec.STRING.fieldOf("comment").forGetter(Track::getTrackComment),
-		LineCodecs.V5.listOf().fieldOf("lines").forGetter(Track::getLines)
-	).apply(instance, (id, dataVersion, exportVersion, trackName, comment, lines) -> new Track(id, exportVersion, trackName, comment, 1, 0, 20, lines, Optional.empty())));
+		return null;
+	}
 
-	public static final Codec<Track> V6 = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("id").forGetter(Track::getId),
-		Codec.INT.fieldOf("data_version").forGetter(Track::getDataVersion),
-		Codec.INT.fieldOf("export_version").forGetter(Track::increasedExportVersion),
-		Codec.STRING.fieldOf("track_name").forGetter(Track::getTrackName),
-		Codec.STRING.fieldOf("comment").forGetter(Track::getTrackComment),
-		Codec.DOUBLE.fieldOf("gravity").forGetter(Track::getGravity),
-		Codec.INT.fieldOf("ticks").forGetter(Track::getTicksInHertz),
-		LineCodecs.V5.listOf().fieldOf("lines").forGetter(Track::getLines),
-		CartModelCodecs.V6.optionalFieldOf("cart_model").forGetter((track) -> Optional.ofNullable(track.getCartModel()))
-	).apply(instance, (id, dataVersion, exportVersion, trackName, comment, gravity, ticks, lines, cartModel) -> new Track(id, exportVersion, trackName, comment, gravity, 0, ticks, lines, cartModel)));
-
-	public static final Codec<Track> V7 = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("id").forGetter(Track::getId),
-		Codec.INT.fieldOf("data_version").forGetter(Track::getDataVersion),
-		Codec.INT.fieldOf("export_version").forGetter(Track::increasedExportVersion),
-		Codec.STRING.fieldOf("track_name").forGetter(Track::getTrackName),
-		Codec.STRING.fieldOf("comment").forGetter(Track::getTrackComment),
-		Codec.DOUBLE.fieldOf("gravity").forGetter(Track::getGravity),
-		Codec.INT.fieldOf("friction").forGetter(Track::getFriction),
-		Codec.INT.fieldOf("ticks").forGetter(Track::getTicksInHertz),
-		LineCodecs.V5.listOf().fieldOf("lines").forGetter(Track::getLines),
-		CartModelCodecs.V6.optionalFieldOf("cart_model").forGetter((track) -> Optional.ofNullable(track.getCartModel()))
-	).apply(instance, (id, data_version, export_version, track_name, comment, gravity, friction, ticks, lines, cart_model) -> {
-		return new Track(id, export_version, track_name, comment, gravity, friction, ticks, lines, cart_model);
-	}));
-
-	public static final Codec<Track> V8 = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("id").forGetter(Track::getId),
-		Codec.INT.fieldOf("data_version").forGetter(Track::getDataVersion),
-		Codec.INT.fieldOf("export_version").forGetter(Track::increasedExportVersion),
-		Codec.STRING.fieldOf("track_name").forGetter(Track::getTrackName),
-		Codec.STRING.fieldOf("comment").forGetter(Track::getTrackComment),
-		Codec.DOUBLE.fieldOf("gravity").forGetter(Track::getGravity),
-		Codec.INT.fieldOf("friction").forGetter(Track::getFriction),
-		Codec.INT.fieldOf("ticks").forGetter(Track::getTicksInHertz),
-		LineCodecs.V8.listOf().fieldOf("lines").forGetter(Track::getLines),
-		CartModelCodecs.V6.optionalFieldOf("cart_model").forGetter((track) -> Optional.ofNullable(track.getCartModel()))
-	).apply(instance, (id, data_version, export_version, track_name, comment, gravity, friction, ticks, lines, cart_model) -> {
-		return new Track(id, export_version, track_name, comment, gravity, friction, ticks, lines, cart_model);
-	}));
-
-	public static final Codec<Track> V10 = RecordCodecBuilder.create(instance -> instance.group(
-		Codec.STRING.fieldOf("id").forGetter(Track::getId),
-		Codec.INT.fieldOf("data_version").forGetter(Track::getDataVersion),
-		Codec.INT.fieldOf("export_version").forGetter(Track::increasedExportVersion),
-		Codec.STRING.fieldOf("track_name").forGetter(Track::getTrackName),
-		Codec.STRING.fieldOf("comment").forGetter(Track::getTrackComment),
-		Codec.DOUBLE.fieldOf("gravity").forGetter(Track::getGravity),
-		Codec.INT.fieldOf("friction").forGetter(Track::getFriction),
-		Codec.INT.fieldOf("ticks").forGetter(Track::getTicksInHertz),
-		Codec.unboundedMap(Codec.STRING, LineCodecs.V10).fieldOf("lines").forGetter(track ->
-			track.getLines().stream().collect(Collectors.toMap(line -> line.getLabel() != null ? line.getLabel() : line.getId(), line -> line))),
-		CartModelCodecs.V6.optionalFieldOf("cart_model").forGetter((track) -> Optional.ofNullable(track.getCartModel()))
-	).apply(instance, (id, data_version, export_version, track_name, comment, gravity, friction, ticks, lineMap, cart_model) -> {
-		return new Track(id, export_version, track_name, comment, gravity, friction, ticks, lineMap.values(), cart_model);
-	}));
-
-	public static final Codec<Track> CURRENT = V10;
 	public static final int CURRENT_VERSION = 10;
+	public static final Codec<Track> CURRENT_CODEC = getNewCodec(CURRENT_VERSION);
 }

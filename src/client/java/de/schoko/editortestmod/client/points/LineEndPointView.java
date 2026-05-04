@@ -212,7 +212,7 @@ public class LineEndPointView extends View {
 					getScreen().getSimulator().putTrainOnLine(line);
 				}
 				if (line.getPhysicsType() == LinePhysicsType.STATION) {
-					ImGui.text("Halting brake: ");
+					ImGui.text("Brakes engaged: ");
 					ImGui.sameLine();
 					ImBoolean fullStop = new ImBoolean();
 					fullStop.set(line.isFullStop());

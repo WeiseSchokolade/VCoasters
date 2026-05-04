@@ -132,7 +132,7 @@ public class Train {
 			}
 			while (distanceAlongLine < 0) {
 				if (line.getInputLine() != null) {
-					line = line.getOutputLine();
+					line = line.getInputLine();
 					distanceAlongLine += (int) (line.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
 				} else {
 					distanceAlongLine = 0;

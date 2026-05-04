@@ -113,9 +113,19 @@ public class RideSimulator {
 				ImGui.button("Move to selected line");
 				ImGui.endDisabled();
 			}
-			ImGui.beginDisabled(paused || train == null);
-			ImGui.text("Velocity:");
+
+			List<Line> lines = track.getLabelledLines();
+			String[] array = lines.stream().map(Line::getLabel).toArray(String[]::new);
+			ImGui.beginDisabled(train == null || array.length == 0);
+
+			if (ImGui.button("Move to")) {
+				putTrainOnLine(lines.get(selectedComboItem.get()));
+			}
 			ImGui.sameLine();
+			ImGui.combo("##DestinationSelect", selectedComboItem, array);
+			ImGui.endDisabled();
+
+			ImGui.beginDisabled(paused || train == null);
 			if (train == null) {
 				showVelocity("Velocity", "-", "-");
 				showVelocity("Max velocity: ", "-", "-");

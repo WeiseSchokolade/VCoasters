@@ -165,4 +165,8 @@ public class Track {
 		if (this.friction != friction) setDirty(true);
 		this.friction = friction;
 	}
+
+	public List<Line> getLabelledLines() {
+		return lines.stream().filter(line -> line.getLabel() != null).toList();
+	}
 }

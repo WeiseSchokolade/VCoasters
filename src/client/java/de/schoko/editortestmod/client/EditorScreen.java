@@ -52,6 +52,9 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 	private boolean requestClosing;
 	private float[] trackTransformation;
 
+	private RideSimulator simulator;
+
+
 	public EditorScreen(Track editedTrack) {
 		super(Component.literal("Editor"));
 		this.editedTrack = editedTrack;
@@ -66,6 +69,8 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		}
 		this.renderItemModel = true;
 		this.newlyOpen = true;
+
+		this.simulator = new RideSimulator(editedTrack);
 	}
 
 	@Override
@@ -79,6 +84,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		mouseGrabbed = io.getWantCaptureMouse();
 		keyboardGrabbed = io.getWantCaptureKeyboard();
 		view.render(io);
+		simulator.renderImGui(io);
 		if (ImGui.begin("Track Settings")) {
 			ImGui.text("Id: ");
 			ImGui.sameLine();
@@ -240,6 +246,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 	@Override
 	public void render(RenderContext renderContext) {
 		this.view.render(renderContext);
+		this.simulator.extract(renderContext);
 	}
 
 	public EditorObject getSelectedObject() {
@@ -256,6 +263,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 
 	public void endClientTick() {
 		view.endClientTick();
+		simulator.tick();
 		List<Line> changedLines = new ArrayList<>();
 		editedTrack.getLines().forEach(line -> {
 			if (line.getRenderer().isDirty()) {
@@ -273,6 +281,9 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		}
 		if (editedTrack.isDirty()) {
 			ClientPlayNetworking.send(new ApplyTrackMetaChangesC2S(editedTrack));
+			if (editedTrack.getTrainMeta().isDirty()) {
+				simulator = new RideSimulator(editedTrack);
+			}
 			editedTrack.setDirty(false);
 
 			if (!editedTrack.getTrainMeta().getModelId().equals(itemModelId)) {
@@ -368,5 +379,9 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 
 	public void setRenderItemModel(boolean renderItemModel) {
 		this.renderItemModel = renderItemModel;
+	}
+
+	public RideSimulator getSimulator() {
+		return simulator;
 	}
 }

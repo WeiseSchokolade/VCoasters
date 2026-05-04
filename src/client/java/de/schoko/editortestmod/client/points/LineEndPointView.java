@@ -24,8 +24,6 @@ public class LineEndPointView extends View {
 	private Gizmo gizmo;
 	private Point previewPoint;
 
-	private FollowerCar car;
-	private RideCar rideCar;
 	private boolean useEndpointRotationGizmo;
 	private boolean isPreviewing;
 
@@ -131,14 +129,6 @@ public class LineEndPointView extends View {
 		if (previewPoint != null) {
 			previewPoint.draw(renderContext);
 		}
-		if (car != null) {
-			if (rideCar != null) {
-				rideCar.render(renderContext);
-			} else {
-				car.tick();
-				car.draw(renderContext);
-			}
-		}
 		if (selectedObject != null && gizmo != null) {
 			gizmo.draw(renderContext, target);
 		}
@@ -219,8 +209,7 @@ public class LineEndPointView extends View {
 
 				ImGui.separatorText("Train");
 				if (ImGui.button("Summon")) {
-					car = new FollowerCar(line, getScreen());
-					rideCar = new RideCar(line, getScreen().getTrack().getCartModel().getSegmentAmount(), car);
+					getScreen().getSimulator().putTrainOnLine(line);
 				}
 				if (line.getPhysicsType() == LinePhysicsType.STATION) {
 					ImGui.text("Halting brake: ");
@@ -339,42 +328,12 @@ public class LineEndPointView extends View {
 				ImGui.separatorText("Train");
 				if (ImGui.button("Summon")) {
 					Line line = (endPoint.isOutputEndPoint() && endPoint.getLine().getOutputLine() != null ? endPoint.getLine().getOutputLine() : endPoint.getLine());
-					car = new FollowerCar(line, getScreen());
-					rideCar = new RideCar(line, getScreen().getTrack().getCartModel().getSegmentAmount(), car);
+					getScreen().getSimulator().putTrainOnLine(line);
 				}
 			}
 			ImGui.end();
 		}
 
-		if (car != null) {
-			if (ImGui.begin("Follower car")) {
-
-				ImGui.text("Show model: ");
-				ImGui.sameLine();
-				ImBoolean imBoolean = new ImBoolean();
-				imBoolean.set(car.isRenderModel());
-				ImGui.checkbox("##ToggleModelVisibility", imBoolean);
-				car.setRenderModel(imBoolean.get());
-
-				ImGui.text("Speed: ");
-				ImGui.sameLine();
-				ImFloat floatValue = new ImFloat();
-				floatValue.set(car.getSpeed());
-				ImGui.inputFloat("##SpeedInput", floatValue);
-				car.setSpeed(floatValue.get());
-
-				if (ImGui.button("Faster")) car.addToSpeed(0.2f);
-				ImGui.sameLine();
-				if (ImGui.button("Pause")) car.setSpeed(0f);
-				ImGui.sameLine();
-				if (ImGui.button("Slower")) car.addToSpeed(-0.2f);
-
-				if (ImGui.button("Remove")) {
-					car = null;
-				}
-			}
-			ImGui.end();
-		}
 	}
 
 	public void showPreview(Line line) {
@@ -426,19 +385,9 @@ public class LineEndPointView extends View {
 		select(null);
 	}
 
-	public void spawnFollowerCar() {
-		if (getScreen().getSelectedObject() instanceof EndPoint endPoint) {
-			car = new FollowerCar(endPoint.getLine(), getScreen());
-			if (endPoint.isOutputEndPoint()) {
-				car.setDistanceTravelled(endPoint.getLine().getLength() - 0.00001f);
-			}
-		}
-	}
-
 
 	@Override
 	public void endClientTick() {
-		if (rideCar != null) rideCar.update();
 		if (gizmo != null && getScreen().getSelectedObject() == null) gizmo = null;
 	}
 }

@@ -28,22 +28,34 @@ public final class EndPoint implements EditorObject, ValuePoint {
 		this(line, isOutputEndPoint, point.x(), point.y(), point.z(), point.yaw(), point.pitch(), point.roll());
 	}
 
-	public void updateCorrespondingEndpoint() {
+	public EndPoint getCorrespondingEndpoint() {
 		EndPoint point;
 		if (isOutputEndPoint) {
-			if (line.getOutputLine() == null) return;
+			if (line.getOutputLine() == null) return null;
 			point = line.getOutputLine().getInputEndPoint();
 		} else {
-			if (line.getInputLine() == null) return;
+			if (line.getInputLine() == null) return null;
 			point = line.getInputLine().getOutputEndPoint();
 		}
-		point.setPos(this.pos);
-		point.yaw = this.yaw;
-		point.pitch = this.pitch;
-		point.roll = this.roll;
+		return point;
 	}
 
-	public void set(ValuePoint valuePoint) {
+	public void updateCorrespondingEndpoint() {
+		EndPoint point = getCorrespondingEndpoint();
+		if (point == null) return;
+		point.merge(this);
+	}
+
+	public boolean equalsCorrespondingEndpoint() {
+		EndPoint endpoint = getCorrespondingEndpoint();
+		if (endpoint == null) return false;
+		return endpoint.pos.equals(this.pos) &&
+			endpoint.yaw == this.yaw &&
+			endpoint.pitch == this.pitch &&
+			endpoint.roll == this.roll;
+	}
+
+	public void merge(ValuePoint valuePoint) {
 		this.pos.set(valuePoint.x(), valuePoint.y(), valuePoint.z());
 		this.yaw = valuePoint.yaw();
 		this.pitch = valuePoint.pitch();

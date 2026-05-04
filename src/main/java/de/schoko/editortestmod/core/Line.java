@@ -47,8 +47,8 @@ public class Line implements EditorObject {
 	}
 
 	public void mergeData(Line line) {
-		this.a.set(line.a);
-		this.b.set(line.b);
+		this.a.merge(line.a);
+		this.b.merge(line.b);
 		this.label = line.getLabel();
 		this.onReachFunction = line.onReachFunction;
 		this.onHaltFunction = line.onHaltFunction;

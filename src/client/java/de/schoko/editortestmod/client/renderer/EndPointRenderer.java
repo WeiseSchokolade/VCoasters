@@ -1,5 +1,6 @@
 package de.schoko.editortestmod.client.renderer;
 
+import de.schoko.editortestmod.client.EditorScreen;
 import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.editor.EditorStyle;
 import de.schoko.editortestmod.core.EditorObject;

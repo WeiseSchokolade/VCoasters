@@ -6,9 +6,8 @@ import com.mojang.math.Axis;
 import de.schoko.editortestmod.TrainMeta;
 import de.schoko.editortestmod.Track;
 import de.schoko.editortestmod.client.core.RenderContextImpl;
-import de.schoko.editortestmod.core.InterpolatedPoint;
-import de.schoko.editortestmod.core.Line;
-import de.schoko.editortestmod.core.RenderContext;
+import de.schoko.editortestmod.codecs.LineCodecs;
+import de.schoko.editortestmod.core.*;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.type.ImBoolean;
@@ -23,10 +22,11 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 public class RideSimulator {
 	private final Track track;
+	private final Supplier<EditorObject> selectedObjectSupplier;
 	private final TrainMeta trainMeta;
 	private Train train;
 
@@ -37,9 +37,10 @@ public class RideSimulator {
 
 	private final List<InterpolatedPoint> oldPositions;
 
-	public RideSimulator(Track track) {
+	public RideSimulator(Track track, Supplier<EditorObject> getSelectedObject) {
 		this.trainMeta = track.getTrainMeta();
 		this.track = track;
+		selectedObjectSupplier = getSelectedObject;
 		//this.train = new Train(track.getFriction(), this.trainMeta.getSegmentAmount(), trainMeta.getCarDistance());
 		this.itemModel = Minecraft.getInstance().getModelManager().getItemModel(trainMeta.getModelId());
 		this.oldPositions = new ArrayList<>();
@@ -87,6 +88,40 @@ public class RideSimulator {
 			if (ImGui.checkbox("##PausedCheckbox", imBoolean)) {
 				paused = imBoolean.get();
 			}
+			ImGui.separatorText("Train");
+			if (selectedObjectSupplier.get() instanceof Line line) {
+				if (ImGui.button("Move to selected line")) {
+					putTrainOnLine(line);
+				}
+			} else if (selectedObjectSupplier.get() instanceof EndPoint endPoint) {
+				if (ImGui.button("Move to selected endpoint")) {
+					putTrainOnLine((endPoint.isOutputEndPoint() && endPoint.getCorrespondingEndpoint() != null) ? endPoint.getCorrespondingEndpoint().getLine() : endPoint.getLine());
+				}
+			} else {
+				ImGui.beginDisabled();
+				ImGui.button("Move to selected line");
+				ImGui.endDisabled();
+			}
+			ImGui.beginDisabled(paused || train == null);
+			ImGui.text("Velocity:");
+			ImGui.sameLine();
+			if (train == null) {
+				ImGui.textColored(0xFFAAFFAA, "-");
+				ImGui.sameLine();
+				ImGui.text("B/S (");
+				ImGui.sameLine();
+				ImGui.textColored(0xFFAACCFF, "-");
+			} else {
+				double velocity = (train.getVelocity() * 20.0 / LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
+				ImGui.textColored(0xFFAAFFAA, String.format("%.3f", velocity));
+				ImGui.sameLine();
+				ImGui.text("B/S (");
+				ImGui.sameLine();
+				ImGui.textColored(0xFF77AAFF, String.format("%.3f", velocity * 3.6));
+			}
+			ImGui.sameLine();
+			ImGui.text("KB/H)");
+			ImGui.endDisabled();
 		}
 		ImGui.end();
 	}

@@ -110,6 +110,10 @@ public class Train {
 		}
 	}
 
+	public int getVelocity() {
+		return frontCar.velocity;
+	}
+
 	static class FrontCar {
 		private Line line;
 		private int velocity;

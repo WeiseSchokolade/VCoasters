@@ -148,8 +148,22 @@ public class LineEndPointView extends View {
 			}
 			ImGui.end();
 		}
-		if (object instanceof Line line) {
-			if (ImGui.begin("Line")) {
+		if (ImGui.begin("Builder")) {
+			if (object instanceof Line line) {
+				ImGui.text("Select");
+				ImGui.sameLine();
+				if (ImGui.button("Input point")) select(line.getInputEndPoint());
+				ImGui.sameLine();
+				ImGui.beginDisabled(line.getInputEndPoint().getCorrespondingEndpoint() == null);
+				if (ImGui.button("Previous")) select(line.getInputEndPoint().getCorrespondingEndpoint().getLine());
+				ImGui.endDisabled();
+				ImGui.sameLine();
+				ImGui.beginDisabled(line.getOutputEndPoint().getCorrespondingEndpoint() == null);
+				if (ImGui.button("Next")) select(line.getOutputEndPoint().getCorrespondingEndpoint().getLine());
+				ImGui.endDisabled();
+				ImGui.sameLine();
+				if (ImGui.button("Output point")) select(line.getOutputEndPoint());
+
 				if (ImGui.button("Add")) this.showPreview(line);
 				ImGui.sameLine();
 				if (ImGui.button("Split")) splitSelectedLineInCenter(line);
@@ -158,98 +172,35 @@ public class LineEndPointView extends View {
 				ImGui.sameLine();
 				if (ImGui.button("Deselect")) select(null);
 
-				if (ImGui.button("Select input")) select(line.getInputEndPoint());
+			}
+			if (object instanceof EndPoint endPoint) {
+				ImGui.text("Select");
 				ImGui.sameLine();
-				if (ImGui.button("Select output")) select(line.getOutputEndPoint());
-
-
-				ImGui.text("Id: " + line.getId());
+				if (ImGui.button("Select line")) select(endPoint.getLine());
 				ImGui.sameLine();
-				if (ImGui.button("Copy")) {
-					Minecraft.getInstance().keyboardHandler.setClipboard(line.getId());
-				}
+				ImGui.beginDisabled(endPoint.getCorrespondingEndpoint() == null);
+				if (ImGui.button("Select corresponding")) select(endPoint.getCorrespondingEndpoint());
+				ImGui.endDisabled();
 
-				ImGui.text("OutputLine: ");
+				if (ImGui.radioButton("Translate", !useEndpointRotationGizmo)) {
+					useEndpointRotationGizmo = false;
+					select(endPoint);
+				}
 				ImGui.sameLine();
-				ImString string = new ImString();
-				string.set(line.getOutputLineId() == null ? "" : line.getOutputLineId());
-				if (ImGui.inputText("##OutputLineInput", string)) {
-					line.setOutputLine(string.get().isBlank() ? null : getScreen().getTrack().getLine(string.get()));
-				}
-
-				ImGui.text("Length (in cb): " + Math.round(line.getLength() * 100));
-				if (line.getLength() > 20) {
-					ImGui.textColored(0xFF0000, "Line is too long! Only up to 20 blocks can be rendered properly!");
-				}
-
-				ImGui.text("Label: ");
-				ImGui.sameLine();
-				string.set(line.getLabel() != null ? line.getLabel() : "");
-				if (ImGui.inputText("##LabelInput", string)) {
-					line.setLabel(string.get().isBlank() ? null : string.get());
-				}
-
-				for (LinePhysicsType value : LinePhysicsType.values()) {
-					if (ImGui.radioButton(value.name(), line.getPhysicsType() == value || (value == LinePhysicsType.REGULAR && line.getPhysicsType() == null))) {
-						line.setPhysicsType(value);
-					}
-				}
-
-				ImGui.text("OnReachFunction: ");
-				ImGui.sameLine();
-				string.set(line.getOnReachFunction() == null ? "" : line.getOnReachFunction());
-				if (ImGui.inputText("##OnReachFunctionInput", string))
-					line.setOnReachFunction(string.get().isBlank() || string.get().equals("null") ? null : string.get());
-
-				ImGui.text("OnHaltFunction: ");
-				ImGui.sameLine();
-				string.set(line.getOnHaltFunction() == null ? "" : line.getOnHaltFunction());
-				if (ImGui.inputText("##OnHaltFunctionInput", string))
-					line.setOnHaltFunction(string.get().isBlank() || string.get().equals("null") ? null : string.get());
-
-				ImGui.separatorText("Train");
-				if (ImGui.button("Summon")) {
-					getScreen().getSimulator().putTrainOnLine(line);
-				}
-				if (line.getPhysicsType() == LinePhysicsType.STATION) {
-					ImGui.text("Brakes engaged: ");
-					ImGui.sameLine();
-					ImBoolean fullStop = new ImBoolean();
-					fullStop.set(line.isFullStop());
-					ImGui.checkbox("##FullStop", fullStop);
-					line.setFullStop(fullStop.get());
-					if (ImGui.button("Release brakes")) {
-						Line inspectedLine = line;
-						while (inspectedLine != null && inspectedLine.getPhysicsType() == LinePhysicsType.STATION) {
-							inspectedLine.setFullStop(false);
-							inspectedLine = inspectedLine.getOutputLine();
-						}
-						inspectedLine = line;
-						while (inspectedLine != null && inspectedLine.getPhysicsType() == LinePhysicsType.STATION) {
-							inspectedLine.setFullStop(false);
-							inspectedLine = inspectedLine.getInputLine();
-						}
-					}
-					ImGui.sameLine();
-					if (ImGui.button("Engage brakes")) {
-						Line inspectedLine = line;
-						while (inspectedLine != null && inspectedLine.getPhysicsType() == LinePhysicsType.STATION) {
-							inspectedLine.setFullStop(true);
-							inspectedLine = inspectedLine.getOutputLine();
-						}
-						inspectedLine = line;
-						while (inspectedLine != null && inspectedLine.getPhysicsType() == LinePhysicsType.STATION) {
-							inspectedLine.setFullStop(true);
-							inspectedLine = inspectedLine.getInputLine();
-						}
-					}
+				if (ImGui.radioButton("Rotate", useEndpointRotationGizmo)) {
+					useEndpointRotationGizmo = true;
+					select(endPoint);
 				}
 			}
-			ImGui.end();
+		}
+		ImGui.end();
+		if (object instanceof Line line) {
+			line.getRenderer().renderImGui(io);
 		} else if (object instanceof EndPoint endPoint) {
 			if (ImGui.begin("Endpoint")) {
 				ImGui.text(endPoint.isOutputEndPoint() ? "Output" : "Input");
-				if (ImGui.button("Select line")) select(endPoint.getLine());
+				ImGui.sameLine();
+				ImGui.text("of " + (endPoint.getLine().getLabel() != null ? endPoint.getLine().getLabel() : endPoint.getLine().getId()));
 
 				ImGui.text("Position: ");
 				ImGui.sameLine();
@@ -269,15 +220,6 @@ public class LineEndPointView extends View {
 					endPoint.setRoll((float) Math.toRadians(floats[2]));
 				}
 
-				if (ImGui.radioButton("Translate", !useEndpointRotationGizmo)) {
-					useEndpointRotationGizmo = false;
-					select(endPoint);
-				}
-				ImGui.sameLine();
-				if (ImGui.radioButton("Rotate", useEndpointRotationGizmo)) {
-					useEndpointRotationGizmo = true;
-					select(endPoint);
-				}
 				if (ImGui.button("Reset rotation")) {
 					endPoint.setYaw(0);
 					endPoint.setPitch(0);
@@ -323,12 +265,6 @@ public class LineEndPointView extends View {
 				}
 				if (ImGui.button("Set recursive weighted rotation")) {
 					EditorCommands.applyWeightedRotationRecursively(endPoint);
-				}
-
-				ImGui.separatorText("Train");
-				if (ImGui.button("Summon")) {
-					Line line = (endPoint.isOutputEndPoint() && endPoint.getLine().getOutputLine() != null ? endPoint.getLine().getOutputLine() : endPoint.getLine());
-					getScreen().getSimulator().putTrainOnLine(line);
 				}
 			}
 			ImGui.end();

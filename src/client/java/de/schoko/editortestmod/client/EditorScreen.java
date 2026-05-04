@@ -70,7 +70,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		this.renderItemModel = true;
 		this.newlyOpen = true;
 
-		this.simulator = new RideSimulator(editedTrack);
+		this.simulator = new RideSimulator(editedTrack, this::getSelectedObject);
 	}
 
 	@Override
@@ -282,7 +282,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		if (editedTrack.isDirty()) {
 			ClientPlayNetworking.send(new ApplyTrackMetaChangesC2S(editedTrack));
 			if (editedTrack.getTrainMeta().isDirty()) {
-				simulator = new RideSimulator(editedTrack);
+				simulator = new RideSimulator(editedTrack, this::getSelectedObject);
 			}
 			editedTrack.setDirty(false);
 

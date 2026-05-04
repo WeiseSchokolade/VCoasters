@@ -1,7 +1,7 @@
 package de.schoko.editortestmod.client;
 
 import de.florianreuth.imguiexample.imgui.RenderInterface;
-import de.schoko.editortestmod.CartModel;
+import de.schoko.editortestmod.TrainMeta;
 import de.schoko.editortestmod.Track;
 import de.schoko.editortestmod.client.core.View;
 import de.schoko.editortestmod.client.lines.CreateFirstLineView;
@@ -14,10 +14,7 @@ import de.schoko.editortestmod.packets.ApplyTrackMetaChangesC2S;
 import de.schoko.editortestmod.packets.SaveDataC2S;
 import imgui.ImGui;
 import imgui.ImGuiIO;
-import imgui.type.ImBoolean;
-import imgui.type.ImDouble;
-import imgui.type.ImInt;
-import imgui.type.ImString;
+import imgui.type.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -37,7 +34,7 @@ import java.util.List;
 
 public class EditorScreen extends Screen implements RenderInterface, EditorDataScreen {
 	private View view;
-	private Track editedTrack;
+	private final Track editedTrack;
 	private EditorObject selectedObject;
 	private boolean mouseGrabbed;
 	private boolean keyboardGrabbed;
@@ -46,8 +43,11 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 
 	private boolean newlyOpen;
 
-	private String itemModelId;
+	private Identifier itemModelId;
 	private ItemModel itemModel;
+	private String inputtedItemModel;
+	private long inputTime;
+
 	private boolean renderItemModel;
 	private boolean requestClosing;
 	private float[] trackTransformation;
@@ -60,9 +60,9 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		} else this.view = new LineEndPointView(this);
 		Minecraft.getInstance().player.connection.send(new ServerboundChangeGameModePacket(GameType.SPECTATOR));
 
-		if (!editedTrack.getCartModel().getModelId().equals(itemModelId)) {
-			itemModelId = editedTrack.getCartModel().getModelId();
-			itemModel = Minecraft.getInstance().getModelManager().getItemModel(Identifier.parse(itemModelId));
+		if (!editedTrack.getTrainMeta().getModelId().equals(itemModelId)) {
+			itemModelId = editedTrack.getTrainMeta().getModelId();
+			itemModel = Minecraft.getInstance().getModelManager().getItemModel(itemModelId);
 		}
 		this.renderItemModel = true;
 		this.newlyOpen = true;
@@ -73,6 +73,7 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 		if (newlyOpen) {
 			newlyOpen = false;
 			io.clearEventsQueue();
+			inputtedItemModel = null;
 		}
 		io.setWantCaptureKeyboard(!EditorTestModClient.isDraggingCamera());
 		mouseGrabbed = io.getWantCaptureMouse();
@@ -168,40 +169,61 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 			}
 
 			ImGui.separatorText("Cart Model");
-			CartModel model = editedTrack.getCartModel();
+			TrainMeta trainMeta = editedTrack.getTrainMeta();
 
 			ImGui.text("Id: ");
 			ImGui.sameLine();
-			inputString.set(model.getModelId());
-			if (ImGui.inputText("##InputCartModelId", inputString)) editedTrack.setDirty(true);
-			model.setModelId(inputString.get());
+			if (inputTime != 0 && System.currentTimeMillis() - inputTime > 15000) {
+				inputtedItemModel = null;
+				inputTime = 0;
+			}
+			inputString.set(inputtedItemModel != null ? inputtedItemModel : trainMeta.getModelId());
+			if (ImGui.inputText("##InputCartModelId", inputString)) {
+				editedTrack.setDirty(true);
+				Identifier identifier = Identifier.tryParse(inputString.get());
+				if (identifier == null) {
+					ImGui.textColored(0xFFFF0000, "Invalid identifier!");
+					inputtedItemModel = inputString.get();
+					if (inputTime == 0) inputTime = System.currentTimeMillis();
+				} else {
+					trainMeta.setModelId(identifier);
+					inputtedItemModel = null;
+					inputTime = 0;
+				}
+			}
+
+			ImGui.text("Car Distance: ");
+			ImGui.sameLine();
+			ImFloat imFloat = new ImFloat(trainMeta.getCarDistance());
+			if (ImGui.inputFloat("##CarDistanceInput", imFloat)) trainMeta.setDirty(true);
+			trainMeta.setCarDistance(imFloat.get());
 
 			ImGui.text("Segments: ");
 			ImGui.sameLine();
-			imInt.set(model.getSegmentAmount());
-			if (ImGui.inputInt("##SegmentAmountInput", imInt)) editedTrack.setDirty(true);
-			model.setSegmentAmount(imInt.get());
+			imInt.set(trainMeta.getSegmentAmount());
+			if (ImGui.inputInt("##SegmentAmountInput", imInt)) trainMeta.setDirty(true);
+			trainMeta.setSegmentAmount(imInt.get());
 
 			ImGui.text("Offset: ");
 			ImGui.sameLine();
-			float[] floatInputArray = new float[] {model.getOffset().x, model.getOffset().y, model.getOffset().z};
-			if (ImGui.inputScalarN("##OffsetInput", floatInputArray, 3)) editedTrack.setDirty(true);
-			model.getOffset().set(floatInputArray);
+			float[] floatInputArray = new float[] {trainMeta.getOffset().x, trainMeta.getOffset().y, trainMeta.getOffset().z};
+			if (ImGui.inputScalarN("##OffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
+			trainMeta.getOffset().set(floatInputArray);
 
 			ImGui.text("Pivot: ");
 			ImGui.sameLine();
-			floatInputArray = new float[] {model.getPivot().x, model.getPivot().y, model.getPivot().z};
-			if (ImGui.inputScalarN("##PivotOffsetInput", floatInputArray, 3)) editedTrack.setDirty(true);
-			model.getPivot().set(floatInputArray);
+			floatInputArray = new float[] {trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z};
+			if (ImGui.inputScalarN("##PivotOffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
+			trainMeta.getPivot().set(floatInputArray);
 
 			ImGui.text("Yaw/Pitch/Roll: ");
 			ImGui.sameLine();
-			floatInputArray = new float[] {(float) Math.toDegrees(model.getYawOffset()), (float) Math.toDegrees(model.getPitchOffset()), (float) Math.toDegrees(model.getRollOffset())};
+			floatInputArray = new float[] {(float) Math.toDegrees(trainMeta.getYawOffset()), (float) Math.toDegrees(trainMeta.getPitchOffset()), (float) Math.toDegrees(trainMeta.getRollOffset())};
 			if (ImGui.inputScalarN("##RotationOffsetInput", floatInputArray, 3)) {
-				editedTrack.setDirty(true);
-				model.setYawOffset((float) Math.toRadians(floatInputArray[0]));
-				model.setPitchOffset((float) Math.toRadians(floatInputArray[1]));
-				model.setRollOffset((float) Math.toRadians(floatInputArray[2]));
+				trainMeta.setDirty(true);
+				trainMeta.setYawOffset((float) Math.toRadians(floatInputArray[0]));
+				trainMeta.setPitchOffset((float) Math.toRadians(floatInputArray[1]));
+				trainMeta.setRollOffset((float) Math.toRadians(floatInputArray[2]));
 			}
 		}
 		ImGui.end();
@@ -253,9 +275,9 @@ public class EditorScreen extends Screen implements RenderInterface, EditorDataS
 			ClientPlayNetworking.send(new ApplyTrackMetaChangesC2S(editedTrack));
 			editedTrack.setDirty(false);
 
-			if (!editedTrack.getCartModel().getModelId().equals(itemModelId)) {
-				itemModelId = editedTrack.getCartModel().getModelId();
-				itemModel = Minecraft.getInstance().getModelManager().getItemModel(Identifier.parse(itemModelId));
+			if (!editedTrack.getTrainMeta().getModelId().equals(itemModelId)) {
+				itemModelId = editedTrack.getTrainMeta().getModelId();
+				itemModel = Minecraft.getInstance().getModelManager().getItemModel(itemModelId);
 			}
 		}
 		if (requestSaving) {

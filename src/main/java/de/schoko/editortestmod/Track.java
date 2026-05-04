@@ -18,12 +18,12 @@ public class Track {
 	private int friction;
 	private int ticksPerSecondInHertz;
 
-	private CartModel model;
+	private final TrainMeta trainMeta;
 
 	private transient List<Line> removedLines;
 	private transient boolean dirty;
 
-	public Track(String id, int exportVersion, String trackName, String trackComment, double gravity, int friction, int ticksInHertz, Collection<Line> lines, Optional<CartModel> model) {
+	public Track(String id, int exportVersion, String trackName, String trackComment, double gravity, int friction, int ticksInHertz, Collection<Line> lines, TrainMeta trainMeta) {
 		this.id = id;
 		this.exportVersion = exportVersion;
 		this.trackName = trackName;
@@ -33,11 +33,11 @@ public class Track {
 		this.ticksPerSecondInHertz = ticksInHertz;
 		this.lines = new ArrayList<>(lines);
 		this.removedLines = new ArrayList<>();
-		this.model = model.orElse(new CartModel());
+		this.trainMeta = trainMeta;
 	}
 
 	public Track(String id) {
-		this(id, TrackCodecs.CURRENT_VERSION, id, "", 0.5, 0, 20, List.of(), Optional.empty());
+		this(id, TrackCodecs.CURRENT_VERSION, id, "", 0.5, 0, 20, List.of(), new TrainMeta());
 	}
 
 	public void mergeMetaFrom(Track track) {
@@ -47,7 +47,7 @@ public class Track {
 		this.gravityInBlocksPerSecondSquared = track.gravityInBlocksPerSecondSquared;
 		this.friction = track.getFriction();
 		this.ticksPerSecondInHertz = track.ticksPerSecondInHertz;
-		this.model.mergeFrom(track.model);
+		this.trainMeta.mergeFrom(track.trainMeta);
 	}
 
 	public void setAcceleration(double gravityInBlocksPerSecondSquared, double tickDurationInSeconds) {
@@ -127,11 +127,12 @@ public class Track {
 	}
 
 	public boolean isDirty() {
-		return dirty;
+		return dirty || trainMeta.isDirty();
 	}
 
 	public void setDirty(boolean dirty) {
 		this.dirty = dirty;
+		if (!dirty) trainMeta.setDirty(false);
 	}
 
 	public double getGravity() {
@@ -152,8 +153,8 @@ public class Track {
 		this.ticksPerSecondInHertz = tickInHertz;
 	}
 
-	public CartModel getCartModel() {
-		return model;
+	public TrainMeta getTrainMeta() {
+		return trainMeta;
 	}
 
 	public int getFriction() {

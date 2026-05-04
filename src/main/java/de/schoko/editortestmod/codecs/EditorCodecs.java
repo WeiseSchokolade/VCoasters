@@ -45,7 +45,7 @@ public class EditorCodecs {
 
 	public static boolean isDataStorageVersionCompatible(int dataStorageVersion) {
 		return switch (dataStorageVersion) {
-			case 1, 4, 5, 6, 7, 8, 10 -> true;
+			case 1, 4, 5, 6, 7, 8, 10, 11 -> true;
 			default -> false;
 		};
 	}

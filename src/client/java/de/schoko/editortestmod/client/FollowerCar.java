@@ -10,17 +10,11 @@ import de.schoko.editortestmod.core.Line;
 import de.schoko.editortestmod.core.RenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.ItemEntityRenderer;
-import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
-import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.item.MissingItemModel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
@@ -44,8 +38,8 @@ public class FollowerCar {
 		this.screen = screen;
 		speed = 0f;
 		lastUpdate = System.currentTimeMillis();
-		offset = screen.getTrack().getCartModel().getOffset();
-		pivot = screen.getTrack().getCartModel().getPivot();
+		offset = screen.getTrack().getTrainMeta().getOffset();
+		pivot = screen.getTrack().getTrainMeta().getPivot();
 		this.renderModel = screen.shouldRenderItemModel();
 	}
 
@@ -94,9 +88,9 @@ public class FollowerCar {
 		stack.translate(-camera.x, -camera.y, -camera.z);
 		stack.translate(point.x(), point.y(), point.z());
 		stack.translate(offset.x, offset.y(), offset.z());
-		stack.last().rotateAround(Axis.YP.rotation(-point.yaw() + screen.getTrack().getCartModel().getYawOffset()), pivot.x, pivot.y, pivot.z);
-		stack.last().rotateAround(Axis.XP.rotation(point.pitch() + screen.getTrack().getCartModel().getPitchOffset()), pivot.x, pivot.y, pivot.z);
-		stack.last().rotateAround(Axis.ZP.rotation(point.roll() + screen.getTrack().getCartModel().getRollOffset()), pivot.x, pivot.y, pivot.z);
+		stack.last().rotateAround(Axis.YP.rotation(-point.yaw() + screen.getTrack().getTrainMeta().getYawOffset()), pivot.x, pivot.y, pivot.z);
+		stack.last().rotateAround(Axis.XP.rotation(point.pitch() + screen.getTrack().getTrainMeta().getPitchOffset()), pivot.x, pivot.y, pivot.z);
+		stack.last().rotateAround(Axis.ZP.rotation(point.roll() + screen.getTrack().getTrainMeta().getRollOffset()), pivot.x, pivot.y, pivot.z);
 		List<net.minecraft.client.resources.model.geometry.BakedQuad> quads = null;
 		ItemModel model = screen.getItemModel();
 		if (model instanceof CuboidItemModelWrapper wrapper) quads = wrapper.quads.getAll();

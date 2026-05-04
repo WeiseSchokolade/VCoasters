@@ -51,7 +51,6 @@ public class EditorTestModClient implements ClientModInitializer {
 		Line.rendererGetter = LineRenderer::new;
 		EndPoint.rendererGetter = EndPointRenderer::new;
 
-
 		instance = this;
 		renderCtx = new RenderContextImpl();
 		LevelRenderEvents.BEFORE_TRANSLUCENT_TERRAIN.register(context -> {

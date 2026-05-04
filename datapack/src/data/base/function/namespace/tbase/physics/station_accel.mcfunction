@@ -1,6 +1,7 @@
 #scoreboard players set acceleration train_math_score 500
 scoreboard players set #target_speed train_math_score 500
 execute if data storage train:storage tbase.line{fullstop:true} if function base:namespace/tbase/physics/station_full_stop run return 1
+scoreboard players set #acceleration train_math_score 0
 
 execute if score #train_vel train_math_score <= #target_speed train_math_score run scoreboard players set #acceleration train_math_score 30
 

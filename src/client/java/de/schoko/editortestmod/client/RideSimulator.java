@@ -97,19 +97,6 @@ public class RideSimulator {
 				paused = imBoolean.get();
 			}
 			ImGui.separatorText("Train");
-			if (selectedObjectSupplier.get() instanceof Line line) {
-				if (ImGui.button("Move to selected line")) {
-					putTrainOnLine(line);
-				}
-			} else if (selectedObjectSupplier.get() instanceof EndPoint endPoint) {
-				if (ImGui.button("Move to selected endpoint")) {
-					putTrainOnLine((endPoint.isOutputEndPoint() && endPoint.getCorrespondingEndpoint() != null) ? endPoint.getCorrespondingEndpoint().getLine() : endPoint.getLine());
-				}
-			} else {
-				ImGui.beginDisabled();
-				ImGui.button("Move to selected line");
-				ImGui.endDisabled();
-			}
 
 			ImGui.beginDisabled(paused || train == null);
 			if (train == null) {
@@ -141,6 +128,20 @@ public class RideSimulator {
 			ImGui.endDisabled();
 
 			ImGui.separatorText("Controls");
+			if (selectedObjectSupplier.get() instanceof Line line) {
+				if (ImGui.button("Move to selected line")) {
+					putTrainOnLine(line);
+				}
+			} else if (selectedObjectSupplier.get() instanceof EndPoint endPoint) {
+				if (ImGui.button("Move to selected endpoint")) {
+					putTrainOnLine((endPoint.isOutputEndPoint() && endPoint.getCorrespondingEndpoint() != null) ? endPoint.getCorrespondingEndpoint().getLine() : endPoint.getLine());
+				}
+			} else {
+				ImGui.beginDisabled();
+				ImGui.button("Move to selected line");
+				ImGui.endDisabled();
+			}
+
 			if (ImGui.beginTable("##TrainControls", 3)) {
 				List<Line> labelledLines = track.getLabelledLines();
 				ImBoolean fullStop = new ImBoolean();

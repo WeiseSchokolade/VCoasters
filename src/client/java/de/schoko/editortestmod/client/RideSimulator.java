@@ -70,6 +70,7 @@ public class RideSimulator {
 	public void extract(RenderContext context) {
 		if (train != null) ((RenderContextImpl) context).registerStandaloneCall(ctx -> {
 			long delta = System.currentTimeMillis() - lastUpdate;
+			if (paused) delta = 0;
 			List<InterpolatedPoint> currentPositions = new ArrayList<>();
 			train.extractRenderedPositions(currentPositions::add);
 			for (int i = 0; i < currentPositions.size() && i < oldPositions.size(); i++) {

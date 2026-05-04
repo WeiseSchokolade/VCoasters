@@ -28,11 +28,33 @@ public class EndPointRenderer extends Renderer<EndPoint> {
 
 	@Override
 	public Optional<Vec3> clip(Vec3 from, Vec3 to) {
+		if (isSameAsCorrespondingEndpoint() && getObject().isOutputEndPoint()) return Optional.empty();
 		return hitbox.clip(from, to);
 	}
 
 	public void upload(RenderContext context, EditorObject target, EditorObject selected) {
-		Vector4f color = (isRendered(target)) ? Colors.WHITE : (isRendered(selected)) ? (getObject().isOutputEndPoint() ? Colors.LIGHT_BLUE : Colors.LIGHT_RED) : (getObject().isOutputEndPoint() ? Colors.BLUE : Colors.RED);
+		Vector4f lightColor;
+		Vector4f baseColor;
+		if (getObject().isOutputEndPoint()) {
+			lightColor = Colors.LIGHT_BLUE;
+			baseColor = Colors.BLUE;
+		} else {
+			lightColor = Colors.LIGHT_RED;
+			baseColor = Colors.RED;
+		}
+		if (isSameAsCorrespondingEndpoint()) {
+			if (getObject().isOutputEndPoint()) {
+				return;
+			}
+			lightColor = Colors.LIGHT_YELLOW;
+			baseColor = Colors.YELLOW;
+		}
+
+		Vector4f color = (isRendered(target)) ? Colors.WHITE : (isRendered(selected)) ? lightColor : baseColor;
 		context.drawAABB(hitbox, color);
+	}
+
+	public boolean isSameAsCorrespondingEndpoint() {
+		return getObject().getCorrespondingEndpoint() != null && getObject().equalsCorrespondingEndpoint();
 	}
 }

@@ -41,8 +41,6 @@ public class RideSimulator {
 	private FloatRecorder velocityRecorder;
 	private FloatRecorder accelerationRecorder;
 
-	private ImInt selectedComboItem;
-
 	public RideSimulator(Track track, Supplier<EditorObject> getSelectedObject) {
 		this.trainMeta = track.getTrainMeta();
 		this.track = track;
@@ -52,7 +50,6 @@ public class RideSimulator {
 		this.oldPositions = new ArrayList<>();
 		this.velocityRecorder = new FloatRecorder(1000);
 		this.accelerationRecorder = new FloatRecorder(1000);
-		this.selectedComboItem = new ImInt();
 	}
 
 	public void putTrainOnLine(Line line) {
@@ -114,17 +111,6 @@ public class RideSimulator {
 				ImGui.endDisabled();
 			}
 
-			List<Line> lines = track.getLabelledLines();
-			String[] array = lines.stream().map(Line::getLabel).toArray(String[]::new);
-			ImGui.beginDisabled(train == null || array.length == 0);
-
-			if (ImGui.button("Move to")) {
-				putTrainOnLine(lines.get(selectedComboItem.get()));
-			}
-			ImGui.sameLine();
-			ImGui.combo("##DestinationSelect", selectedComboItem, array);
-			ImGui.endDisabled();
-
 			ImGui.beginDisabled(paused || train == null);
 			if (train == null) {
 				showVelocity("Velocity", "-", "-");
@@ -153,6 +139,30 @@ public class RideSimulator {
 				accelerationRecorder.reset();
 			}
 			ImGui.endDisabled();
+
+			ImGui.separatorText("Controls");
+			if (ImGui.beginTable("##TrainControls", 3)) {
+				List<Line> labelledLines = track.getLabelledLines();
+				ImBoolean fullStop = new ImBoolean();
+				for (int i = 0; i < labelledLines.size(); i++) {
+					ImGui.tableNextRow();
+					Line station = labelledLines.get(i);
+					ImGui.tableSetColumnIndex(0);
+					ImGui.text(station.getLabel());
+					if (station.getPhysicsType().supportsFullstop()) {
+						ImGui.tableSetColumnIndex(1);
+						fullStop.set(station.isFullStop());
+						if (ImGui.checkbox("##TrainFullstopControlFullstopCheckbox" + i, fullStop)) {
+							station.setFullStop(fullStop.get());
+						}
+					}
+					ImGui.tableSetColumnIndex(2);
+					if (ImGui.button("Move here##TrainControlMovement" + i)) {
+						putTrainOnLine(station);
+					}
+				}
+				ImGui.endTable();
+			}
 		}
 		ImGui.end();
 	}

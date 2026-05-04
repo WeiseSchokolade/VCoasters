@@ -118,6 +118,21 @@ public class Train {
 		return acceleration;
 	}
 
+	public InterpolatedPoint getCarPosition(int index) {
+		Line inspectedLine = frontCar.line;
+		int distanceAlongLine = frontCar.distanceAlongLine - index * distanceBetweenCars;
+
+		while (distanceAlongLine < 0) {
+			if (inspectedLine.getInputLine() != null) {
+				inspectedLine = inspectedLine.getInputLine();
+				distanceAlongLine += (int) (inspectedLine.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
+			} else {
+				distanceAlongLine = 0;
+			}
+		}
+		return inspectedLine.lerp(((float) distanceAlongLine / LineCodecs.CURRENT_LINE_LENGTH_MODIFIER) / inspectedLine.getLength());
+	}
+
 	static class FrontCar {
 		private Line line;
 		private int velocity;

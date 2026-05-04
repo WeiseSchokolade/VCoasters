@@ -128,6 +128,14 @@ public class RideSimulator {
 			ImGui.endDisabled();
 
 			ImGui.separatorText("Controls");
+			ImGui.beginDisabled(train == null && Minecraft.getInstance().screen instanceof EditorDataScreen);
+			if (ImGui.button("Enter train view")) {
+				EditorScreen screen = (EditorScreen) Minecraft.getInstance().screen;
+				Minecraft.getInstance().setScreen(new TrainViewScreen(screen));
+			}
+			ImGui.endDisabled();
+			ImGui.sameLine();
+
 			if (selectedObjectSupplier.get() instanceof Line line) {
 				if (ImGui.button("Move to selected line")) {
 					putTrainOnLine(line);
@@ -213,8 +221,18 @@ public class RideSimulator {
 		stack.popPose();
 	}
 
-
 	public TrainMeta getTrainMeta() {
 		return trainMeta;
+	}
+
+	public Train getTrain() {
+		return train;
+	}
+
+	public InterpolatedPoint getTrainCarPoint(int index) {
+		if (train == null) return null;
+		long delta = System.currentTimeMillis() - lastUpdate;
+		if (paused) delta = 0;
+		return InterpolatedPoint.lerp(delta / 50.0f, oldPositions.get(index), train.getCarPosition(index));
 	}
 }

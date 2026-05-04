@@ -76,6 +76,8 @@ public class EditorTestModClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.screen instanceof EditorScreen screen) {
 				screen.endClientTick();
+			} else if (client.screen instanceof TrainViewScreen screen) {
+				screen.endClientTick();
 			}
 		});
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(EditorTestMod.MOD_ID, "testelement"), (context, tickCounter) -> {

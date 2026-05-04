@@ -1,6 +1,5 @@
 package de.schoko.editortestmod.client;
 
-import de.florianreuth.imguiexample.imgui.RenderInterface;
 import de.schoko.editortestmod.TrainMeta;
 import de.schoko.editortestmod.Track;
 import de.schoko.editortestmod.client.core.View;
@@ -32,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EditorScreen extends Screen implements RenderInterface, EditorDataScreen {
+public non-sealed class EditorScreen extends Screen implements EditorDataScreen {
 	private View view;
 	private final Track editedTrack;
 	private EditorObject selectedObject;

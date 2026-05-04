@@ -3,13 +3,14 @@ package de.schoko.editortestmod.client;
 import de.schoko.editortestmod.Track;
 import de.schoko.editortestmod.core.EditorObject;
 import de.schoko.editortestmod.core.RenderContext;
+import imgui.ImGuiIO;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 
-public class EditorChatScreen extends ChatScreen implements EditorDataScreen {
+public non-sealed class EditorChatScreen extends ChatScreen implements EditorDataScreen {
 	private final EditorDataScreen previousScreen;
 
 	public EditorChatScreen(EditorDataScreen previousScreen, String string, boolean bl) {
@@ -26,6 +27,11 @@ public class EditorChatScreen extends ChatScreen implements EditorDataScreen {
 	@Override
 	public void render(RenderContext renderContext) {
 		previousScreen.render(renderContext);
+	}
+
+	@Override
+	public void render(ImGuiIO io) {
+		previousScreen.render(io);
 	}
 
 	@Override

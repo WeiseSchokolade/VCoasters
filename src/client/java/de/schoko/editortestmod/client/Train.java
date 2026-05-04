@@ -13,6 +13,7 @@ public class Train {
 	private final int friction;
 	private final int segmentAmount;
 	private final int distanceBetweenCars;
+	private int acceleration;
 
 	public Train(Line line, int friction, int segmentAmount, float distanceBetweenCars) {
 		this.frontCar = new FrontCar(line);
@@ -64,7 +65,6 @@ public class Train {
 		Line inspectedLine = frontCar.line;
 		int distanceAlongLine = frontCar.distanceAlongLine;
 
-		int acceleration;
 		if (inspectedLine.getPhysicsType() == LinePhysicsType.STATION) {
 			acceleration = getAcceleration(inspectedLine, frontCar.velocity, true);
 		} else {
@@ -112,6 +112,10 @@ public class Train {
 
 	public int getVelocity() {
 		return frontCar.velocity;
+	}
+
+	public int getAcceleration() {
+		return acceleration;
 	}
 
 	static class FrontCar {

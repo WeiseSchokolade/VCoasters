@@ -11,6 +11,7 @@ import de.schoko.editortestmod.core.*;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
@@ -37,6 +38,11 @@ public class RideSimulator {
 
 	private final List<InterpolatedPoint> oldPositions;
 
+	private FloatRecorder velocityRecorder;
+	private FloatRecorder accelerationRecorder;
+
+	private ImInt selectedComboItem;
+
 	public RideSimulator(Track track, Supplier<EditorObject> getSelectedObject) {
 		this.trainMeta = track.getTrainMeta();
 		this.track = track;
@@ -44,6 +50,9 @@ public class RideSimulator {
 		//this.train = new Train(track.getFriction(), this.trainMeta.getSegmentAmount(), trainMeta.getCarDistance());
 		this.itemModel = Minecraft.getInstance().getModelManager().getItemModel(trainMeta.getModelId());
 		this.oldPositions = new ArrayList<>();
+		this.velocityRecorder = new FloatRecorder(1000);
+		this.accelerationRecorder = new FloatRecorder(1000);
+		this.selectedComboItem = new ImInt();
 	}
 
 	public void putTrainOnLine(Line line) {
@@ -66,6 +75,8 @@ public class RideSimulator {
 		oldPositions.clear();
 		train.extractRenderedPositions(oldPositions::add);
 		train.update();
+		velocityRecorder.add(train.getVelocity());
+		accelerationRecorder.add(train.getAcceleration());
 	}
 
 	public void extract(RenderContext context) {
@@ -106,24 +117,58 @@ public class RideSimulator {
 			ImGui.text("Velocity:");
 			ImGui.sameLine();
 			if (train == null) {
-				ImGui.textColored(0xFFAAFFAA, "-");
-				ImGui.sameLine();
-				ImGui.text("B/S (");
-				ImGui.sameLine();
-				ImGui.textColored(0xFFAACCFF, "-");
+				showVelocity("Velocity", "-", "-");
+				showVelocity("Max velocity: ", "-", "-");
 			} else {
 				double velocity = (train.getVelocity() * 20.0 / LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
-				ImGui.textColored(0xFFAAFFAA, String.format("%.3f", velocity));
-				ImGui.sameLine();
-				ImGui.text("B/S (");
-				ImGui.sameLine();
-				ImGui.textColored(0xFF77AAFF, String.format("%.3f", velocity * 3.6));
+				showVelocity("Velocity", String.format("%.3f", velocity), String.format("%.3f", velocity * 3.6));
+				double maxVelocity = velocityRecorder.getMax() * 20.0 / LineCodecs.CURRENT_LINE_LENGTH_MODIFIER;
+				showVelocity("Max velocity", String.format("%.3f", maxVelocity), String.format("%.3f", maxVelocity * 3.6));
 			}
-			ImGui.sameLine();
-			ImGui.text("KB/H)");
+
+			if (train == null) {
+				showAcceleration("Max acceleration", "-");
+			} else {
+				showAcceleration("Max acceleration", String.format("%.3f", moreAbs(accelerationRecorder.getMax(), accelerationRecorder.getMin()) * 20.0 / LineCodecs.CURRENT_LINE_LENGTH_MODIFIER));
+			}
+
+			ImGui.text("Last " + String.format("%.3f", velocityRecorder.getLength() * 0.05) + " seconds:");
+
+			float[] values = velocityRecorder.getValues();
+			ImGui.plotLines("##Velocity", values, values.length, 0, "Velocity", Math.min(velocityRecorder.getMin(), 0), velocityRecorder.getMax(), 300, 60);
+			values = accelerationRecorder.getValues();
+			ImGui.plotLines("##Acceleration", values, values.length, 0, "Acceleration", Math.min(accelerationRecorder.getMin(), 0), accelerationRecorder.getMax(), 300, 60);
+			if (ImGui.button("Reset")) {
+				velocityRecorder.reset();
+				accelerationRecorder.reset();
+			}
 			ImGui.endDisabled();
 		}
 		ImGui.end();
+	}
+
+	public double moreAbs(double a, double b) {
+		return Math.abs(a) >= Math.abs(b) ? a : b;
+	}
+
+	public void showVelocity(String label, String velocityText, String velocityConvertedText) {
+		ImGui.text(label);
+		ImGui.sameLine();
+		ImGui.textColored(0xFFAAFFAA, velocityText);
+		ImGui.sameLine();
+		ImGui.text("B/S (");
+		ImGui.sameLine();
+		ImGui.textColored(0xFFAACCFF, velocityConvertedText);
+		ImGui.sameLine();
+		ImGui.text("KB/H)");
+	}
+
+	public void showAcceleration(String label, String text) {
+		ImGui.text(label);
+		ImGui.sameLine();
+		ImGui.textColored(0xFFAAFFAA, text);
+		ImGui.sameLine();
+		ImGui.text("B/S²");
 	}
 
 	public void renderItemModel(LevelRenderContext context, InterpolatedPoint point) {

@@ -1,5 +1,6 @@
 package de.schoko.editortestmod.core;
 
+import imgui.ImGuiIO;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
@@ -13,6 +14,8 @@ public abstract class Renderer<T extends EditorObject> {
 		this.dirty = false;
 		updateHitbox(object);
 	}
+
+	public abstract void renderImGui(ImGuiIO io);
 
 	public abstract void upload(RenderContext renderContext, EditorObject target, EditorObject selected);
 

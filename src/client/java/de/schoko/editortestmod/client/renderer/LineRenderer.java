@@ -3,6 +3,8 @@ package de.schoko.editortestmod.client.renderer;
 import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.editor.EditorStyle;
 import de.schoko.editortestmod.core.*;
+import imgui.ImGui;
+import imgui.ImGuiIO;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -17,6 +19,10 @@ public class LineRenderer extends Renderer<Line> {
 	public LineRenderer(Line line) {
 		renderedQuads = new ArrayList<>();
 		super(line);
+	}
+
+	@Override
+	public void renderImGui(ImGuiIO io) {
 	}
 
 	@Override

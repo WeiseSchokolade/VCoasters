@@ -6,6 +6,7 @@ import de.schoko.editortestmod.core.EditorObject;
 import de.schoko.editortestmod.core.EndPoint;
 import de.schoko.editortestmod.core.RenderContext;
 import de.schoko.editortestmod.core.Renderer;
+import imgui.ImGuiIO;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -30,6 +31,11 @@ public class EndPointRenderer extends Renderer<EndPoint> {
 	public Optional<Vec3> clip(Vec3 from, Vec3 to) {
 		if (isSameAsCorrespondingEndpoint() && getObject().isOutputEndPoint()) return Optional.empty();
 		return hitbox.clip(from, to);
+	}
+
+	@Override
+	public void renderImGui(ImGuiIO io) {
+
 	}
 
 	public void upload(RenderContext context, EditorObject target, EditorObject selected) {

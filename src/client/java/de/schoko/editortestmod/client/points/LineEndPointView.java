@@ -12,12 +12,14 @@ import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import org.joml.Vector3f;
 
+import java.util.List;
 import java.util.Optional;
 
 public class LineEndPointView extends View {
@@ -27,8 +29,11 @@ public class LineEndPointView extends View {
 	private boolean useEndpointRotationGizmo;
 	private boolean isPreviewing;
 
+	private ImInt selectedComboItem;
+
 	public LineEndPointView(EditorScreen screen) {
 		super(screen);
+		this.selectedComboItem = new ImInt();
 	}
 
 	public boolean select(EditorObject object) {
@@ -149,9 +154,18 @@ public class LineEndPointView extends View {
 			ImGui.end();
 		}
 		if (ImGui.begin("Builder")) {
+			List<Line> lines = getScreen().getTrack().getLabelledLines();
+			String[] array = lines.stream().map(Line::getLabel).toArray(String[]::new);
+			ImGui.beginDisabled(array.length == 0);
+
+			if (ImGui.button("Select")) {
+				select(lines.get(selectedComboItem.get()));
+			}
+			ImGui.sameLine();
+			if (array.length > 0) ImGui.combo("##LabelledSelectionSelect", selectedComboItem, array);
+			ImGui.endDisabled();
+
 			if (object instanceof Line line) {
-				ImGui.text("Select");
-				ImGui.sameLine();
 				if (ImGui.button("Input point")) select(line.getInputEndPoint());
 				ImGui.sameLine();
 				ImGui.beginDisabled(line.getInputEndPoint().getCorrespondingEndpoint() == null);
@@ -174,8 +188,6 @@ public class LineEndPointView extends View {
 
 			}
 			if (object instanceof EndPoint endPoint) {
-				ImGui.text("Select");
-				ImGui.sameLine();
 				if (ImGui.button("Select line")) select(endPoint.getLine());
 				ImGui.sameLine();
 				ImGui.beginDisabled(endPoint.getCorrespondingEndpoint() == null);

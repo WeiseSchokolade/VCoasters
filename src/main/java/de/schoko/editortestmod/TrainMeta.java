@@ -30,7 +30,7 @@ public class TrainMeta {
 
 	public TrainMeta() {
 		this.model = Identifier.fromNamespaceAndPath("minecraft", "target_block");
-		this.carDistance = 15000;
+		this.carDistance = 1.5f;
 		this.offset = new Vector3f();
 		this.pivot = new Vector3f();
 		this.segmentAmount = 1;

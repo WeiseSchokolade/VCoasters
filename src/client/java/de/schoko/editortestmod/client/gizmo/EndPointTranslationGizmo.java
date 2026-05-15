@@ -27,6 +27,5 @@ public class EndPointTranslationGizmo extends TranslationGizmo {
 	@Override
 	public void setNewCenter(Vector3f vector3f) {
 		endpoint.setPos(vector3f);
-		endpoint.updateCorrespondingEndpoint();
 	}
 }

@@ -128,7 +128,7 @@ public class RideSimulator {
 			ImGui.endDisabled();
 
 			ImGui.separatorText("Controls");
-			ImGui.beginDisabled(train == null && Minecraft.getInstance().screen instanceof EditorDataScreen);
+			ImGui.beginDisabled(train == null || !(Minecraft.getInstance().screen instanceof EditorScreen));
 			if (ImGui.button("Enter train view")) {
 				EditorScreen screen = (EditorScreen) Minecraft.getInstance().screen;
 				Minecraft.getInstance().setScreen(new TrainViewScreen(screen));

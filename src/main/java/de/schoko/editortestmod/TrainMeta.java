@@ -38,6 +38,7 @@ public class TrainMeta {
 
 	public void mergeFrom(TrainMeta model) {
 		this.model = model.model;
+		this.carDistance = model.carDistance;
 		this.offset.set(model.offset);
 		this.pivot.set(model.pivot);
 		this.yawOffset = model.yawOffset;

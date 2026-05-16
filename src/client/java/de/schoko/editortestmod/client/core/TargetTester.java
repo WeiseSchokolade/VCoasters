@@ -1,6 +1,7 @@
 package de.schoko.editortestmod.client.core;
 
 import de.schoko.editortestmod.client.EditorTestModClient;
+import de.schoko.editortestmod.client.editor.EditorOptions;
 import de.schoko.editortestmod.core.EditorObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -21,7 +22,7 @@ public interface TargetTester {
 		if (player == null) return false;
 		Vec3 from = player.getEyePosition();
 		Vec3 direction = player.getViewVector(1);
-		double entityInteractionRange = player.entityInteractionRange();
+		double entityInteractionRange = EditorOptions.interactionRange;
 		Vec3 to = from.add(direction.scale(entityInteractionRange));
 
 		return aabb.clip(from, to).isPresent();
@@ -87,7 +88,7 @@ public interface TargetTester {
 		if (player == null) return null;
 		Vec3 from = player.getEyePosition();
 
-		double entityInteractionRange = player.entityInteractionRange();
+		double entityInteractionRange = EditorOptions.interactionRange;
 		Vec3 to = from.add(getMouseViewDirection().scale(entityInteractionRange));
 
 		double minDistanceSQ = Double.MAX_VALUE;

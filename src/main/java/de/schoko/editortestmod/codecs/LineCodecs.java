@@ -206,9 +206,9 @@ public enum LineCodecs {;
 			Codec.INT.optionalFieldOf("yaw").forGetter(c -> EditorCodecs.emptyOptionalIfZero(c.aYaw)),
 			Codec.INT.optionalFieldOf("pitch").forGetter(c -> EditorCodecs.emptyOptionalIfZero(c.aPitch)),
 			Codec.INT.optionalFieldOf("roll").forGetter(c -> EditorCodecs.emptyOptionalIfZero(c.aRoll)),
-			Codec.INT.optionalFieldOf("dx").forGetter(c -> EditorCodecs.emptyOptionalIfZero((c.bX - c.aX) / 1000)),
-			Codec.INT.optionalFieldOf("dy").forGetter(c -> EditorCodecs.emptyOptionalIfZero((c.bY - c.aY) / 1000)),
-			Codec.INT.optionalFieldOf("dz").forGetter(c -> EditorCodecs.emptyOptionalIfZero((c.bZ - c.aZ) / 1000)),
+			Codec.INT.optionalFieldOf("dx").forGetter(c -> EditorCodecs.emptyOptionalIfZero(Math.round((c.bX - c.aX) / 1000f))),
+			Codec.INT.optionalFieldOf("dy").forGetter(c -> EditorCodecs.emptyOptionalIfZero(Math.round((c.bY - c.aY) / 1000f))),
+			Codec.INT.optionalFieldOf("dz").forGetter(c -> EditorCodecs.emptyOptionalIfZero(Math.round((c.bZ - c.aZ) / 1000f))),
 			Codec.INT.optionalFieldOf("dyaw").forGetter(c -> EditorCodecs.emptyOptionalIfZero(c.bYaw - c.aYaw)),
 			Codec.INT.optionalFieldOf("dpitch").forGetter(c -> EditorCodecs.emptyOptionalIfZero(c.bPitch - c.aPitch)),
 			Codec.INT.optionalFieldOf("droll").forGetter(c -> EditorCodecs.emptyOptionalIfZero(c.bRoll - c.aRoll))
@@ -216,6 +216,7 @@ public enum LineCodecs {;
 			new V8DeltaChange(aX.orElse(0), aY.orElse(0), aZ.orElse(0), aYaw.orElse(0), aPitch.orElse(0), aRoll.orElse(0),
 				aX.orElse(0) + dX.orElse(0) * 1000, aY.orElse(0) + dY.orElse(0) * 1000, aZ.orElse(0) + dZ.orElse(0) * 1000, aYaw.orElse(0) + dYaw.orElse(0), aPitch.orElse(0) + dPitch.orElse(0), aRoll.orElse(0) + dRoll.orElse(0)
 			)));
+
 	}
 
 	public static final Codec<Line> V8 = RecordCodecBuilder.create(instance -> instance.group(

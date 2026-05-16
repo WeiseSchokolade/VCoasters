@@ -19,6 +19,7 @@ public final class EndPoint implements EditorObject, ValuePoint {
 		this.line = line;
 		this.isOutputEndPoint = isOutputEndPoint;
 		this.pos = new Vector3f(x, y, z);
+		clampPos();
 		this.yaw = yaw;
 		this.pitch = pitch;
 		this.roll = roll;
@@ -26,6 +27,12 @@ public final class EndPoint implements EditorObject, ValuePoint {
 
 	public EndPoint(Line line, boolean isOutputEndPoint, ValuePoint point) {
 		this(line, isOutputEndPoint, point.x(), point.y(), point.z(), point.yaw(), point.pitch(), point.roll());
+	}
+
+	private void clampPos() {
+		this.pos.x = Math.round(pos.x * 1000d) / 1000f;
+		this.pos.y = Math.round(pos.y * 1000d) / 1000f;
+		this.pos.z = Math.round(pos.z * 1000d) / 1000f;
 	}
 
 	public EndPoint getCorrespondingEndpoint() {
@@ -57,14 +64,10 @@ public final class EndPoint implements EditorObject, ValuePoint {
 
 	public void merge(ValuePoint valuePoint) {
 		this.pos.set(valuePoint.x(), valuePoint.y(), valuePoint.z());
+		clampPos();
 		this.yaw = valuePoint.yaw();
 		this.pitch = valuePoint.pitch();
 		this.roll = valuePoint.roll();
-		markRendererAsDirty();
-	}
-
-	public void setPos(Vector3f pos) {
-		this.pos.set(pos);
 		markRendererAsDirty();
 	}
 
@@ -80,8 +83,13 @@ public final class EndPoint implements EditorObject, ValuePoint {
 			'}';
 	}
 
+	public void setPos(Vector3f pos) {
+		setPos(pos.x, pos.y, pos.z);
+	}
+
 	public void setPos(double x, double y, double z) {
 		this.pos.set(x, y, z);
+		clampPos();
 		markRendererAsDirty();
 	}
 

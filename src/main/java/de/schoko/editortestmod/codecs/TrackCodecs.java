@@ -44,7 +44,6 @@ public enum TrackCodecs {
 			.replace8(Field.of(TrainMetaCodecs.V11, "train_meta", Track::getTrainMeta));
 		if (dataVersion == 11) return v11.append(getVersion(11)).build((id, exportVersion, trackName, comment, lines , gravity, ticks, trainMeta, friction, _) -> new Track(id, exportVersion, trackName, comment, gravity, friction, ticks, lines.values(), trainMeta));
 
-
 		return null;
 	}
 

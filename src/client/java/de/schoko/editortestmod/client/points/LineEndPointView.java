@@ -6,6 +6,7 @@ import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.core.TargetTester;
 import de.schoko.editortestmod.client.core.View;
 import de.schoko.editortestmod.client.editor.EditorCommands;
+import de.schoko.editortestmod.client.editor.EditorOptions;
 import de.schoko.editortestmod.client.gizmo.*;
 import de.schoko.editortestmod.core.*;
 import imgui.ImGui;
@@ -31,12 +32,9 @@ public class LineEndPointView extends View {
 
 	private ImInt selectedComboItem;
 
-	private boolean autoSnap;
-
 	public LineEndPointView(EditorScreen screen) {
 		super(screen);
 		this.selectedComboItem = new ImInt();
-		this.autoSnap = true;
 	}
 
 	public boolean select(EditorObject object) {
@@ -138,7 +136,7 @@ public class LineEndPointView extends View {
 			previewPoint.draw(renderContext);
 		}
 		if (selectedObject != null && gizmo != null) {
-			if (autoSnap) {
+			if (EditorOptions.autoSnap) {
 				if (selectedObject instanceof EndPoint endPoint) {
 					if (endPoint.equalsCorrespondingEndpoint()) {
 						gizmo.draw(renderContext, target);
@@ -230,9 +228,15 @@ public class LineEndPointView extends View {
 					select(endPoint);
 				}
 			}
-			ImBoolean autoSnap = new ImBoolean(this.autoSnap);
+			ImBoolean autoSnap = new ImBoolean(EditorOptions.autoSnap);
 			if (ImGui.checkbox("Auto-Snap", autoSnap)) {
-				this.autoSnap = autoSnap.get();
+				EditorOptions.autoSnap = autoSnap.get();
+			}
+			ImInt entityInteractionDistance = new ImInt(EditorOptions.interactionRange);
+			ImGui.text("Range: ");
+			ImGui.sameLine();
+			if (ImGui.inputInt("##Range", entityInteractionDistance)) {
+				EditorOptions.interactionRange = entityInteractionDistance.get();
 			}
 		}
 		ImGui.end();
@@ -249,7 +253,7 @@ public class LineEndPointView extends View {
 				float[] floats = new float[] {endPoint.getX(), endPoint.getY(), endPoint.getZ()};
 				if (ImGui.inputScalarN("##PositionInput", floats, 3)) {
 					endPoint.setPos(floats[0], floats[1], floats[2]);
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 
 				ImGui.text("Rotation: ");
@@ -261,23 +265,23 @@ public class LineEndPointView extends View {
 					endPoint.setYaw((float) Math.toRadians(floats[0]));
 					endPoint.setPitch((float) Math.toRadians(floats[1]));
 					endPoint.setRoll((float) Math.toRadians(floats[2]));
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 
 				if (ImGui.button("Reset rotation")) {
 					endPoint.setYaw(0);
 					endPoint.setPitch(0);
 					endPoint.setRoll(0);
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 				if (ImGui.button("Snap to xz bottom")) {
 					endPoint.setPos(Math.floor(endPoint.x()) + 0.5f, Math.floor(endPoint.y()), Math.floor(endPoint.z()) + 0.5f);
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 				ImGui.sameLine();
 				if (ImGui.button("Snap to xyz center")) {
 					endPoint.setPos(Math.floor(endPoint.x()) + 0.5f, Math.floor(endPoint.y()) + 0.5f, Math.floor(endPoint.z()) + 0.5f);
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 				if (ImGui.button("Update corresponding endpoint")) {
 					endPoint.updateCorrespondingEndpoint();
@@ -289,7 +293,7 @@ public class LineEndPointView extends View {
 					float pitch = player.getXRot();
 					endPoint.setYaw((float) Math.toRadians(yaw));
 					endPoint.setPitch((float) Math.toRadians(pitch));
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 				if (ImGui.button("Set rotation from tangent")) {
 					Vector3f direction = EditorCommands.getAverageDirection(endPoint);
@@ -300,7 +304,7 @@ public class LineEndPointView extends View {
 					endPoint.setYaw(yaw);
 					endPoint.setPitch(pitch);
 					//endPoint.updateCorrespondingEndpoint();
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 				if (ImGui.button("Set rotation from weighted tangent")) {
 					Vector3f direction = EditorCommands.getWeightedAverageDirection(endPoint);
@@ -311,7 +315,7 @@ public class LineEndPointView extends View {
 					endPoint.setYaw(yaw);
 					endPoint.setPitch(pitch);
 					//endPoint.updateCorrespondingEndpoint();
-					if (autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
 				}
 				if (ImGui.button("Set recursive weighted rotation")) {
 					EditorCommands.applyWeightedRotationRecursively(endPoint);

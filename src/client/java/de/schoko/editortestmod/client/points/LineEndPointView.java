@@ -156,6 +156,8 @@ public class LineEndPointView extends View {
 						if (inputEquals) line.getInputEndPoint().updateCorrespondingEndpoint();
 						if (outputEquals) line.getOutputEndPoint().updateCorrespondingEndpoint();
 					}
+				} else {
+					gizmo.draw(renderContext, target);
 				}
 			} else {
 				gizmo.draw(renderContext, target);

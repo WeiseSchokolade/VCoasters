@@ -144,7 +144,7 @@ public class Train {
 
 		public void update() {
 			distanceAlongLine += velocity;
-			while (distanceAlongLine >= line.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER) {
+			while (distanceAlongLine > line.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER) {
 				if (line.getOutputLine() != null) {
 					distanceAlongLine -= (int) (line.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
 					line = line.getOutputLine();

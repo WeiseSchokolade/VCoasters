@@ -114,7 +114,7 @@ public class RideSimulator {
 
 	public void renderImGui(ImGuiIO imGui) {
 		if (ImGui.begin("Simulation")) {
-			ImGui.text("Paused: ");
+			ImGui.text("Paused:");
 			ImGui.sameLine();
 			ImBoolean imBoolean = new ImBoolean(paused);
 			if (ImGui.checkbox("##PausedCheckbox", imBoolean)) {

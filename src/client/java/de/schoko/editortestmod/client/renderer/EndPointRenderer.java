@@ -66,6 +66,14 @@ public class EndPointRenderer extends Renderer<EndPoint> {
 
 		Vector4f color = (isRendered(target)) ? Colors.WHITE : (isRendered(selected)) ? lightColor : baseColor;
 		context.drawAABB(hitbox, color);
+
+		if (EditorOptions.showRollAngle) {
+			Vector3f direction = getObject().getRotatedViewDirection(1);
+			Vector3f rollVector = direction.cross(new Vector3f(0f, 1f, 0f), new Vector3f()).cross(direction).rotateAxis(getObject().getRoll(), direction.x, direction.y, direction.z).normalize(0.5f);
+			//Vector3f rollAxis = Geometry.applyRotation(new Vector3f(0f, 0f, 1f), getObject().getYaw(), getObject().getPitch(), 0);
+			//Vector3f rollVector = new Vector3f(0f, 0.5f, 0f).rotateAxis(getObject().getRoll(), rollAxis.x, rollAxis.y, rollAxis.z);
+			context.drawBoxLine(hitbox.getCenter().toVector3f(), hitbox.getCenter().toVector3f().add(rollVector), 0.05f, Colors.BLUE);
+		}
 	}
 
 	public boolean isSameAsCorrespondingEndpoint() {

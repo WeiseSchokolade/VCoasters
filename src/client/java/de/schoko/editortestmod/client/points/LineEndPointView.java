@@ -233,6 +233,9 @@ public class LineEndPointView extends View {
 					EditorOptions.showAngleSharpness = showAngleSharpness.get();
 				}
 				ImBoolean showRollAngle = new ImBoolean(EditorOptions.showRollAngle);
+				if (ImGui.checkbox("Show roll angle", showRollAngle)) {
+					EditorOptions.showRollAngle = showRollAngle.get();
+				}
 			}
 			ImBoolean autoSnap = new ImBoolean(EditorOptions.autoSnap);
 			if (ImGui.checkbox("Auto-Snap", autoSnap)) {

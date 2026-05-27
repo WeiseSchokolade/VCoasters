@@ -243,12 +243,13 @@ public enum LineCodecs {;
 		return line;
 	}));
 
-	public static final int CURRENT_LINE_LENGTH_MODIFIER = 10000;
+
+	public static final int V10_LINE_LENGTH_MODIFIER = 10000;
 
 	public static final Codec<Line> V10 = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.fieldOf("id").forGetter(Line::getId),
 		V8DeltaChange.V8_CODEC.fieldOf("delta").forGetter(V8DeltaChange::new),
-		Codec.FLOAT.fieldOf("length").forGetter(line -> line.getLength() * CURRENT_LINE_LENGTH_MODIFIER),
+		Codec.FLOAT.fieldOf("length").forGetter(line -> line.getLength() * V10_LINE_LENGTH_MODIFIER),
 		Codec.STRING.optionalFieldOf("label").forGetter(line -> Optional.ofNullable(line.getLabel() != null && !line.getLabel().isBlank() ? line.getLabel() : null)),
 		Codec.STRING.optionalFieldOf("output_line_id").forGetter(line -> Optional.ofNullable(line.getOutputLineId())),
 		Codec.STRING.optionalFieldOf("output_line").forGetter(line -> Optional.ofNullable(line.getOutputLine() != null ? line.getOutputLine().getLabel() != null ? line.getOutputLine().getLabel() : line.getOutputLine().getId() : null)),
@@ -258,7 +259,7 @@ public enum LineCodecs {;
 		Codec.BOOL.optionalFieldOf("fullstop").forGetter(line -> Optional.ofNullable(line.getPhysicsType() != null && line.getPhysicsType().supportsFullstop() ? line.isFullStop() : null)),
 		Codec.STRING.optionalFieldOf("on_reach").forGetter(line -> Optional.ofNullable(line.getOnReachFunction())),
 		Codec.STRING.optionalFieldOf("on_halt").forGetter(line -> Optional.ofNullable(line.getOnHaltFunction())),
-		Codec.FLOAT.optionalFieldOf("acceleration").forGetter(l -> l.isAccelerationCalculated() ? Optional.of((float) (l.getAcceleration() * CURRENT_LINE_LENGTH_MODIFIER)) : Optional.empty())
+		Codec.FLOAT.optionalFieldOf("acceleration").forGetter(l -> l.isAccelerationCalculated() ? Optional.of((float) (l.getAcceleration() * V10_LINE_LENGTH_MODIFIER)) : Optional.empty())
 	).apply(instance, (id, delta,
 	                   lengthIgnored, label, outputLineId, outputLine, inputLineId, inputLine, physicsType, fullStop, onReachFunction, onHaltFunction, accelerationIgnored) -> {
 		Line line = new Line(id, delta.getA(), delta.getB());
@@ -271,5 +272,6 @@ public enum LineCodecs {;
 		return line;
 	}));
 
+	public static final int CURRENT_LINE_LENGTH_MODIFIER = V10_LINE_LENGTH_MODIFIER;
 	public static final Codec<Line> CURRENT = V10;
 }

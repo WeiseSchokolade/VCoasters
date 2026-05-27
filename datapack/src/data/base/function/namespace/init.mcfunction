@@ -4,7 +4,7 @@ scoreboard objectives remove train_math_score
 scoreboard objectives remove train_data_score
 
 execute store result score data_version train_data_score run data get storage track:storage data_version
-execute unless score data_version train_data_score matches 8 run return run say Uh oh! Incompatible data version!
+execute unless score data_version train_data_score matches 11 run return run say Uh oh! Incompatible data version!
 
 scoreboard objectives add train_math_score dummy
 scoreboard objectives add train_data_score dummy

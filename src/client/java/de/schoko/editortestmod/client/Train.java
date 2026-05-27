@@ -8,6 +8,11 @@ import de.schoko.editortestmod.core.LinePhysicsType;
 import java.util.function.Consumer;
 
 public class Train {
+	private static final int TARGET_LIFT_SPEED = 1000;
+	private static final int TARGET_THROUGH_STATION_SPEED = 1000;
+	private static final int MAX_BRAKE_SPEED = 1500;
+
+
 	private FrontCar frontCar;
 
 	private final int friction;
@@ -26,19 +31,19 @@ public class Train {
 		int acceleration;
 		switch (line.getPhysicsType()) {
 			case BRAKE:
-				if (velocity <= 1000) break;
-				acceleration = -500;
-				if (velocity + acceleration > 1000) return acceleration;
-				return 1000 - velocity; // Make up the remaining difference
+				if (velocity <= MAX_BRAKE_SPEED) break;
+				acceleration = -LinePhysicsType.BRAKE.getAccelerationForce();
+				if (velocity + acceleration > MAX_BRAKE_SPEED) return acceleration;
+				return MAX_BRAKE_SPEED - velocity; // Make up the remaining difference
 			case LIFT:
-				if (velocity > 500) break;
-				if (velocity == 500) return 0;
-				acceleration = 50;
-				if (velocity + acceleration <= 500) return acceleration;
-				return 500 - velocity; // Make up the remaining difference
+				if (velocity > TARGET_LIFT_SPEED) break;
+				if (velocity == TARGET_LIFT_SPEED) return 0;
+				acceleration = LinePhysicsType.LIFT.getAccelerationForce();
+				if (velocity + acceleration <= TARGET_LIFT_SPEED) return acceleration;
+				return TARGET_LIFT_SPEED - velocity; // Make up the remaining difference
 			case STATION:
 				if (!isFirstCar) break;
-				int targetSpeed = 500;
+				int targetSpeed = TARGET_THROUGH_STATION_SPEED;
 				if (line.isFullStop()) {
 					targetSpeed = 0;
 					if (velocity > targetSpeed) {

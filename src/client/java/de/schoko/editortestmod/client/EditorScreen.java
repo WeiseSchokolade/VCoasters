@@ -323,7 +323,7 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 
 	@Override
 	public void tick() {
-		if (EditorTestModClient.isDraggingCamera()) {
+		if (EditorTestModClient.isDraggingCamera() && Minecraft.getInstance().player != null) {
 			KeyMapping.setAll();
 			Minecraft.getInstance().player.input.tick();
 			Minecraft.getInstance().player.applyInput();
@@ -333,7 +333,7 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 	@Override
 	public void onClose() {
 		super.onClose();
-		Minecraft.getInstance().player.connection.send(new ServerboundChangeGameModePacket(GameType.CREATIVE));
+		if (Minecraft.getInstance().player != null) Minecraft.getInstance().player.connection.send(new ServerboundChangeGameModePacket(GameType.CREATIVE));
 	}
 
 	@Override

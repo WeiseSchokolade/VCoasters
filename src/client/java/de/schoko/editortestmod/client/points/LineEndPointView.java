@@ -227,6 +227,12 @@ public class LineEndPointView extends View {
 					useEndpointRotationGizmo = true;
 					select(endPoint);
 				}
+
+				ImBoolean showAngleSharpness = new ImBoolean(EditorOptions.showAngleSharpness);
+				if (ImGui.checkbox("Show angle sharpness", showAngleSharpness)) {
+					EditorOptions.showAngleSharpness = showAngleSharpness.get();
+				}
+				ImBoolean showRollAngle = new ImBoolean(EditorOptions.showRollAngle);
 			}
 			ImBoolean autoSnap = new ImBoolean(EditorOptions.autoSnap);
 			if (ImGui.checkbox("Auto-Snap", autoSnap)) {

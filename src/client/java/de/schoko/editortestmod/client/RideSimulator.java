@@ -5,13 +5,16 @@ import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.math.Axis;
 import de.schoko.editortestmod.TrainMeta;
 import de.schoko.editortestmod.Track;
+import de.schoko.editortestmod.client.core.Colors;
 import de.schoko.editortestmod.client.core.RenderContextImpl;
 import de.schoko.editortestmod.codecs.LineCodecs;
 import de.schoko.editortestmod.core.*;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import imgui.type.ImLong;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
@@ -20,6 +23,7 @@ import net.minecraft.client.renderer.item.MissingItemModel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +37,12 @@ public class RideSimulator {
 
 	private final ItemModel itemModel;
 
+	private boolean showTrackAttachmentPoints;
+
 	private boolean paused;
 	private long lastUpdate;
+
+	private long stepDuration;
 
 	private final List<InterpolatedPoint> oldPositions;
 
@@ -50,6 +58,7 @@ public class RideSimulator {
 		this.oldPositions = new ArrayList<>();
 		this.velocityRecorder = new FloatRecorder(1000);
 		this.accelerationRecorder = new FloatRecorder(1000);
+		this.stepDuration = 50;
 	}
 
 	public void putTrainOnLine(Line line) {
@@ -58,34 +67,49 @@ public class RideSimulator {
 
 	public void tick() {
 
-		long delta = System.currentTimeMillis() - lastUpdate;
-		if (delta < 50) {
+		long tickTime = System.currentTimeMillis();
+		long delta = tickTime - lastUpdate;
+		if (delta < stepDuration) {
 			return;
 		} else if (delta > 15000) {
 			lastUpdate = System.currentTimeMillis();
 			return;
 		}
-		lastUpdate += 50;
+		while (lastUpdate < tickTime) {
+			lastUpdate += stepDuration;
 
-		if (paused || train == null) return;
+			if (paused || train == null) return;
 
-		oldPositions.clear();
-		train.extractRenderedPositions(oldPositions::add);
-		train.update();
-		velocityRecorder.add(train.getVelocity());
-		accelerationRecorder.add(train.getAcceleration());
+			oldPositions.clear();
+			train.extractRenderedPositions(oldPositions::add);
+			train.update();
+			velocityRecorder.add(train.getVelocity());
+			accelerationRecorder.add(train.getAcceleration());
+		}
 	}
 
 	public void extract(RenderContext context) {
-		if (train != null) ((RenderContextImpl) context).registerStandaloneCall(ctx -> {
+		if (train != null) {
 			long delta = System.currentTimeMillis() - lastUpdate;
-			if (paused) delta = 0;
+			if (paused) delta = stepDuration;
 			List<InterpolatedPoint> currentPositions = new ArrayList<>();
 			train.extractRenderedPositions(currentPositions::add);
-			for (int i = 0; i < currentPositions.size() && i < oldPositions.size(); i++) {
-				renderItemModel(ctx, InterpolatedPoint.lerp(delta / 50.0f, oldPositions.get(i), currentPositions.get(i)));
+			if (currentPositions.size() != oldPositions.size()) return;
+			for (int i = 0; i < currentPositions.size(); i++) {
+				currentPositions.set(i, InterpolatedPoint.lerp(((float) delta) / stepDuration, oldPositions.get(i), currentPositions.get(i)));
 			}
-		});
+
+			if (showTrackAttachmentPoints) {
+				for (InterpolatedPoint position : currentPositions) {
+					renderTrackAttachmentPoint(context, position);
+				}
+			}
+			((RenderContextImpl) context).registerStandaloneCall(ctx -> {
+				for (InterpolatedPoint position : currentPositions) {
+					renderItemModel(ctx, position);
+				}
+			});
+		}
 	}
 
 	public void renderImGui(ImGuiIO imGui) {
@@ -96,7 +120,29 @@ public class RideSimulator {
 			if (ImGui.checkbox("##PausedCheckbox", imBoolean)) {
 				paused = imBoolean.get();
 			}
+			ImInt imInt = new ImInt((int) stepDuration);
+			ImGui.text("Time step duration:");
+			ImGui.sameLine();
+			if (ImGui.inputInt("##PlaybackSpeedInput", imInt)) {
+				if (imInt.get() <= 0) {
+					imInt.set(1);
+				}
+				if (imInt.get() > 500) {
+					imInt.set(500);
+				}
+				stepDuration = imInt.get();
+			}
+
 			ImGui.separatorText("Train");
+
+			ImGui.beginDisabled(train == null);
+			imBoolean.set(showTrackAttachmentPoints);
+			ImGui.text("Attachment points:");
+			ImGui.sameLine();
+			if (ImGui.checkbox("##ShowTrackAttachmentPointsCheckbox", imBoolean)) {
+				showTrackAttachmentPoints = imBoolean.get();
+			}
+			ImGui.endDisabled();
 
 			ImGui.beginDisabled(paused || train == null);
 			if (train == null) {
@@ -221,6 +267,10 @@ public class RideSimulator {
 		stack.popPose();
 	}
 
+	public void renderTrackAttachmentPoint(RenderContext context, InterpolatedPoint point) {
+		context.drawRotatedBox(point.point(), point.yaw(), point.pitch(), point.roll(), new Vector3f(0.125f, 0.075f, 0.2f), 0.25f, 0.15f, 0.4f, Colors.LIGHT_GRAY);
+	}
+
 	public TrainMeta getTrainMeta() {
 		return trainMeta;
 	}
@@ -233,6 +283,6 @@ public class RideSimulator {
 		if (train == null) return null;
 		long delta = System.currentTimeMillis() - lastUpdate;
 		if (paused) delta = 0;
-		return InterpolatedPoint.lerp(delta / 50.0f, oldPositions.get(index), train.getCarPosition(index));
+		return InterpolatedPoint.lerp(((float) delta) / stepDuration, oldPositions.get(index), train.getCarPosition(index));
 	}
 }

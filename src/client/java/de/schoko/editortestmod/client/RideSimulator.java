@@ -204,7 +204,7 @@ public class RideSimulator {
 					Line station = labelledLines.get(i);
 					ImGui.tableSetColumnIndex(0);
 					ImGui.text(station.getLabel());
-					if (station.getPhysicsType().supportsFullstop()) {
+					if (station.getPhysicsType() != null && station.getPhysicsType().supportsFullstop()) {
 						ImGui.tableSetColumnIndex(1);
 						fullStop.set(station.isFullStop());
 						if (ImGui.checkbox("##TrainFullstopControlFullstopCheckbox" + i, fullStop)) {

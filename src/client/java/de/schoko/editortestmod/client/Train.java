@@ -138,6 +138,22 @@ public class Train {
 		return inspectedLine.lerp(((float) distanceAlongLine / LineCodecs.CURRENT_LINE_LENGTH_MODIFIER) / inspectedLine.getLength());
 	}
 
+	public void move(double dx) {
+		frontCar.distanceAlongLine += (int) Math.round(dx * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
+		if (frontCar.distanceAlongLine < 0) {
+			if (frontCar.line.getInputLine() != null) {
+				frontCar.line = frontCar.line.getInputLine();
+				frontCar.distanceAlongLine += (int) (frontCar.line.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
+			} else {
+				frontCar.distanceAlongLine = 0;
+			}
+		}
+		if (frontCar.distanceAlongLine > (int) (frontCar.line.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER)) {
+			frontCar.distanceAlongLine -= (int) (frontCar.line.getLength() * LineCodecs.CURRENT_LINE_LENGTH_MODIFIER);
+			frontCar.line = frontCar.line.getOutputLine();
+		}
+	}
+
 	static class FrontCar {
 		private Line line;
 		private int velocity;

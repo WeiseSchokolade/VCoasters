@@ -135,6 +135,16 @@ public class RideSimulator {
 
 			ImGui.separatorText("Train");
 
+			ImGui.beginDisabled(!paused || train == null);
+			if (ImGui.button("-0.1")) {
+				train.move(-0.1);
+			}
+			ImGui.sameLine();
+			if (ImGui.button("+0.1")) {
+				train.move(0.1);
+			}
+			ImGui.endDisabled();
+
 			ImGui.beginDisabled(train == null);
 			imBoolean.set(showTrackAttachmentPoints);
 			ImGui.text("Attachment points:");

@@ -1,10 +1,12 @@
 package de.schoko.editortestmod.client;
 
+import com.mojang.serialization.DataResult;
 import de.schoko.editortestmod.TrainMeta;
 import de.schoko.editortestmod.Track;
 import de.schoko.editortestmod.client.core.View;
 import de.schoko.editortestmod.client.lines.CreateFirstLineView;
 import de.schoko.editortestmod.client.points.LineEndPointView;
+import de.schoko.editortestmod.codecs.TrackCodecs;
 import de.schoko.editortestmod.core.EditorObject;
 import de.schoko.editortestmod.core.Line;
 import de.schoko.editortestmod.core.RenderContext;
@@ -22,6 +24,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundChangeGameModePacket;
 import net.minecraft.resources.Identifier;
@@ -171,6 +175,15 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 				}
 			} else {
 				trackTransformation = null;
+			}
+
+			if (ImGui.button("Print track string to console")) {
+				editedTrack.setAcceleration(editedTrack.getGravity(), 1.0 / editedTrack.getTicksInHertz());
+				DataResult<Tag> result = TrackCodecs.CURRENT_CODEC.encodeStart(NbtOps.INSTANCE, editedTrack);
+
+				if (result.result().isPresent()) {
+					System.out.println(result.result().get());
+				}
 			}
 
 			ImGui.separatorText("Cart Model");

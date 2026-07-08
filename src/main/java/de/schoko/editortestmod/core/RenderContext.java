@@ -1,12 +1,16 @@
 package de.schoko.editortestmod.core;
 
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.world.phys.AABB;
-import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 
 public interface RenderContext {
+	// 26.2 Render System
+	void renderAndDraw(LevelRenderContext context);
+
+
 	void drawQuads(Iterable<QuadObtainer.Quad> quads, float r, float g, float b, float a);
 
 	default void drawQuads(Iterable<QuadObtainer.Quad> quads, Vector4f color) {

@@ -1,6 +1,5 @@
 package de.schoko.editortestmod.client.mixin;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import de.schoko.editortestmod.client.EditorTestModClient;
 import de.schoko.editortestmod.client.mixininterfaces.ExtendedMouseHandler;
 import net.minecraft.client.Minecraft;
@@ -36,8 +35,8 @@ public abstract class MouseHandlerMixin implements ExtendedMouseHandler {
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;simulateRightClick(Lnet/minecraft/client/input/MouseButtonInfo;Z)Lnet/minecraft/client/input/MouseButtonInfo;"), method = "onButton")
-	public void mouseReleased(long l, MouseButtonInfo mouseButtonInfo, int i, CallbackInfo ci) {
-		if (i == 0 && mouseButtonInfo.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+	public void mouseReleased(long handle, MouseButtonInfo rawButtonInfo, int i, CallbackInfo ci) {
+		if (i == 0 && rawButtonInfo.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
 			EditorTestModClient.setDraggingCamera(false);
 			EditorTestModClient.leftMouseReleased();
 		}

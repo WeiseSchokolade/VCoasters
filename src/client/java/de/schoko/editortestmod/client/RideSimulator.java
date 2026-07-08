@@ -103,12 +103,12 @@ public class RideSimulator {
 				for (InterpolatedPoint position : currentPositions) {
 					renderTrackAttachmentPoint(context, position);
 				}
-			}
+			}/*
 			((RenderContextImpl) context).registerStandaloneCall(ctx -> {
 				for (InterpolatedPoint position : currentPositions) {
 					renderItemModel(ctx, position);
 				}
-			});
+			});*/
 		}
 	}
 
@@ -184,10 +184,10 @@ public class RideSimulator {
 			ImGui.endDisabled();
 
 			ImGui.separatorText("Controls");
-			ImGui.beginDisabled(train == null || !(Minecraft.getInstance().screen instanceof EditorScreen));
+			ImGui.beginDisabled(train == null || !(Minecraft.getInstance().gui.screen() instanceof EditorScreen));
 			if (ImGui.button("Enter train view")) {
-				EditorScreen screen = (EditorScreen) Minecraft.getInstance().screen;
-				Minecraft.getInstance().setScreen(new TrainViewScreen(screen));
+				EditorScreen screen = (EditorScreen) Minecraft.getInstance().gui.screen();
+				Minecraft.getInstance().gui.setScreen(new TrainViewScreen(screen));
 			}
 			ImGui.endDisabled();
 			ImGui.sameLine();
@@ -270,8 +270,11 @@ public class RideSimulator {
 		if (itemModel instanceof CuboidItemModelWrapper wrapper) quads = wrapper.quads.getAll();
 		else if (itemModel instanceof MissingItemModel missing) quads = missing.quads;
 		if (quads != null) {
+
 			for (BakedQuad quad : quads) {
-				Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypes.solidMovingBlock()).putBakedQuad(stack.last(), quad, new QuadInstance());
+				// TODO: Debug halt in display entity, find buffer, mixin into entity? buffer, add models
+				Minecraft.getInstance().gameRenderer.extract();
+				//Minecraft.getInstance().gameRenderer.renderBuffers().sectionBufferPool().getBuffer(RenderTypes.solidMovingBlock()).putBakedQuad(stack.last(), quad, new QuadInstance());
 			}
 		}
 		stack.popPose();

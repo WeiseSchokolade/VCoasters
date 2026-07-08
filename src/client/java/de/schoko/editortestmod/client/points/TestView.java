@@ -80,7 +80,7 @@ public class TestView extends View {
 	}
 
 	@Override
-	public void render(ImGuiIO io) {
+	public void renderImGui(ImGuiIO io) {
 
 	}
 

@@ -4,20 +4,19 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "GameRendererMixin",
-    "GuiMixin",
+    "HudMixin",
     "KeyboardInputMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "MouseHandlerMixin",
-    "SpectatorGuiMixin",
-    "imgui.GameRendererMixin",
-    "imgui.MinecraftMixin"
+    "SpectatorGuiMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
     "AABBMixin",
-    "CameraMixin"
+    "CameraMixin",
+    "GuiMixin"
   ]
 }

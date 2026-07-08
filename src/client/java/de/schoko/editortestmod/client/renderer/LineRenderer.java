@@ -44,7 +44,7 @@ public class LineRenderer extends Renderer<Line> {
 			string.set(line.getOutputLineId() == null ? "" : line.getOutputLineId());
 			if (ImGui.inputText("##OutputLineInput", string)) {
 				// TODO: Find better solution than static access
-				if (Minecraft.getInstance().screen instanceof EditorDataScreen dataScreen) line.setOutputLine(string.get().isBlank() ? null : dataScreen.getTrack().getLine(string.get()));
+				if (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen dataScreen) line.setOutputLine(string.get().isBlank() ? null : dataScreen.getTrack().getLine(string.get()));
 			}
 
 			ImGui.text("Length (in cb): " + Math.round(line.getLength() * 100));

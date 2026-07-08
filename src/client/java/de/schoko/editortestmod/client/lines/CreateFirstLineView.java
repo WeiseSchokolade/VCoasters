@@ -46,7 +46,7 @@ public class CreateFirstLineView extends View {
 	}
 
 	@Override
-	public void render(ImGuiIO io) {
+	public void renderImGui(ImGuiIO io) {
 		if (ImGui.begin("Preview")) {
 			if (ImGui.button("Create")) {
 				Line line = new Line(Line.getNewRandomId(), a, b);

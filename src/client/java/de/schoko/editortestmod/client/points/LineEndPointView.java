@@ -106,7 +106,7 @@ public class LineEndPointView extends View {
 		//renderContext.drawBoxLine(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 1f, 0f), 0.2f, Colors.WHITE);
 
 		EditorObject target;
-		if (!EditorTestModClient.isDraggingCamera() && (Minecraft.getInstance().screen == null || !Minecraft.getInstance().screen.isMouseOver(Minecraft.getInstance().mouseHandler.xpos(), Minecraft.getInstance().mouseHandler.ypos()))) {
+		if (!EditorTestModClient.isDraggingCamera() && (Minecraft.getInstance().gui.screen() == null || !Minecraft.getInstance().gui.screen().isMouseOver(Minecraft.getInstance().mouseHandler.xpos(), Minecraft.getInstance().mouseHandler.ypos()))) {
 			Optional<EditorObject> optionalTarget = TargetTester.getClosestTarget(
 				TargetTester.provider(
 					track.getLines().size() * 2,
@@ -164,7 +164,7 @@ public class LineEndPointView extends View {
 	}
 
 	@Override
-	public void render(ImGuiIO io) {
+	public void renderImGui(ImGuiIO io) {
 		EditorObject object = getScreen().getSelectedObject();
 		if (isPreviewing) {
 			if (ImGui.begin("Line preview")) {

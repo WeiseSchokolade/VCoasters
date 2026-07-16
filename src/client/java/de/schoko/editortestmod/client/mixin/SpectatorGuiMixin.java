@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SpectatorGui.class)
 public class SpectatorGuiMixin {
 	@Inject(at = @At("HEAD"), method = "onHotbarSelected", cancellable = true)
-	public void handleHotbarKey(int i, CallbackInfo ci) {
+	public void handleHotbarKey(int slot, CallbackInfo ci) {
 		if (EditorTestModClient.blockSpectatorAccess()) {
 			ci.cancel();
 		}

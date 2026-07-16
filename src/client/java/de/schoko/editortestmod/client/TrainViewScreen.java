@@ -27,16 +27,16 @@ public non-sealed class TrainViewScreen extends Screen implements EditorDataScre
 
 	@Override
 	public void onClose() {
-		Minecraft.getInstance().setScreen(previousScreen);
+		Minecraft.getInstance().gui.setScreen(previousScreen);
 	}
 
 	@Override
-	public void render(RenderContext renderContext) {
+	public void submitWorldObjects(RenderContext renderContext) {
 		renderContext.drawAABox(0, 0, 0, 1, 1, 1, 1, 1, 1, 0);
 	}
 
 	@Override
-	public void render(ImGuiIO io) {
+	public void renderImGui(ImGuiIO io) {
 		previousScreen.getSimulator().renderImGui(io);
 		if (ImGui.begin("Train view")) {
 			if (ImGui.button("Exit")) {

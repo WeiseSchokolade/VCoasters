@@ -16,6 +16,10 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	maven {
+		url = "https://maven.ryanhcode.dev/releases"
+		name = "RyanHCode Maven"
+	}
 }
 
 loom {
@@ -41,15 +45,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	include implementation("io.github.spair:imgui-java-binding:${project.imgui_version}")
-	include implementation("io.github.spair:imgui-java-lwjgl3:${project.imgui_version}") {
-		exclude group: "org.lwjgl"
-		exclude group: "org.lwjgl.lwjgl"
-	}
-
-	include implementation("io.github.spair:imgui-java-natives-windows:${project.imgui_version}")
-	include implementation("io.github.spair:imgui-java-natives-linux:${project.imgui_version}")
-	include implementation("io.github.spair:imgui-java-natives-macos:${project.imgui_version}")
+	implementation "foundry.imguimc:imguimc-fabric-26.2:2.0.2"
 }
 
 processResources {

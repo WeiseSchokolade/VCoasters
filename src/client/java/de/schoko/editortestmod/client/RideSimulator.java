@@ -15,13 +15,17 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImLong;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.item.MissingItemModel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
@@ -103,12 +107,29 @@ public class RideSimulator {
 				for (InterpolatedPoint position : currentPositions) {
 					renderTrackAttachmentPoint(context, position);
 				}
-			}
+			}/*
 			((RenderContextImpl) context).registerStandaloneCall(ctx -> {
 				for (InterpolatedPoint position : currentPositions) {
 					renderItemModel(ctx, position);
 				}
-			});
+			});*/
+		}
+	}
+
+	public void submitWorldModels(LevelExtractionContext context) {
+		if (train != null) {
+			long delta = System.currentTimeMillis() - lastUpdate;
+			if (paused) delta = stepDuration;
+			List<InterpolatedPoint> currentPositions = new ArrayList<>();
+			train.extractRenderedPositions(currentPositions::add);
+			if (currentPositions.size() != oldPositions.size()) return;
+			for (int i = 0; i < currentPositions.size(); i++) {
+				currentPositions.set(i, InterpolatedPoint.lerp(((float) delta) / stepDuration, oldPositions.get(i), currentPositions.get(i)));
+			}
+
+			for (InterpolatedPoint position : currentPositions) {
+				submitItemModel(context, position);
+			}
 		}
 	}
 
@@ -184,10 +205,10 @@ public class RideSimulator {
 			ImGui.endDisabled();
 
 			ImGui.separatorText("Controls");
-			ImGui.beginDisabled(train == null || !(Minecraft.getInstance().screen instanceof EditorScreen));
+			ImGui.beginDisabled(train == null || !(Minecraft.getInstance().gui.screen() instanceof EditorScreen));
 			if (ImGui.button("Enter train view")) {
-				EditorScreen screen = (EditorScreen) Minecraft.getInstance().screen;
-				Minecraft.getInstance().setScreen(new TrainViewScreen(screen));
+				EditorScreen screen = (EditorScreen) Minecraft.getInstance().gui.screen();
+				Minecraft.getInstance().gui.setScreen(new TrainViewScreen(screen));
 			}
 			ImGui.endDisabled();
 			ImGui.sameLine();
@@ -256,8 +277,8 @@ public class RideSimulator {
 		ImGui.text("B/S²");
 	}
 
-	public void renderItemModel(LevelRenderContext context, InterpolatedPoint point) {
-		PoseStack stack = context.poseStack();
+	public void submitItemModel(LevelExtractionContext context, InterpolatedPoint point) {
+		PoseStack stack = new PoseStack();
 		stack.pushPose();
 		Vec3 camera = context.levelState().cameraRenderState.pos;
 		stack.translate(-camera.x, -camera.y, -camera.z);
@@ -270,9 +291,7 @@ public class RideSimulator {
 		if (itemModel instanceof CuboidItemModelWrapper wrapper) quads = wrapper.quads.getAll();
 		else if (itemModel instanceof MissingItemModel missing) quads = missing.quads;
 		if (quads != null) {
-			for (BakedQuad quad : quads) {
-				Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypes.solidMovingBlock()).putBakedQuad(stack.last(), quad, new QuadInstance());
-			}
+			context.levelRenderer().submitNodeStorage.submitItem(stack, ItemDisplayContext.NONE, 0xFFFFFF, OverlayTexture.NO_OVERLAY, 0, new int[0], quads, ItemStackRenderState.FoilType.NONE);
 		}
 		stack.popPose();
 	}

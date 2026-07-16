@@ -77,7 +77,7 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 	}
 
 	@Override
-	public void render(ImGuiIO io) {
+	public void renderImGui(ImGuiIO io) {
 		if (newlyOpen) {
 			newlyOpen = false;
 			io.clearEventsQueue();
@@ -86,7 +86,7 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 		io.setWantCaptureKeyboard(!EditorTestModClient.isDraggingCamera());
 		mouseGrabbed = io.getWantCaptureMouse();
 		keyboardGrabbed = io.getWantCaptureKeyboard();
-		view.render(io);
+		view.renderImGui(io);
 		simulator.renderImGui(io);
 		if (ImGui.begin("Track Settings")) {
 			ImGui.text("Id: ");
@@ -256,7 +256,7 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 	}
 
 	@Override
-	public void render(RenderContext renderContext) {
+	public void submitWorldObjects(RenderContext renderContext) {
 		this.view.render(renderContext);
 		this.simulator.extract(renderContext);
 	}

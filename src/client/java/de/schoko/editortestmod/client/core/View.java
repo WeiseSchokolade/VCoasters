@@ -1,6 +1,5 @@
 package de.schoko.editortestmod.client.core;
 
-import de.florianreuth.imguiexample.imgui.RenderInterface;
 import de.schoko.editortestmod.client.EditorScreen;
 import de.schoko.editortestmod.core.RenderContext;
 

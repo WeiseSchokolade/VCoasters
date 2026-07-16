@@ -21,17 +21,17 @@ public non-sealed class EditorChatScreen extends ChatScreen implements EditorDat
 
 	@Override
 	public void onClose() {
-		Minecraft.getInstance().setScreen((Screen) previousScreen);
+		Minecraft.getInstance().gui.setScreen((Screen) previousScreen);
 	}
 
 	@Override
-	public void render(RenderContext renderContext) {
-		previousScreen.render(renderContext);
+	public void submitWorldObjects(RenderContext renderContext) {
+		previousScreen.submitWorldObjects(renderContext);
 	}
 
 	@Override
-	public void render(ImGuiIO io) {
-		previousScreen.render(io);
+	public void renderImGui(ImGuiIO io) {
+		previousScreen.renderImGui(io);
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public non-sealed class EditorChatScreen extends ChatScreen implements EditorDat
 		} else if (keyEvent.isConfirmation()) {
 			this.handleChatInput(this.input.getValue(), true);
 			this.exitReason = ChatScreen.ExitReason.DONE;
-			this.minecraft.setScreen((Screen) previousScreen);
+			this.minecraft.gui.setScreen((Screen) previousScreen);
 			return true;
 		} else {
 			switch (keyEvent.key()) {
@@ -67,12 +67,12 @@ public non-sealed class EditorChatScreen extends ChatScreen implements EditorDat
 				case 265:
 					this.moveInHistory(-1);
 					break;
-				case 266:
-					this.minecraft.gui.getChat().scrollChat(this.minecraft.gui.getChat().getLinesPerPage() - 1);
-					break;
-				case 267:
-					this.minecraft.gui.getChat().scrollChat(-this.minecraft.gui.getChat().getLinesPerPage() + 1);
-					break;
+				//case 266: // TODO: Fix
+				//	this.minecraft.gui.getChat().scrollChat(this.minecraft.gui.getChat().getLinesPerPage() - 1);
+				//	break;
+				//case 267:
+				//	this.minecraft.gui.getChat().scrollChat(-this.minecraft.gui.getChat().getLinesPerPage() + 1);
+				//	break;
 				default:
 					return false;
 			}

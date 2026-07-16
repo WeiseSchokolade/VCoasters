@@ -73,7 +73,7 @@ public class EditorTestModClient implements ClientModInitializer {
 		LevelExtractionEvents.END_EXTRACTION.register(context -> {
 			if (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen screen) {
 				screen.submitWorldObjects(renderCtx);
-
+				if (screen instanceof EditorScreen editorScreen) editorScreen.getSimulator().submitWorldModels(context);
 
 				renderCtx.drawAABox(1, 1, 1, 2, 2, 2, 1, 0.5f, 1, 0.25f);
 //				renderCtx.drawRhomboid(new Vector3f(-1, 1, 1), new Vector3f(1, 0, 0), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1), new Vector4f(0, 1, 0, 1));

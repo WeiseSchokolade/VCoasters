@@ -8,6 +8,4 @@ accessible field net/minecraft/client/renderer/item/MissingItemModel quads Ljava
 accessible field net/minecraft/server/commands/data/StorageDataAccessor SUGGEST_STORAGE Lcom/mojang/brigadier/suggestion/SuggestionProvider;
 accessible field net/minecraft/client/gui/screens/ChatScreen commandSuggestions Lnet/minecraft/client/gui/components/CommandSuggestions;
 
-### Florianreuth imgui
-accessible field com/mojang/blaze3d/systems/GpuDevice backend Lcom/mojang/blaze3d/systems/GpuDeviceBackend;
-accessible class com/mojang/blaze3d/opengl/GlDevice
+accessible field net/minecraft/client/renderer/LevelRenderer submitNodeStorage Lnet/minecraft/client/renderer/SubmitNodeStorage;

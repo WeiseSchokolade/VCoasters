@@ -144,8 +144,9 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 			ImGui.sameLine();
 			imInt = new ImInt();
 			imInt.set(editedTrack.getTicksInHertz());
-			ImGui.inputInt("##TicksPerSecondInput", imInt);
-			editedTrack.setTicksInHertz(imInt.get());
+			if (ImGui.inputInt("##TicksPerSecondInput", imInt) && imInt.get() > -1) {
+				editedTrack.setTicksInHertz(imInt.get());
+			}
 
 			if (ImGui.button("Save")) {
 				requestSaving = true;
@@ -213,14 +214,16 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 			ImGui.text("Car Distance: ");
 			ImGui.sameLine();
 			ImFloat imFloat = new ImFloat(trainMeta.getCarDistance());
-			if (ImGui.inputFloat("##CarDistanceInput", imFloat)) trainMeta.setDirty(true);
-			trainMeta.setCarDistance(imFloat.get());
+			if (ImGui.inputFloat("##CarDistanceInput", imFloat) && imFloat.get() > 0) {
+				trainMeta.setCarDistance(imFloat.get());
+			}
 
 			ImGui.text("Segments: ");
 			ImGui.sameLine();
 			imInt.set(trainMeta.getSegmentAmount());
-			if (ImGui.inputInt("##SegmentAmountInput", imInt)) trainMeta.setDirty(true);
-			trainMeta.setSegmentAmount(imInt.get());
+			if (ImGui.inputInt("##SegmentAmountInput", imInt) && imInt.get() > 0) {
+				trainMeta.setSegmentAmount(imInt.get());
+			}
 
 			ImGui.text("Offset: ");
 			ImGui.sameLine();

@@ -172,8 +172,15 @@ public class LineEndPointView extends View {
 				if (ImGui.button("Create")) {
 					this.createPreviewed();
 				}
+				ImGui.sameLine();
 				if (ImGui.button("Cancel")) {
 					this.cancelPreview();
+				}
+
+				String[] names = Arrays.stream(EditorOptions.SnapSetting.values()).map(EditorOptions.SnapSetting::getName).toArray(String[]::new);
+				ImInt imInt = new ImInt(EditorOptions.snapSettingIndex);
+				if (ImGui.combo("Snap to", imInt, names)) {
+					EditorOptions.snapSettingIndex = imInt.get();
 				}
 			}
 			ImGui.end();

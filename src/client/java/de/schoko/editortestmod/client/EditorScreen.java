@@ -277,68 +277,67 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 					}
 				}
 				ImGui.endDisabled();
-
-				ImGui.separator();
 			}
 
-			ImGui.separatorText("Cart Model");
-			TrainMeta trainMeta = editedTrack.getTrainMeta();
+			if (ImGui.collapsingHeader("Train Cars##TrainMetaHeader")) {
+				TrainMeta trainMeta = editedTrack.getTrainMeta();
 
-			ImGui.text("Id: ");
-			ImGui.sameLine();
-			if (inputTime != 0 && System.currentTimeMillis() - inputTime > 15000) {
-				inputtedItemModel = null;
-				inputTime = 0;
-			}
-			inputString.set(inputtedItemModel != null ? inputtedItemModel : trainMeta.getModelId());
-			if (ImGui.inputText("##InputCartModelId", inputString)) {
-				editedTrack.setDirty(true);
-				Identifier identifier = Identifier.tryParse(inputString.get());
-				if (identifier == null) {
-					ImGui.textColored(0xFFFF0000, "Invalid identifier!");
-					inputtedItemModel = inputString.get();
-					if (inputTime == 0) inputTime = System.currentTimeMillis();
-				} else {
-					trainMeta.setModelId(identifier);
+				ImGui.text("Id: ");
+				ImGui.sameLine();
+				if (inputTime != 0 && System.currentTimeMillis() - inputTime > 15000) {
 					inputtedItemModel = null;
 					inputTime = 0;
 				}
-			}
+				inputString.set(inputtedItemModel != null ? inputtedItemModel : trainMeta.getModelId());
+				if (ImGui.inputText("##InputCartModelId", inputString)) {
+					editedTrack.setDirty(true);
+					Identifier identifier = Identifier.tryParse(inputString.get());
+					if (identifier == null) {
+						ImGui.textColored(0xFFFF0000, "Invalid identifier!");
+						inputtedItemModel = inputString.get();
+						if (inputTime == 0) inputTime = System.currentTimeMillis();
+					} else {
+						trainMeta.setModelId(identifier);
+						inputtedItemModel = null;
+						inputTime = 0;
+					}
+				}
 
-			ImGui.text("Car Distance: ");
-			ImGui.sameLine();
-			ImFloat imFloat = new ImFloat(trainMeta.getCarDistance());
-			if (ImGui.inputFloat("##CarDistanceInput", imFloat) && imFloat.get() > 0) {
-				trainMeta.setCarDistance(imFloat.get());
-			}
+				ImGui.text("Car Distance: ");
+				ImGui.sameLine();
+				ImFloat imFloat = new ImFloat(trainMeta.getCarDistance());
+				if (ImGui.inputFloat("##CarDistanceInput", imFloat) && imFloat.get() > 0) {
+					trainMeta.setCarDistance(imFloat.get());
+				}
 
-			ImGui.text("Segments: ");
-			ImGui.sameLine();
-			imInt.set(trainMeta.getSegmentAmount());
-			if (ImGui.inputInt("##SegmentAmountInput", imInt) && imInt.get() > 0) {
-				trainMeta.setSegmentAmount(imInt.get());
-			}
+				ImGui.text("Segments: ");
+				ImGui.sameLine();
+				imInt.set(trainMeta.getSegmentAmount());
+				if (ImGui.inputInt("##SegmentAmountInput", imInt) && imInt.get() > 0) {
+					trainMeta.setSegmentAmount(imInt.get());
+				}
 
-			ImGui.text("Offset: ");
-			ImGui.sameLine();
-			float[] floatInputArray = new float[] {trainMeta.getOffset().x, trainMeta.getOffset().y, trainMeta.getOffset().z};
-			if (ImGui.inputScalarN("##OffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
-			trainMeta.getOffset().set(floatInputArray);
+				ImGui.text("Offset: ");
+				ImGui.sameLine();
+				float[] floatInputArray = new float[]{trainMeta.getOffset().x, trainMeta.getOffset().y, trainMeta.getOffset().z};
+				if (ImGui.inputScalarN("##OffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
+				trainMeta.getOffset().set(floatInputArray);
 
-			ImGui.text("Pivot: ");
-			ImGui.sameLine();
-			floatInputArray = new float[] {trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z};
-			if (ImGui.inputScalarN("##PivotOffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
-			trainMeta.getPivot().set(floatInputArray);
+				ImGui.text("Pivot: ");
+				ImGui.sameLine();
+				floatInputArray = new float[]{trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z};
+				if (ImGui.inputScalarN("##PivotOffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
+				trainMeta.getPivot().set(floatInputArray);
 
-			ImGui.text("Yaw/Pitch/Roll: ");
-			ImGui.sameLine();
-			floatInputArray = new float[] {(float) Math.toDegrees(trainMeta.getYawOffset()), (float) Math.toDegrees(trainMeta.getPitchOffset()), (float) Math.toDegrees(trainMeta.getRollOffset())};
-			if (ImGui.inputScalarN("##RotationOffsetInput", floatInputArray, 3)) {
-				trainMeta.setDirty(true);
-				trainMeta.setYawOffset((float) Math.toRadians(floatInputArray[0]));
-				trainMeta.setPitchOffset((float) Math.toRadians(floatInputArray[1]));
-				trainMeta.setRollOffset((float) Math.toRadians(floatInputArray[2]));
+				ImGui.text("Yaw/Pitch/Roll: ");
+				ImGui.sameLine();
+				floatInputArray = new float[]{(float) Math.toDegrees(trainMeta.getYawOffset()), (float) Math.toDegrees(trainMeta.getPitchOffset()), (float) Math.toDegrees(trainMeta.getRollOffset())};
+				if (ImGui.inputScalarN("##RotationOffsetInput", floatInputArray, 3)) {
+					trainMeta.setDirty(true);
+					trainMeta.setYawOffset((float) Math.toRadians(floatInputArray[0]));
+					trainMeta.setPitchOffset((float) Math.toRadians(floatInputArray[1]));
+					trainMeta.setRollOffset((float) Math.toRadians(floatInputArray[2]));
+				}
 			}
 		}
 		ImGui.end();

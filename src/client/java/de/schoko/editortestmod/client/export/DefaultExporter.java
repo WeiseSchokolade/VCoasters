@@ -220,9 +220,6 @@ scoreboard players operation #total_acceleration train_math_score += #accelerati
 					return Transformer.Action.CONTINUE;
 				})
 				.advanceStage("Script load", data -> {
-						//TinyFileDialogs.tinyfd_colorChooser("Colors?", "#FF0077", ByteBuffer.wrap(new byte[] {0, 0, 0}), ByteBuffer.wrap(new byte[] {0, 0, 0}));
-						//TinyFileDialogs.tinyfd_messageBox("Heya!", "How you doin?", "ok", "info", 0);
-						//TinyFileDialogs.tinyfd_notifyPopup("Uh, oh!", "They call me hermit, the frog", "warning");
 					Map<String, String> contentMap = new HashMap<>();
 					String prefix = data.majorNamespace() + "/function/" + data.minorNamespace() + "/";
 					data.fileDataList().forEach(file -> {

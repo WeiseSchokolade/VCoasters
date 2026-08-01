@@ -221,7 +221,7 @@ scoreboard players operation #total_acceleration train_math_score += #accelerati
 				})
 				.advanceStage("Script load", data -> {
 					Map<String, String> contentMap = new HashMap<>();
-					String prefix = "/data/" + data.majorNamespace() + "/function/" + data.minorNamespace() + "/";
+					String prefix = "data/" + data.majorNamespace() + "/function/" + data.minorNamespace() + "/";
 					data.fileDataList().forEach(file -> {
 						contentMap.put(prefix + file.localPath() + ".mcfunction", file.content().get());
 					});

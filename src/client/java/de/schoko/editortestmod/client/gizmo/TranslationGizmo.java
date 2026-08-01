@@ -12,7 +12,7 @@ import java.util.Optional;
 public abstract class TranslationGizmo implements Gizmo {
 	public static final TranslationAxis[] TRANSLATION_AXIS = {TranslationAxis.X, TranslationAxis.X, TranslationAxis.Y, TranslationAxis.Y, TranslationAxis.Z, TranslationAxis.Z};
 
-	private static final float HALF_DIAMETER = 0.05f;
+	private static final float HALF_DIAMETER = 0.075f;
 	private static final float LENGTH = 1f;
 	private static final float OFFSET = 0.4f;
 

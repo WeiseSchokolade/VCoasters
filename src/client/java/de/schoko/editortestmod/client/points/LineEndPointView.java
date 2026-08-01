@@ -20,6 +20,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import org.joml.Vector3f;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -226,6 +227,12 @@ public class LineEndPointView extends View {
 				if (ImGui.radioButton("Rotate", useEndpointRotationGizmo)) {
 					useEndpointRotationGizmo = true;
 					select(endPoint);
+				}
+
+				String[] names = Arrays.stream(EditorOptions.SnapSetting.values()).map(EditorOptions.SnapSetting::getName).toArray(String[]::new);
+				ImInt imInt = new ImInt(EditorOptions.snapSettingIndex);
+				if (ImGui.combo("Snap to", imInt, names)) {
+					EditorOptions.snapSettingIndex = imInt.get();
 				}
 
 				ImBoolean showAngleSharpness = new ImBoolean(EditorOptions.showAngleSharpness);

@@ -1,5 +1,6 @@
 package de.schoko.editortestmod.client.gizmo;
 
+import de.schoko.editortestmod.client.editor.EditorOptions;
 import de.schoko.editortestmod.core.EditorObject;
 import de.schoko.editortestmod.core.EndPoint;
 import de.schoko.editortestmod.core.RenderContext;
@@ -26,6 +27,16 @@ public class EndPointTranslationGizmo extends TranslationGizmo {
 
 	@Override
 	public void setNewCenter(Vector3f vector3f) {
+		snap(vector3f);
 		endpoint.setPos(vector3f);
+	}
+
+	public void snap(Vector3f vector3f) {
+		EditorOptions.SnapSetting snapping = EditorOptions.getSnapSetting();
+		vector3f.set(
+			snapping.snap(vector3f.x),
+			snapping.snap(vector3f.y),
+			snapping.snap(vector3f.z)
+		);
 	}
 }

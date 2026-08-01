@@ -237,6 +237,12 @@ public class RideSimulator {
 			}
 
 			if (ImGui.beginTable("##TrainControls", 3)) {
+				ImGui.tableNextRow();
+				ImGui.tableSetColumnIndex(0);
+				ImGui.text("Line ID");
+				ImGui.tableSetColumnIndex(1);
+				ImGui.text("Fullstop");
+
 				List<Line> labelledLines = track.getLabelledLines();
 				ImBoolean fullStop = new ImBoolean();
 				for (int i = 0; i < labelledLines.size(); i++) {

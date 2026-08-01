@@ -9,10 +9,9 @@
 	],
 	"accessWidener": "vcoasters.accessWidener",
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/WeiseSchokolade/VCoasters"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/vcoasters/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -36,8 +35,5 @@
 		"java": ">=25",
 		"fabric-api": "*",
 		"imguimc": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }

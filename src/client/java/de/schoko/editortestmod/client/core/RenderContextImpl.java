@@ -34,6 +34,7 @@ public class RenderContextImpl implements RenderContext {
 		.withLocation(Identifier.fromNamespaceAndPath(EditorTestMod.MOD_ID, "pipeline/debug_filled_box_through_walls"))
 		.withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
 		.withPrimitiveTopology(PrimitiveTopology.LINES)
+		.withDepthStencilState(DepthStencilState.DEFAULT)
 		//.withDepthTestFunction(CompareOp.LESS_THAN)
 		.build()
 	);
@@ -43,6 +44,8 @@ public class RenderContextImpl implements RenderContext {
 			.withLocation(Identifier.fromNamespaceAndPath(EditorTestMod.MOD_ID, "pipeline/debug_filled_box_through_walls"))
 			.withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
 			.withPrimitiveTopology(PrimitiveTopology.QUADS)
+			.withDepthStencilState(DepthStencilState.DEFAULT)
+			.withCull(true)
 			//.withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN, true))
 			//.withDepthWrite(true)
 			//.withDepthTestFunction(CompareOp.LESS_THAN)

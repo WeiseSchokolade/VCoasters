@@ -1,0 +1,20 @@
+scoreboard players operation #total_acceleration train_math_score = #acceleration train_math_score
+
+data modify storage train:storage points set value []
+
+function base:namespace/current/load_interpolation_data
+
+function base:namespace/interpolate
+data modify storage train:storage points append from storage train:storage interpolated_point
+
+@{insert_for_each_cart}
+
+scoreboard players operation #acceleration train_math_score = #total_acceleration train_math_score
+scoreboard players operation #acceleration train_math_score /= #cart_amount train_data_score
+
+execute if score #train_vel train_math_score matches -100..100 run return 0
+scoreboard players operation #applied_friction train_math_score = #train_vel train_math_score
+scoreboard players operation #applied_friction train_math_score *= #friction train_data_score
+scoreboard players operation #applied_friction train_math_score /= #10000 train_math_score
+execute if score #applied_friction train_math_score matches -1..1 run scoreboard players set #applied_friction train_math_score 0
+scoreboard players operation #acceleration train_math_score -= #applied_friction train_math_score

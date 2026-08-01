@@ -1,0 +1,24 @@
+scoreboard players operation #dist train_math_score = #tbase.dist train_data_score
+scoreboard players operation #train_vel train_math_score = #tbase.vel train_data_score
+scoreboard players operation #dist train_math_score += #train_vel train_math_score
+
+# Line length retrieval
+execute store result score #line_length train_math_score run data get storage train:storage tbase.line.length
+
+execute if score #dist train_math_score >= #line_length train_math_score run function base:namespace/tbase/leave_line_at_output
+execute if score #dist train_math_score matches ..-1 run function base:namespace/tbase/leave_line_at_input
+
+scoreboard players operation #tbase.dist train_data_score = #dist train_math_score
+
+data modify storage train:storage current_line set from storage train:storage tbase.line
+
+function base:namespace/tbase/physics/get_physics_accel
+
+execute store result score #should_calc_total train_math_score unless data storage train:storage current_line{physics_type:"STATION"}
+
+execute if score #should_calc_total train_math_score matches 0 unless score #tbase.halting train_data_score matches -1 if score #train_vel train_math_score matches 0 if score #acceleration train_math_score matches 0 run return run function base:namespace/tbase/on_halt
+scoreboard players set #tbase.halting train_data_score 0
+function base:namespace/tick_train
+execute as @e[tag=train_cart_tag,tag=tbase] run function base:namespace/tick_entity
+
+scoreboard players operation #tbase.vel train_data_score += #acceleration train_math_score

@@ -63,6 +63,10 @@ public class Track {
 		lines.forEach(Line::resetVelocity);
 	}
 
+	public void bakeAcceleration() {
+		setAcceleration(getGravity(), 1.0 / getTicksInHertz());
+	}
+
 	public List<Line> getLines() {
 		return lines;
 	}

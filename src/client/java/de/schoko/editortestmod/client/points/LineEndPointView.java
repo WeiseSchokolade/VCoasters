@@ -20,6 +20,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import org.joml.Vector3f;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -171,22 +172,34 @@ public class LineEndPointView extends View {
 				if (ImGui.button("Create")) {
 					this.createPreviewed();
 				}
+				ImGui.sameLine();
 				if (ImGui.button("Cancel")) {
 					this.cancelPreview();
+				}
+
+				String[] names = Arrays.stream(EditorOptions.SnapSetting.values()).map(EditorOptions.SnapSetting::getName).toArray(String[]::new);
+				ImInt imInt = new ImInt(EditorOptions.snapSettingIndex);
+				if (ImGui.combo("Snap to", imInt, names)) {
+					EditorOptions.snapSettingIndex = imInt.get();
 				}
 			}
 			ImGui.end();
 		}
 		if (ImGui.begin("Builder")) {
+
 			List<Line> lines = getScreen().getTrack().getLabelledLines();
 			String[] array = lines.stream().map(Line::getLabel).toArray(String[]::new);
-			ImGui.beginDisabled(array.length == 0);
 
-			if (ImGui.button("Select")) {
-				select(lines.get(selectedComboItem.get()));
+			if (array.length > 0) {
+				if (ImGui.button("Select")) {
+					select(lines.get(selectedComboItem.get()));
+				}
+				ImGui.sameLine();
+				ImGui.combo("##LabelledSelectionSelect", selectedComboItem, array);
 			}
-			ImGui.sameLine();
-			if (array.length > 0) ImGui.combo("##LabelledSelectionSelect", selectedComboItem, array);
+
+			ImGui.beginDisabled(object == null);
+			if (ImGui.button("Deselect##DeselectButton")) select(null);
 			ImGui.endDisabled();
 
 			if (object instanceof Line line) {
@@ -205,10 +218,9 @@ public class LineEndPointView extends View {
 				if (ImGui.button("Add")) this.showPreview(line);
 				ImGui.sameLine();
 				if (ImGui.button("Split")) splitSelectedLineInCenter(line);
+				ImGui.setItemTooltip("Splits selected line in the middle");
 				ImGui.sameLine();
 				if (ImGui.button("Delete")) deleteSelectedLine(line);
-				ImGui.sameLine();
-				if (ImGui.button("Deselect")) select(null);
 
 			}
 			if (object instanceof EndPoint endPoint) {
@@ -228,6 +240,12 @@ public class LineEndPointView extends View {
 					select(endPoint);
 				}
 
+				String[] names = Arrays.stream(EditorOptions.SnapSetting.values()).map(EditorOptions.SnapSetting::getName).toArray(String[]::new);
+				ImInt imInt = new ImInt(EditorOptions.snapSettingIndex);
+				if (ImGui.combo("Snap to", imInt, names)) {
+					EditorOptions.snapSettingIndex = imInt.get();
+				}
+
 				ImBoolean showAngleSharpness = new ImBoolean(EditorOptions.showAngleSharpness);
 				if (ImGui.checkbox("Show angle sharpness", showAngleSharpness)) {
 					EditorOptions.showAngleSharpness = showAngleSharpness.get();
@@ -241,6 +259,7 @@ public class LineEndPointView extends View {
 			if (ImGui.checkbox("Auto-Snap", autoSnap)) {
 				EditorOptions.autoSnap = autoSnap.get();
 			}
+			ImGui.setItemTooltip("Automatically treats endpoints as if they were unified");
 			ImInt entityInteractionDistance = new ImInt(EditorOptions.interactionRange);
 			ImGui.text("Range: ");
 			ImGui.sameLine();

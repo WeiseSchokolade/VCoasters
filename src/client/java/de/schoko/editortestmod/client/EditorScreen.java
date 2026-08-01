@@ -4,6 +4,7 @@ import com.mojang.serialization.DataResult;
 import de.schoko.editortestmod.TrainMeta;
 import de.schoko.editortestmod.Track;
 import de.schoko.editortestmod.client.core.View;
+import de.schoko.editortestmod.client.export.DefaultExporter;
 import de.schoko.editortestmod.client.lines.CreateFirstLineView;
 import de.schoko.editortestmod.client.points.LineEndPointView;
 import de.schoko.editortestmod.codecs.TrackCodecs;
@@ -15,6 +16,8 @@ import de.schoko.editortestmod.packets.ApplyTrackMetaChangesC2S;
 import de.schoko.editortestmod.packets.SaveDataC2S;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.flag.ImGuiTableFlags;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
@@ -31,7 +34,11 @@ import net.minecraft.network.protocol.game.ServerboundChangeGameModePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +57,11 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 	private ItemModel itemModel;
 	private String inputtedItemModel;
 	private long inputTime;
+
+	private String requestedFilePath;
+	private String majorNamespace;
+	private String minorNamespace;
+	private List<String> stationNames;
 
 	private boolean renderItemModel;
 	private boolean requestClosing;
@@ -72,6 +84,8 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 		}
 		this.renderItemModel = true;
 		this.newlyOpen = true;
+
+		this.stationNames = new ArrayList<>();
 
 		this.simulator = new RideSimulator(editedTrack, this::getSelectedObject);
 	}
@@ -144,8 +158,9 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 			ImGui.sameLine();
 			imInt = new ImInt();
 			imInt.set(editedTrack.getTicksInHertz());
-			ImGui.inputInt("##TicksPerSecondInput", imInt);
-			editedTrack.setTicksInHertz(imInt.get());
+			if (ImGui.inputInt("##TicksPerSecondInput", imInt) && imInt.get() > -1) {
+				editedTrack.setTicksInHertz(imInt.get());
+			}
 
 			if (ImGui.button("Save")) {
 				requestSaving = true;
@@ -177,71 +192,152 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 				trackTransformation = null;
 			}
 
-			if (ImGui.button("Print track string to console")) {
-				editedTrack.setAcceleration(editedTrack.getGravity(), 1.0 / editedTrack.getTicksInHertz());
-				DataResult<Tag> result = TrackCodecs.CURRENT_CODEC.encodeStart(NbtOps.INSTANCE, editedTrack);
 
-				if (result.result().isPresent()) {
-					System.out.println(result.result().get());
+			if (ImGui.collapsingHeader("Export##ExportHeader")) {
+				//TinyFileDialogs.tinyfd_colorChooser("Colors?", "#FF0077", ByteBuffer.wrap(new byte[] {0, 0, 0}), ByteBuffer.wrap(new byte[] {0, 0, 0}));
+				//TinyFileDialogs.tinyfd_messageBox("Heya!", "How you doin?", "ok", "info", 0);
+				//TinyFileDialogs.tinyfd_notifyPopup("Uh, oh!", "They call me hermit, the frog", "warning");
+				ImGui.text("File:");
+				ImGui.sameLine();
+				inputString = new ImString();
+				inputString.set(requestedFilePath);
+				if (ImGui.inputText("##FilePathInput", inputString)) {
+					this.requestedFilePath = inputString.get();
 				}
+				ImGui.sameLine();
+				if (ImGui.button("Choose")) {
+					requestedFilePath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedFilePath, PointerBuffer.allocateDirect(0), "This is a description");
+				}
+
+				if (majorNamespace == null) majorNamespace = editedTrack.getId().split(":")[0];
+				if (minorNamespace == null) minorNamespace = editedTrack.getId().contains(":") ? editedTrack.getId().split(":")[1] : editedTrack.getTrackName();
+
+				ImGui.text("Major namespace");
+				ImGui.sameLine();
+				inputString = new ImString();
+				inputString.set(majorNamespace);
+				if (ImGui.inputText("##MajorNameInput", inputString)) {
+					majorNamespace = inputString.get();
+				}
+
+				ImGui.text("Minor namespace");
+				ImGui.sameLine();
+				inputString = new ImString();
+				inputString.set(minorNamespace);
+				if (ImGui.inputText("##MinorNameInput", inputString)) {
+					minorNamespace = inputString.get();
+				}
+
+				boolean allIdsExist = true;
+
+				if (ImGui.beginTable("Trains", 3)) {
+					ImGui.tableNextRow();
+					ImGui.tableSetColumnIndex(0);
+					ImGui.text("Train name");
+					ImGui.tableSetColumnIndex(1);
+					ImGui.text("Line ID");
+
+					for (int i = 0; i < stationNames.size(); i++) {
+						String name = stationNames.get(i);
+
+						ImGui.tableNextRow();
+						ImGui.tableSetColumnIndex(0);
+						ImGui.text("t" + (i + 1));
+
+						ImGui.tableSetColumnIndex(1);
+						inputString = new ImString();
+						inputString.set(name);
+						ImGui.inputText("##InputStationName" + i, inputString);
+						name = inputString.get();
+						stationNames.set(i, name);
+
+						if (editedTrack.getLine(name) == null) allIdsExist = false;
+
+						ImGui.tableSetColumnIndex(2);
+						if (ImGui.button("Remove")) {
+							stationNames.remove(i);
+							i--;
+						}
+					}
+					ImGui.endTable();
+					if (ImGui.button("Add train")) {
+						String id = !editedTrack.getLines().isEmpty() ? editedTrack.getLines().getFirst().getId() : "Line";
+						stationNames.add(id);
+					}
+				}
+
+				ImGui.beginDisabled(stationNames.isEmpty() || !allIdsExist);
+				if (ImGui.button("Export")) {
+					try {
+						DefaultExporter.getExporter().exportToZip(editedTrack, stationNames, majorNamespace, minorNamespace, new File(requestedFilePath));
+						TinyFileDialogs.tinyfd_messageBox("Export", editedTrack.getTrackName() + " was exported!", "ok", "info", 0);
+					} catch (IOException e) {
+						TinyFileDialogs.tinyfd_messageBox("Export", "An error occurred while trying to export your track!\n" + e.getMessage(), "ok", "error", 0);
+						e.printStackTrace();
+					}
+				}
+				ImGui.endDisabled();
 			}
 
-			ImGui.separatorText("Cart Model");
-			TrainMeta trainMeta = editedTrack.getTrainMeta();
+			if (ImGui.collapsingHeader("Train Cars##TrainMetaHeader")) {
+				TrainMeta trainMeta = editedTrack.getTrainMeta();
 
-			ImGui.text("Id: ");
-			ImGui.sameLine();
-			if (inputTime != 0 && System.currentTimeMillis() - inputTime > 15000) {
-				inputtedItemModel = null;
-				inputTime = 0;
-			}
-			inputString.set(inputtedItemModel != null ? inputtedItemModel : trainMeta.getModelId());
-			if (ImGui.inputText("##InputCartModelId", inputString)) {
-				editedTrack.setDirty(true);
-				Identifier identifier = Identifier.tryParse(inputString.get());
-				if (identifier == null) {
-					ImGui.textColored(0xFFFF0000, "Invalid identifier!");
-					inputtedItemModel = inputString.get();
-					if (inputTime == 0) inputTime = System.currentTimeMillis();
-				} else {
-					trainMeta.setModelId(identifier);
+				ImGui.text("Id: ");
+				ImGui.sameLine();
+				if (inputTime != 0 && System.currentTimeMillis() - inputTime > 15000) {
 					inputtedItemModel = null;
 					inputTime = 0;
 				}
-			}
+				inputString.set(inputtedItemModel != null ? inputtedItemModel : trainMeta.getModelId());
+				if (ImGui.inputText("##InputCartModelId", inputString)) {
+					editedTrack.setDirty(true);
+					Identifier identifier = Identifier.tryParse(inputString.get());
+					if (identifier == null) {
+						ImGui.textColored(0xFFFF0000, "Invalid identifier!");
+						inputtedItemModel = inputString.get();
+						if (inputTime == 0) inputTime = System.currentTimeMillis();
+					} else {
+						trainMeta.setModelId(identifier);
+						inputtedItemModel = null;
+						inputTime = 0;
+					}
+				}
 
-			ImGui.text("Car Distance: ");
-			ImGui.sameLine();
-			ImFloat imFloat = new ImFloat(trainMeta.getCarDistance());
-			if (ImGui.inputFloat("##CarDistanceInput", imFloat)) trainMeta.setDirty(true);
-			trainMeta.setCarDistance(imFloat.get());
+				ImGui.text("Car Distance: ");
+				ImGui.sameLine();
+				ImFloat imFloat = new ImFloat(trainMeta.getCarDistance());
+				if (ImGui.inputFloat("##CarDistanceInput", imFloat) && imFloat.get() > 0) {
+					trainMeta.setCarDistance(imFloat.get());
+				}
 
-			ImGui.text("Segments: ");
-			ImGui.sameLine();
-			imInt.set(trainMeta.getSegmentAmount());
-			if (ImGui.inputInt("##SegmentAmountInput", imInt)) trainMeta.setDirty(true);
-			trainMeta.setSegmentAmount(imInt.get());
+				ImGui.text("Segments: ");
+				ImGui.sameLine();
+				imInt.set(trainMeta.getSegmentAmount());
+				if (ImGui.inputInt("##SegmentAmountInput", imInt) && imInt.get() > 0) {
+					trainMeta.setSegmentAmount(imInt.get());
+				}
 
-			ImGui.text("Offset: ");
-			ImGui.sameLine();
-			float[] floatInputArray = new float[] {trainMeta.getOffset().x, trainMeta.getOffset().y, trainMeta.getOffset().z};
-			if (ImGui.inputScalarN("##OffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
-			trainMeta.getOffset().set(floatInputArray);
+				ImGui.text("Offset: ");
+				ImGui.sameLine();
+				float[] floatInputArray = new float[]{trainMeta.getOffset().x, trainMeta.getOffset().y, trainMeta.getOffset().z};
+				if (ImGui.inputScalarN("##OffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
+				trainMeta.getOffset().set(floatInputArray);
 
-			ImGui.text("Pivot: ");
-			ImGui.sameLine();
-			floatInputArray = new float[] {trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z};
-			if (ImGui.inputScalarN("##PivotOffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
-			trainMeta.getPivot().set(floatInputArray);
+				ImGui.text("Pivot: ");
+				ImGui.sameLine();
+				floatInputArray = new float[]{trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z};
+				if (ImGui.inputScalarN("##PivotOffsetInput", floatInputArray, 3)) trainMeta.setDirty(true);
+				trainMeta.getPivot().set(floatInputArray);
 
-			ImGui.text("Yaw/Pitch/Roll: ");
-			ImGui.sameLine();
-			floatInputArray = new float[] {(float) Math.toDegrees(trainMeta.getYawOffset()), (float) Math.toDegrees(trainMeta.getPitchOffset()), (float) Math.toDegrees(trainMeta.getRollOffset())};
-			if (ImGui.inputScalarN("##RotationOffsetInput", floatInputArray, 3)) {
-				trainMeta.setDirty(true);
-				trainMeta.setYawOffset((float) Math.toRadians(floatInputArray[0]));
-				trainMeta.setPitchOffset((float) Math.toRadians(floatInputArray[1]));
-				trainMeta.setRollOffset((float) Math.toRadians(floatInputArray[2]));
+				ImGui.text("Yaw/Pitch/Roll: ");
+				ImGui.sameLine();
+				floatInputArray = new float[]{(float) Math.toDegrees(trainMeta.getYawOffset()), (float) Math.toDegrees(trainMeta.getPitchOffset()), (float) Math.toDegrees(trainMeta.getRollOffset())};
+				if (ImGui.inputScalarN("##RotationOffsetInput", floatInputArray, 3)) {
+					trainMeta.setDirty(true);
+					trainMeta.setYawOffset((float) Math.toRadians(floatInputArray[0]));
+					trainMeta.setPitchOffset((float) Math.toRadians(floatInputArray[1]));
+					trainMeta.setRollOffset((float) Math.toRadians(floatInputArray[2]));
+				}
 			}
 		}
 		ImGui.end();

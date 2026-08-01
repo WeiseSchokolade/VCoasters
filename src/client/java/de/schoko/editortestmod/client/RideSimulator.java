@@ -165,6 +165,15 @@ public class RideSimulator {
 				train.move(0.1);
 			}
 			ImGui.endDisabled();
+			ImGui.beginDisabled(paused || train == null);
+			if (ImGui.button("> 100")) {
+				train.addToVelocity(100);
+			}
+			ImGui.sameLine();
+			if (ImGui.button("> -100")) {
+				train.addToVelocity(-100);
+			}
+			ImGui.endDisabled();
 
 			ImGui.beginDisabled(train == null);
 			imBoolean.set(showTrackAttachmentPoints);
@@ -228,6 +237,12 @@ public class RideSimulator {
 			}
 
 			if (ImGui.beginTable("##TrainControls", 3)) {
+				ImGui.tableNextRow();
+				ImGui.tableSetColumnIndex(0);
+				ImGui.text("Line ID");
+				ImGui.tableSetColumnIndex(1);
+				ImGui.text("Fullstop");
+
 				List<Line> labelledLines = track.getLabelledLines();
 				ImBoolean fullStop = new ImBoolean();
 				for (int i = 0; i < labelledLines.size(); i++) {

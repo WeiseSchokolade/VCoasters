@@ -1,0 +1,5 @@
+data modify storage train:storage tbase set value {id:"tbase",line:{}}
+data modify storage train:storage tbase.line set from storage track:storage lines.@{train_start_line_id}
+scoreboard players set #tbase.vel train_data_score 0
+scoreboard players set #tbase.dist train_data_score 0
+scoreboard players set #tbase.halting train_data_score -1

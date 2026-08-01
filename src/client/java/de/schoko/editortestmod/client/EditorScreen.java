@@ -178,7 +178,7 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 			}
 
 			if (ImGui.button("Print track string to console")) {
-				editedTrack.setAcceleration(editedTrack.getGravity(), 1.0 / editedTrack.getTicksInHertz());
+				editedTrack.bakeAcceleration();
 				DataResult<Tag> result = TrackCodecs.CURRENT_CODEC.encodeStart(NbtOps.INSTANCE, editedTrack);
 
 				if (result.result().isPresent()) {

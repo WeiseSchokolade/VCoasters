@@ -23,3 +23,5 @@ execute store result score #friction train_data_score run data get storage track
 data modify storage train:storage interpolated_point set value {Pos:[0d,0d,0d],Rotation:[0f,0f],transformation:{left_rotation:{axis:[0f,0f,1f],angle:0f}}}
 
 function base:namespace/reset_trains
+
+function base:namespace/spawn_entities

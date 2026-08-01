@@ -152,7 +152,7 @@ public final class DefaultExporter {
 					for (int trainId = 1; trainId <= trainAmount; trainId++) {
 						String trainTag = "t" + trainId;
 						for (int segmentId = 1; segmentId <= segmentAmount; segmentId++) {
-							spawnFile.content().appendLine("summon item_display ~ ~ ~ {{teleport_duration:2,item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:item_model\":\"" + itemModelName + "\"}},Tags:[\"train_cart_tag\",\"train_cart_tag." + trainTag + "\",\"train_cart_tag." + ("cart." + segmentId) + "\"]}}");
+							spawnFile.content().appendLine("summon item_display ~ ~ ~ {teleport_duration:2,item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:item_model\":\"" + itemModelName + "\"}},Tags:[\"train_cart_tag\",\"train_cart_tag." + trainTag + "\",\"train_cart_tag." + ("cart." + segmentId) + "\"]}");
 						}
 					}
 

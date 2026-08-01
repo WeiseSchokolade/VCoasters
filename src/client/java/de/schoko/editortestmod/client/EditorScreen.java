@@ -16,6 +16,8 @@ import de.schoko.editortestmod.packets.ApplyTrackMetaChangesC2S;
 import de.schoko.editortestmod.packets.SaveDataC2S;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.flag.ImGuiTableFlags;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
@@ -32,6 +34,8 @@ import net.minecraft.network.protocol.game.ServerboundChangeGameModePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +58,11 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 	private String inputtedItemModel;
 	private long inputTime;
 
+	private String requestedFilePath;
+	private String majorNamespace;
+	private String minorNamespace;
+	private List<String> stationNames;
+
 	private boolean renderItemModel;
 	private boolean requestClosing;
 	private float[] trackTransformation;
@@ -75,6 +84,8 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 		}
 		this.renderItemModel = true;
 		this.newlyOpen = true;
+
+		this.stationNames = new ArrayList<>();
 
 		this.simulator = new RideSimulator(editedTrack, this::getSelectedObject);
 	}
@@ -181,22 +192,93 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 				trackTransformation = null;
 			}
 
-			if (ImGui.button("Test export to file")) {
-				try {
-					DefaultExporter.getExporter().exportToZip(editedTrack, List.of("station", "pre_station"), editedTrack.getId().split(":")[0], editedTrack.getId().split(":")[1], new File("C:\\Users\\User\\Downloads\\file.zip"));
-				} catch (IOException e) {
-					System.err.println("Couldn't export zip!");
-					e.printStackTrace();
-				}
-			}
 
-			if (ImGui.button("Print track string to console")) {
-				editedTrack.bakeAcceleration();
-				DataResult<Tag> result = TrackCodecs.CURRENT_CODEC.encodeStart(NbtOps.INSTANCE, editedTrack);
-
-				if (result.result().isPresent()) {
-					System.out.println(result.result().get());
+			if (ImGui.collapsingHeader("Export##ExportHeader")) {
+				//TinyFileDialogs.tinyfd_colorChooser("Colors?", "#FF0077", ByteBuffer.wrap(new byte[] {0, 0, 0}), ByteBuffer.wrap(new byte[] {0, 0, 0}));
+				//TinyFileDialogs.tinyfd_messageBox("Heya!", "How you doin?", "ok", "info", 0);
+				//TinyFileDialogs.tinyfd_notifyPopup("Uh, oh!", "They call me hermit, the frog", "warning");
+				ImGui.text("File:");
+				ImGui.sameLine();
+				inputString = new ImString();
+				inputString.set(requestedFilePath);
+				if (ImGui.inputText("##FilePathInput", inputString)) {
+					this.requestedFilePath = inputString.get();
 				}
+				ImGui.sameLine();
+				if (ImGui.button("Choose")) {
+					requestedFilePath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedFilePath, PointerBuffer.allocateDirect(0), "This is a description");
+				}
+
+				if (majorNamespace == null) majorNamespace = editedTrack.getId().split(":")[0];
+				if (minorNamespace == null) minorNamespace = editedTrack.getId().contains(":") ? editedTrack.getId().split(":")[1] : editedTrack.getTrackName();
+
+				ImGui.text("Major namespace");
+				ImGui.sameLine();
+				inputString = new ImString();
+				inputString.set(majorNamespace);
+				if (ImGui.inputText("##MajorNameInput", inputString)) {
+					majorNamespace = inputString.get();
+				}
+
+				ImGui.text("Minor namespace");
+				ImGui.sameLine();
+				inputString = new ImString();
+				inputString.set(minorNamespace);
+				if (ImGui.inputText("##MinorNameInput", inputString)) {
+					minorNamespace = inputString.get();
+				}
+
+				boolean allIdsExist = true;
+
+				if (ImGui.beginTable("Trains", 3)) {
+					ImGui.tableNextRow();
+					ImGui.tableSetColumnIndex(0);
+					ImGui.text("Train name");
+					ImGui.tableSetColumnIndex(1);
+					ImGui.text("Line ID");
+
+					for (int i = 0; i < stationNames.size(); i++) {
+						String name = stationNames.get(i);
+
+						ImGui.tableNextRow();
+						ImGui.tableSetColumnIndex(0);
+						ImGui.text("t" + (i + 1));
+
+						ImGui.tableSetColumnIndex(1);
+						inputString = new ImString();
+						inputString.set(name);
+						ImGui.inputText("##InputStationName" + i, inputString);
+						name = inputString.get();
+						stationNames.set(i, name);
+
+						if (editedTrack.getLine(name) == null) allIdsExist = false;
+
+						ImGui.tableSetColumnIndex(2);
+						if (ImGui.button("Remove")) {
+							stationNames.remove(i);
+							i--;
+						}
+					}
+					ImGui.endTable();
+					if (ImGui.button("Add train")) {
+						String id = !editedTrack.getLines().isEmpty() ? editedTrack.getLines().getFirst().getId() : "Line";
+						stationNames.add(id);
+					}
+				}
+
+				ImGui.beginDisabled(stationNames.isEmpty() || !allIdsExist);
+				if (ImGui.button("Export")) {
+					try {
+						DefaultExporter.getExporter().exportToZip(editedTrack, stationNames, majorNamespace, minorNamespace, new File(requestedFilePath));
+						TinyFileDialogs.tinyfd_messageBox("Export", editedTrack.getTrackName() + " was exported!", "ok", "info", 0);
+					} catch (IOException e) {
+						TinyFileDialogs.tinyfd_messageBox("Export", "An error occurred while trying to export your track!\n" + e.getMessage(), "ok", "error", 0);
+						e.printStackTrace();
+					}
+				}
+				ImGui.endDisabled();
+
+				ImGui.separator();
 			}
 
 			ImGui.separatorText("Cart Model");

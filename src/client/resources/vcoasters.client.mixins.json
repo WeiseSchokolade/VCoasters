@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "de.schoko.vcoasters.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "GameRendererMixin",
+    "HudMixin",
+    "KeyboardInputMixin",
+    "LevelRendererMixin",
+    "MinecraftMixin",
+    "MouseHandlerMixin",
+    "SpectatorGuiMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "AABBMixin",
+    "CameraMixin",
+    "GuiMixin"
+  ]
+}

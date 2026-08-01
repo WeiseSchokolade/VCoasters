@@ -1,0 +1,24 @@
+package de.schoko.vcoasters.client.mixin;
+
+import de.schoko.vcoasters.client.VCoastersClient;
+import net.minecraft.client.renderer.GameRenderer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+@Mixin(GameRenderer.class)
+public class GameRendererMixin {
+	@Inject(method = "close", at = @At("RETURN"))
+	private void init(CallbackInfo info) {
+		VCoastersClient.instance.close();
+	}
+
+	@Inject(method = "shouldRenderBlockOutline", at = @At("HEAD"), cancellable = true)
+	private void shouldRenderBlockOutline(CallbackInfoReturnable<Boolean> cir) {
+		if (!VCoastersClient.shouldRenderBlockOutline()) {
+			cir.setReturnValue(false);
+		}
+	}
+}

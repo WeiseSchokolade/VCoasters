@@ -1,0 +1,13 @@
+{
+  "sources": [        {
+      "type": "directory",
+      "source": "vcoasters:logo",
+      "prefix": "logo/"
+    },    {
+      "type": "directory",
+      "source": "vcoasters:numbers",
+      "prefix": "numbers/"
+    }
+
+  ]
+}

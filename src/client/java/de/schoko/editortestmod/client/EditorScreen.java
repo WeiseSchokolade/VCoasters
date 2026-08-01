@@ -4,6 +4,7 @@ import com.mojang.serialization.DataResult;
 import de.schoko.editortestmod.TrainMeta;
 import de.schoko.editortestmod.Track;
 import de.schoko.editortestmod.client.core.View;
+import de.schoko.editortestmod.client.export.DefaultExporter;
 import de.schoko.editortestmod.client.lines.CreateFirstLineView;
 import de.schoko.editortestmod.client.points.LineEndPointView;
 import de.schoko.editortestmod.codecs.TrackCodecs;
@@ -32,6 +33,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -176,6 +179,15 @@ public non-sealed class EditorScreen extends Screen implements EditorDataScreen 
 				}
 			} else {
 				trackTransformation = null;
+			}
+
+			if (ImGui.button("Test export to file")) {
+				try {
+					DefaultExporter.getExporter().exportToZip(editedTrack, List.of("station", "pre_station"), editedTrack.getId().split(":")[0], editedTrack.getId().split(":")[1], new File("C:\\Users\\User\\Downloads\\file.zip"));
+				} catch (IOException e) {
+					System.err.println("Couldn't export zip!");
+					e.printStackTrace();
+				}
 			}
 
 			if (ImGui.button("Print track string to console")) {

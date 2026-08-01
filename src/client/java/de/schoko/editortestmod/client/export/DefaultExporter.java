@@ -28,6 +28,7 @@ public final class DefaultExporter {
 		"spawn_entities",
 		"call_on_reach",
 		"call_on_halt",
+		"interpolate",
 		"current/load_interpolation_data",
 		"current/leave_line_at_input",
 		"current/jump_to_input_line",
@@ -134,7 +135,7 @@ public final class DefaultExporter {
 					resetFile.content().set("");
 					for (int i = 1; i <= trainAmount; i++) {
 						String name = "t" + i;
-						resetFile.content().append(content.replaceAll("tbase", name).replace("@\\{train_start_line_id}", data.trainStartLineIds().get(i - 1)));
+						resetFile.content().append(content.replaceAll("tbase", name).replace("@{train_start_line_id}", data.trainStartLineIds().get(i - 1)));
 					}
 					return Transformer.Action.CONTINUE;
 				})
@@ -202,7 +203,7 @@ scoreboard players operation #total_acceleration train_math_score += #accelerati
 					String scoreboardBase = data.majorNamespace() + "." + data.minorNamespace().replace("/", ".");
 					return new InitStageData.TrackParsedDataAndNamespaces(data.track(), data.fileDataList(), data.majorNamespace(), data.minorNamespace(),
 						data.track().getId(),
-						data.majorNamespace() + ":" + data.minorNamespace(),
+						data.majorNamespace() + ":" + data.minorNamespace() + "/train",
 						scoreboardBase + ".data",
 						scoreboardBase + ".math",
 						scoreboardBase

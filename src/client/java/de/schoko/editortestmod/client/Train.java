@@ -119,6 +119,10 @@ public class Train {
 		return frontCar.velocity;
 	}
 
+	public void addToVelocity(int value) {
+		frontCar.velocity += value;
+	}
+
 	public int getAcceleration() {
 		return acceleration;
 	}

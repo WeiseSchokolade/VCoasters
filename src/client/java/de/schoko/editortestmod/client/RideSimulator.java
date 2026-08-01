@@ -165,6 +165,15 @@ public class RideSimulator {
 				train.move(0.1);
 			}
 			ImGui.endDisabled();
+			ImGui.beginDisabled(paused || train == null);
+			if (ImGui.button("> 100")) {
+				train.addToVelocity(100);
+			}
+			ImGui.sameLine();
+			if (ImGui.button("> -100")) {
+				train.addToVelocity(-100);
+			}
+			ImGui.endDisabled();
 
 			ImGui.beginDisabled(train == null);
 			imBoolean.set(showTrackAttachmentPoints);

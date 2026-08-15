@@ -1,12 +1,15 @@
 package de.schoko.vcoasters.client.lines;
 
+import de.schoko.vcoasters.client.EditorMode;
 import de.schoko.vcoasters.client.EditorScreen;
+import de.schoko.vcoasters.client.TrackEditorMode;
 import de.schoko.vcoasters.client.VCoastersClient;
 import de.schoko.vcoasters.client.core.Colors;
 import de.schoko.vcoasters.client.core.TargetTester;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.editor.EditorStyle;
 import de.schoko.vcoasters.client.points.LineEndPointView;
+import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
 import imgui.ImGui;
@@ -14,13 +17,13 @@ import imgui.ImGuiIO;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
-public class CreateFirstLineView extends View {
+public class CreateFirstLineView extends View<TrackEditorMode> {
 
 	private Vector3f a;
 	private Vector3f b;
 
-	public CreateFirstLineView(EditorScreen screen) {
-		super(screen);
+	public CreateFirstLineView(TrackEditorMode mode) {
+		super(mode);
 	}
 
 	@Override
@@ -50,9 +53,9 @@ public class CreateFirstLineView extends View {
 		if (ImGui.begin("Preview")) {
 			if (ImGui.button("Create")) {
 				Line line = new Line(Line.getNewRandomId(), a, b);
-				line.getRenderer().setDirty(true);
-				getScreen().getTrack().getLines().add(line);
-				getScreen().setView(new LineEndPointView(getScreen()));
+				line.getComponent(DirtContainer.class).setDirty(true);
+				getMode().getEditedTrack().getLines().add(line);
+				getMode().setView(new LineEndPointView(getMode()));
 			}
 		}
 		ImGui.end();

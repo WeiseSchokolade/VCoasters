@@ -3,13 +3,13 @@ package de.schoko.vcoasters.core;
 import de.schoko.vcoasters.TrackLineManager;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
 public class Line implements EditorObject {
-	public static Function<Line, Renderer<Line>> rendererGetter;
-
 	private final String id;
 	private final EndPoint a;
 	private final EndPoint b;
@@ -17,7 +17,6 @@ public class Line implements EditorObject {
 	private Line outputLine;
 	private String outputLineId;
 	private Line inputLine;
-	private Renderer<Line> renderer;
 	private String onReachFunction;
 	private String onHaltFunction;
 	private double acceleration;
@@ -26,37 +25,58 @@ public class Line implements EditorObject {
 
 	private boolean fullStop;
 
+	private final List<EditorComponent> editorComponents;
+
 	public Line(Vector3f a, Vector3f b) {
 		this(getNewRandomId(), a, b);
 	}
 
 	public Line(String id, Vector3f a, Vector3f b) {
-		this.id = id;
-		this.a = new EndPoint(this, false, a.x, a.y, a.z, 0, 0, 0);
-		this.b = new EndPoint(this, true, b.x, b.y, b.z, 0, 0, 0);
+		this(id, new InterpolatedPoint(a, 0, 0, 0), new InterpolatedPoint(b, 0, 0, 0));
 	}
 
 	public Line(String id, ValuePoint a, ValuePoint b) {
 		this.id = id;
 		this.a = new EndPoint(this, false, a);
 		this.b = new EndPoint(this, true, b);
+		this.editorComponents = new ArrayList<>();
 	}
 
 	public static String getNewRandomId() {
 		return "Id" + UUID.randomUUID();
 	}
 
-	public void mergeData(Line line) {
-		this.a.merge(line.a);
-		this.b.merge(line.b);
-		this.label = line.getLabel();
-		this.onReachFunction = line.onReachFunction;
-		this.onHaltFunction = line.onHaltFunction;
-		this.physicsType = line.physicsType;
-		this.fullStop = line.fullStop;
+	public boolean mergeData(Line line) {
+		boolean different = false;
+
+		different |= a.merge(line.a);
+		different |= b.merge(line.b);
+
+		if (!this.label.equals(line.getLabel())) {
+			this.label = line.getLabel();
+			different = true;
+		}
+		if (!this.onReachFunction.equals(line.onReachFunction)) {
+			this.onReachFunction = line.onReachFunction;
+			different = true;
+		}
+		if (!this.onHaltFunction.equals(line.onHaltFunction)) {
+			this.onHaltFunction = line.onHaltFunction;
+			different = true;
+		}
+		if (this.physicsType != line.physicsType) {
+			this.physicsType = line.physicsType;
+			different = true;
+		}
+		if (this.fullStop != line.fullStop) {
+			this.fullStop = line.fullStop;
+			different = true;
+		}
 		if (!Objects.equals(this.outputLineId, line.outputLineId)) {
 			TrackLineManager.replaceOutput(this, line.outputLineId);
+			different = true;
 		}
+		return different;
 	}
 
 	public Vector3f getDirection(float length) {
@@ -93,7 +113,7 @@ public class Line implements EditorObject {
 	public void setOutputLine(Line line) {
 		if (this.outputLine != null) {
 			this.outputLine.inputLine = null;
-			this.outputLine.markRendererAsDirty();
+			this.outputLine.notifyOfDirt();
 		}
 		this.outputLine = line;
 		if (this.outputLine == null) {
@@ -106,14 +126,14 @@ public class Line implements EditorObject {
 			this.outputLine.inputLine.outputLine = null;
 		}
 		this.outputLine.inputLine = this;
-		markRendererAsDirty();
+		notifyOfDirt();
 	}
 
 	public void setNewCenter(Vector3f newCenter) {
 		Vector3f diff = getCenter().sub(newCenter);
 		a.pos().sub(diff);
 		b.pos().sub(diff);
-		markRendererAsDirty();
+		notifyOfDirt();
 	}
 
 	public void cutOut() {
@@ -168,13 +188,9 @@ public class Line implements EditorObject {
 		return b.pos().distanceSquared(a.pos());
 	}
 
-	public Renderer<Line> getRenderer() {
-		if (renderer == null) renderer = rendererGetter.apply(this);
-		return renderer;
-	}
-
-	public void markRendererAsDirty() {
-		if (renderer != null) renderer.setDirty(true);
+	public void notifyOfDirt() {
+		DirtContainer component = getComponent(DirtContainer.class);
+		if (component != null) component.setDirty(true);
 	}
 
 	public String getOutputLineId() {
@@ -190,7 +206,7 @@ public class Line implements EditorObject {
 	}
 
 	public void setOnReachFunction(String onReachFunction) {
-		if (!Objects.equals(this.onReachFunction, onReachFunction)) markRendererAsDirty();
+		if (!Objects.equals(this.onReachFunction, onReachFunction)) notifyOfDirt();
 		this.onReachFunction = onReachFunction;
 	}
 
@@ -199,7 +215,7 @@ public class Line implements EditorObject {
 	}
 
 	public void setOnHaltFunction(String onHaltFunction) {
-		if (!Objects.equals(this.onHaltFunction, onHaltFunction)) markRendererAsDirty();
+		if (!Objects.equals(this.onHaltFunction, onHaltFunction)) notifyOfDirt();
 		this.onHaltFunction = onHaltFunction;
 	}
 
@@ -229,7 +245,7 @@ public class Line implements EditorObject {
 	}
 
 	public void setPhysicsType(LinePhysicsType physicsType) {
-		if (this.physicsType != physicsType) markRendererAsDirty();
+		if (this.physicsType != physicsType) notifyOfDirt();
 		this.physicsType = physicsType;
 	}
 
@@ -250,7 +266,7 @@ public class Line implements EditorObject {
 	}
 
 	public void setFullStop(boolean fullStop) {
-		if (this.fullStop != fullStop) markRendererAsDirty();
+		if (this.fullStop != fullStop) notifyOfDirt();
 		this.fullStop = fullStop;
 	}
 
@@ -259,13 +275,26 @@ public class Line implements EditorObject {
 	}
 
 	public void setLabel(String label) {
-		if (!Objects.equals(this.label, label)) markRendererAsDirty();
+		if (!Objects.equals(this.label, label)) notifyOfDirt();
 		this.label = label;
 	}
 
 	public void shift(float dx, float dy, float dz) {
 		a.setPos(a.getPos().add(dx, dy, dz, new Vector3f()));
 		b.setPos(b.getPos().add(dx, dy, dz, new Vector3f()));
-		markRendererAsDirty();
+		notifyOfDirt();
+	}
+
+	public List<EditorComponent> getEditorComponents() {
+		return editorComponents;
+	}
+
+	public <T extends EditorComponent> T getComponent(Class<T> clazz) {
+		//noinspection unchecked
+		return (T) editorComponents.stream().filter(clazz::isInstance).findFirst().orElse(null);
+	}
+
+	public void addComponent(EditorComponent component) {
+		this.editorComponents.add(component);
 	}
 }

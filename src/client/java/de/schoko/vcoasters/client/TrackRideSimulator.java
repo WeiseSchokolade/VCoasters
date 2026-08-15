@@ -27,8 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class RideSimulator {
+public class TrackRideSimulator {
 	private final Track track;
+	private final Runnable enterTrainViewRecall;
 	private final Supplier<EditorObject> selectedObjectSupplier;
 	private final TrainMeta trainMeta;
 	private Train train;
@@ -47,9 +48,10 @@ public class RideSimulator {
 	private FloatRecorder velocityRecorder;
 	private FloatRecorder accelerationRecorder;
 
-	public RideSimulator(Track track, Supplier<EditorObject> getSelectedObject) {
+	public TrackRideSimulator(Track track, Runnable enterTrainViewRecall, Supplier<EditorObject> getSelectedObject) {
 		this.trainMeta = track.getTrainMeta();
 		this.track = track;
+		this.enterTrainViewRecall = enterTrainViewRecall;
 		selectedObjectSupplier = getSelectedObject;
 		//this.train = new Train(track.getFriction(), this.trainMeta.getSegmentAmount(), trainMeta.getCarDistance());
 		this.itemModel = Minecraft.getInstance().getModelManager().getItemModel(trainMeta.getModelId());
@@ -210,8 +212,7 @@ public class RideSimulator {
 			ImGui.separatorText("Controls");
 			ImGui.beginDisabled(train == null || !(Minecraft.getInstance().gui.screen() instanceof EditorScreen));
 			if (ImGui.button("Enter train view")) {
-				EditorScreen screen = (EditorScreen) Minecraft.getInstance().gui.screen();
-				Minecraft.getInstance().gui.setScreen(new TrainViewScreen(screen));
+				enterTrainViewRecall.run();
 			}
 			ImGui.endDisabled();
 			ImGui.sameLine();

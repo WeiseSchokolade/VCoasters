@@ -17,7 +17,7 @@ public class GameRendererMixin {
 
 	@Inject(method = "shouldRenderBlockOutline", at = @At("HEAD"), cancellable = true)
 	private void shouldRenderBlockOutline(CallbackInfoReturnable<Boolean> cir) {
-		if (!VCoastersClient.shouldRenderBlockOutline()) {
+		if (VCoastersClient.cancelRenderBlockOutline()) {
 			cir.setReturnValue(false);
 		}
 	}

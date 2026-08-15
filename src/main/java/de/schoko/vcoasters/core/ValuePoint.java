@@ -21,6 +21,15 @@ public interface ValuePoint {
 	float pitch();
 	float roll();
 
+	static boolean equals(ValuePoint a, ValuePoint b) {
+		return a.x() == b.x() &&
+			a.y() == b.y() &&
+			a.z() == b.z() &&
+			a.yaw() == b.yaw() &&
+			a.pitch() == b.pitch() &&
+			a.roll() == b.roll();
+	}
+
 	default ValuePoint valueCopy() {
 		return new InterpolatedPoint(x(), y(), z(), yaw(), pitch(), roll());
 	}

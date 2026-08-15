@@ -64,6 +64,7 @@ public class RenderContextImpl implements RenderContext {
 
 	@Override
 	public void renderAndDraw(LevelRenderContext context) {
+		if (submittedQuadRenderStates.isEmpty()) return; // Drawing is canceled if there is nothing to be drawn; TODO: Check if this crashes
 		RenderPipeline renderPipeline = FILLED_BOXES;
 		VertexFormat formatBinding = renderPipeline.getVertexFormatBinding(0);
 		PrimitiveTopology primitive = renderPipeline.getPrimitiveTopology();

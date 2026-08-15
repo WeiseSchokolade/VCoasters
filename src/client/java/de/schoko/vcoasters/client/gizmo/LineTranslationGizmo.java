@@ -1,5 +1,6 @@
 package de.schoko.vcoasters.client.gizmo;
 
+import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.EditorObject;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
@@ -15,7 +16,7 @@ public class LineTranslationGizmo extends TranslationGizmo {
 
 	@Override
 	public void draw(RenderContext context, EditorObject target) {
-		if (line.getRenderer().isDirty()) updateHitboxes();
+		if (line.getComponent(DirtContainer.class).isDirty()) updateHitboxes();
 		super.draw(context, target);
 	}
 
@@ -27,7 +28,7 @@ public class LineTranslationGizmo extends TranslationGizmo {
 	@Override
 	public void setNewCenter(Vector3f vector3f) {
 		line.setNewCenter(vector3f);
-		line.markRendererAsDirty();
+		line.notifyOfDirt();
 	}
 
 }

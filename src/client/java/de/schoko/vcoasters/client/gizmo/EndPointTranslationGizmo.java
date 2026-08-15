@@ -1,6 +1,7 @@
 package de.schoko.vcoasters.client.gizmo;
 
 import de.schoko.vcoasters.client.editor.EditorOptions;
+import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.EditorObject;
 import de.schoko.vcoasters.core.EndPoint;
 import de.schoko.vcoasters.core.RenderContext;
@@ -16,7 +17,7 @@ public class EndPointTranslationGizmo extends TranslationGizmo {
 
 	@Override
 	public void draw(RenderContext context, EditorObject target) {
-		if (endpoint.getRenderer().isDirty()) updateHitboxes();
+		if (endpoint.getComponent(DirtContainer.class).isDirty()) updateHitboxes();
 		super.draw(context, target);
 	}
 

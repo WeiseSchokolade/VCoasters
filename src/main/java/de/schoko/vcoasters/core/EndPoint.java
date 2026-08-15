@@ -2,18 +2,19 @@ package de.schoko.vcoasters.core;
 
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public final class EndPoint implements EditorObject, ValuePoint {
-	public static Function<EndPoint, Renderer<EndPoint>> rendererGetter;
-
 	private final Line line;
 	private final boolean isOutputEndPoint;
 	private final Vector3f pos;
 	private float yaw;
 	private float pitch;
 	private float roll;
-	private Renderer<EndPoint> renderer;
+
+	private final List<EditorComponent> editorComponents;
 
 	public EndPoint(Line line, boolean isOutputEndPoint, float x, float y, float z, float yaw, float pitch, float roll) {
 		this.line = line;
@@ -23,6 +24,7 @@ public final class EndPoint implements EditorObject, ValuePoint {
 		this.yaw = yaw;
 		this.pitch = pitch;
 		this.roll = roll;
+		this.editorComponents = new ArrayList<>();
 	}
 
 	public EndPoint(Line line, boolean isOutputEndPoint, ValuePoint point) {
@@ -62,13 +64,16 @@ public final class EndPoint implements EditorObject, ValuePoint {
 			endpoint.roll == this.roll;
 	}
 
-	public void merge(ValuePoint valuePoint) {
+	public boolean merge(ValuePoint valuePoint) {
+		if (ValuePoint.equals(this, valuePoint)) return false;
 		this.pos.set(valuePoint.x(), valuePoint.y(), valuePoint.z());
 		clampPos();
+
 		this.yaw = valuePoint.yaw();
 		this.pitch = valuePoint.pitch();
 		this.roll = valuePoint.roll();
 		markRendererAsDirty();
+		return true;
 	}
 
 	@Override
@@ -109,13 +114,9 @@ public final class EndPoint implements EditorObject, ValuePoint {
 		return pos;
 	}
 
-	public Renderer<EndPoint> getRenderer() {
-		if (renderer == null) renderer = rendererGetter.apply(this);
-		return renderer;
-	}
-
 	public void markRendererAsDirty() {
-		if (renderer != null) renderer.setDirty(true);
+		DirtContainer component = getComponent(DirtContainer.class);
+		if (component != null) component.setDirty(true);
 	}
 
 	@Override
@@ -165,5 +166,18 @@ public final class EndPoint implements EditorObject, ValuePoint {
 
 	public boolean isOutputEndPoint() {
 		return isOutputEndPoint;
+	}
+
+	public List<EditorComponent> getEditorComponents() {
+		return editorComponents;
+	}
+
+	public <T extends EditorComponent> T getComponent(Class<T> clazz) {
+		//noinspection unchecked
+		return (T) editorComponents.stream().filter(clazz::isInstance).findFirst().orElse(null);
+	}
+
+	public void addComponent(EditorComponent component) {
+		this.editorComponents.add(component);
 	}
 }

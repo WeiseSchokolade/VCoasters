@@ -4,9 +4,6 @@ import de.schoko.vcoasters.VCoasters;
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.client.core.RenderContextImpl;
 import de.schoko.vcoasters.client.mixininterfaces.ExtendedMouseHandler;
-import de.schoko.vcoasters.client.renderer.EndPointRenderer;
-import de.schoko.vcoasters.client.renderer.LineRenderer;
-import de.schoko.vcoasters.core.EndPoint;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
 import foundry.imgui.api.ImGuiMCEvents;
@@ -18,7 +15,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -53,14 +49,12 @@ public class VCoastersClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		Line.rendererGetter = LineRenderer::new;
-		EndPoint.rendererGetter = EndPointRenderer::new;
 
 		instance = this;
 		renderCtx = new RenderContextImpl();
 
 		ImGuiMCEvents.INSTANCE.preRenderImGuiEvent(() -> {
-			if (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen screen) {
+			if (Minecraft.getInstance().gui.screen() instanceof EditorScreen screen) {
 				ImGui.pushFont(ImGui.getIO().getFontDefault(), 15);
 				screen.renderImGui(ImGui.getIO());
 				ImGui.popFont();
@@ -71,9 +65,9 @@ public class VCoastersClient implements ClientModInitializer {
 		//LevelRenderEvents.COLLECT_SUBMITS.register(context -> context.submitNodeCollector().submitItem());
 
 		LevelExtractionEvents.END_EXTRACTION.register(context -> {
-			if (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen screen) {
+			if (Minecraft.getInstance().gui.screen() instanceof EditorScreen screen) {
 				screen.submitWorldObjects(renderCtx);
-				if (screen instanceof EditorScreen editorScreen) editorScreen.getSimulator().submitWorldModels(context);
+				screen.submitWorldModels(context);
 
 				renderCtx.drawAABox(1, 1, 1, 2, 2, 2, 1, 0.5f, 1, 0.25f);
 //				renderCtx.drawRhomboid(new Vector3f(-1, 1, 1), new Vector3f(1, 0, 0), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1), new Vector4f(0, 1, 0, 1));
@@ -87,19 +81,19 @@ public class VCoastersClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.gui.screen() instanceof EditorScreen screen) {
 				screen.endClientTick();
-			} else if (client.gui.screen() instanceof TrainViewScreen screen) {
-				screen.endClientTick();
 			}
 			//if (ImGuiMC.isImguiLoaded()) ImGui.showDemoWindow();
-			if (isDraggingCamera())
+			if (isDraggingCamera()) {
 				if (!grabbedMouse) {
 					grabbedMouse = true;
 					Minecraft.getInstance().mouseHandler.grabMouse();
+				} else {
+					grabbedMouse = false;
 				}
-				else grabbedMouse = false;
+			}
 		});
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(VCoasters.MOD_ID, "testelement"), (context, tickCounter) -> {
-			if (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen) context.text(Minecraft.getInstance().font, "Editor Mode", 5, 5, 0xFFFFFFFF);
+			if (Minecraft.getInstance().gui.screen() instanceof EditorScreen) context.text(Minecraft.getInstance().font, "Editor Mode", 5, 5, 0xFFFFFFFF);
 			for (int i = 0; i < debugStrings.size(); i++) {
 				context.text(Minecraft.getInstance().font, debugStrings.get(i), 5, 25 + i * 15, 0xE0E0FFFF);
 			}
@@ -107,19 +101,6 @@ public class VCoastersClient implements ClientModInitializer {
 		});
 
 		EditorClientPackets.registerPackets();
-	}
-
-	public void processKeyEvent(KeyEvent event) {
-		if (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen screen) {
-			if (Minecraft.getInstance().options.keyChat.matches(event)) {
-				while (Minecraft.getInstance().options.keyChat.consumeClick()) {}
-				Minecraft.getInstance().gui.setScreen(new EditorChatScreen(screen, "", false));
-			}
-			if (Minecraft.getInstance().options.keyCommand.matches(event)) {
-				while (Minecraft.getInstance().options.keyCommand.consumeClick()) {}
-				Minecraft.getInstance().gui.setScreen(new EditorChatScreen(screen, "/", false));
-			}
-		}
 	}
 
 	public void close() {
@@ -135,7 +116,9 @@ public class VCoastersClient implements ClientModInitializer {
 				line.setOutputLine(idLineMap.get(outputLineId));
 			}
 		}
-		Minecraft.getInstance().gui.setScreen(new EditorScreen(track));
+		EditorScreen screen = new EditorScreen();
+		Minecraft.getInstance().gui.setScreen(screen);
+		screen.setMode(new TrackEditorMode(track));
 	}
 
 	public static boolean handleAttack() {
@@ -149,23 +132,23 @@ public class VCoastersClient implements ClientModInitializer {
 	}
 
 	public static void leftMouseReleased() {
-		if (Minecraft.getInstance().gui.screen() instanceof EditorScreen screen) screen.leftmouseReleased();
+		if (Minecraft.getInstance().gui.screen() instanceof EditorScreen screen) screen.leftMouseReleased();
 	}
 
-	public static boolean shouldRenderBlockOutline() {
-		return !(Minecraft.getInstance().gui.screen() instanceof EditorDataScreen);
+	public static boolean cancelRenderBlockOutline() {
+		return Minecraft.getInstance().gui.screen() instanceof EditorScreen;
 	}
 
 	public static boolean blockSpectatorAccess() {
-		return (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen);
+		return (Minecraft.getInstance().gui.screen() instanceof EditorScreen);
 	}
 
 	public static boolean forceRenderCrosshair(HitResult result) {
-		return (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen) && isDraggingCamera() && false;
+		return (Minecraft.getInstance().gui.screen() instanceof EditorScreen) && isDraggingCamera() && false;
 	}
 
 	public static boolean shouldFreeMouse() {
-		return (Minecraft.getInstance().gui.screen() instanceof EditorDataScreen) && !isDraggingCamera();
+		return (Minecraft.getInstance().gui.screen() instanceof EditorScreen) && !isDraggingCamera();
 	}
 
 	public static void setLastProjectionMatrix(Matrix4f lastProjectionMatrix) {

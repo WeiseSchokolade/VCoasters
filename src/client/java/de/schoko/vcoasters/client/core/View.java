@@ -1,13 +1,14 @@
 package de.schoko.vcoasters.client.core;
 
+import de.schoko.vcoasters.client.EditorMode;
 import de.schoko.vcoasters.client.EditorScreen;
 import de.schoko.vcoasters.core.RenderContext;
 
-public abstract class View implements RenderInterface {
-	private final EditorScreen screen;
+public abstract class View<T extends EditorMode<T>> implements RenderInterface {
+	private final T mode;
 
-	public View(EditorScreen screen) {
-		this.screen = screen;
+	public View(T mode) {
+		this.mode = mode;
 	}
 
 	public abstract void load();
@@ -19,8 +20,8 @@ public abstract class View implements RenderInterface {
 
 	public abstract void leftMouseReleased();
 
-	public EditorScreen getScreen() {
-		return screen;
+	public T getMode() {
+		return mode;
 	}
 
 	public abstract void endClientTick();

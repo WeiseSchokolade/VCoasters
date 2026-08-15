@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class LevelRendererMixin {
 	@Inject(at = @At("HEAD"), method = "submitBlockOutline", cancellable = true)
 	public void vcoasters$renderBlockOutline(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, LevelRenderState levelRenderState, CallbackInfo ci) {
-		if (!VCoastersClient.shouldRenderBlockOutline()) {
+		if (VCoastersClient.cancelRenderBlockOutline()) {
 			ci.cancel();
 		}
 	}

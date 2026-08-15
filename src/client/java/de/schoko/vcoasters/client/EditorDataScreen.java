@@ -4,10 +4,9 @@ import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.client.core.RenderInterface;
 import de.schoko.vcoasters.core.EditorObject;
 import de.schoko.vcoasters.core.RenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
 
-public sealed interface EditorDataScreen extends RenderInterface permits EditorScreen, EditorChatScreen, TrainViewScreen {
+sealed interface EditorDataScreen extends RenderInterface permits EditorScreen {
 	void submitWorldObjects(RenderContext renderContext);
-
-	EditorObject getSelectedObject();
-	Track getTrack();
+	void submitWorldModels(LevelExtractionContext context);
 }

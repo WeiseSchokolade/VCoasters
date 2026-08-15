@@ -37,7 +37,7 @@ public class EndPointRotationGizmo implements Gizmo {
 
 	@Override
 	public void draw(RenderContext renderContext, EditorObject target) {
-		if (endpoint.getRenderer().isDirty()) {
+		if (endpoint.getComponent(DirtContainer.class).isDirty()) {
 			updateHitboxes();
 		}
 		if (draggedClippable instanceof AABB aabb) {

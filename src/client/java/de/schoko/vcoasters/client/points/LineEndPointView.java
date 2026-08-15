@@ -8,6 +8,9 @@ import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.editor.EditorCommands;
 import de.schoko.vcoasters.client.editor.EditorOptions;
 import de.schoko.vcoasters.client.gizmo.*;
+import de.schoko.vcoasters.client.renderer.EndpointBoxComponent;
+import de.schoko.vcoasters.client.renderer.LineBoxComponent;
+import de.schoko.vcoasters.client.renderer.LineRenderImGuiComponent;
 import de.schoko.vcoasters.core.*;
 import imgui.ImGui;
 import imgui.ImGuiIO;
@@ -22,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class LineEndPointView extends View {
+public class LineEndPointView extends View<TrackEditorMode> {
 	private Gizmo gizmo;
 	private Point previewPoint;
 
@@ -31,8 +34,8 @@ public class LineEndPointView extends View {
 
 	private ImInt selectedComboItem;
 
-	public LineEndPointView(EditorScreen screen) {
-		super(screen);
+	public LineEndPointView(TrackEditorMode mode) {
+		super(mode);
 		this.selectedComboItem = new ImInt();
 	}
 
@@ -43,30 +46,30 @@ public class LineEndPointView extends View {
 			case EndPoint endPoint -> (useEndpointRotationGizmo) ? new EndPointRotationGizmo(endPoint) : new EndPointTranslationGizmo(endPoint);
 			default -> null;
 		};
-		if (getScreen().getSelectedObject() == object) return false;
-		getScreen().setSelectedObject(object);
+		if (getMode().isSelected(object)) return false;
+		getMode().select(object);
 		return true;
 	}
 
 	@Override
 	public boolean handleAttack() {
-		Track track = getScreen().getTrack();
+		Track track = getMode().getEditedTrack();
 		Runnable successResponse = (Minecraft.getInstance().player != null) ? () -> Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND) : () -> {};
 		boolean handled = TargetTester.consumeClosestTarget(
 			TargetTester.consumer(previewPoint != null ? 1 : 0, (index, from, to) -> previewPoint.getAABB().clip(from, to), i -> {
 				successResponse.run();
 				gizmo = new PointTranslationGizmo(previewPoint);
 			}),
-			TargetTester.consumer(track.getLines().size() * 2, (i, from, to) -> (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint()).getRenderer().clip(from, to), i -> {
+			TargetTester.consumer(track.getLines().size() * 2, (i, from, to) -> (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint()).getComponent(EndpointBoxComponent.class).clip(from, to), i -> {
 				if (previewPoint != null) cancelPreview();
 				EndPoint endpoint = (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint());
-				if (getScreen().getSelectedObject() == endpoint) {
+				if (getMode().isSelected(endpoint)) {
 					useEndpointRotationGizmo = !useEndpointRotationGizmo;
 				}
 				select(endpoint);
 				successResponse.run();
 			}),
-			TargetTester.consumer(track.getLines().size(), (i, from, to) -> track.getLines().get(i).getRenderer().clip(from, to), i -> {
+			TargetTester.consumer(track.getLines().size(), (i, from, to) -> track.getLines().get(i).getComponent(LineBoxComponent.class).clip(from, to), i -> {
 				Line line = track.getLines().get(i);
 				successResponse.run();
 				if (select(line) && previewPoint != null) cancelPreview();
@@ -100,7 +103,9 @@ public class LineEndPointView extends View {
 
 	@Override
 	public void render(RenderContext renderContext) {
-		Track track = getScreen().getTrack();
+		getMode().getSimulator().extract(renderContext);
+
+		Track track = getMode().getEditedTrack();
 
 		//renderContext.drawBoxLine(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 1f, 0f), 0.2f, Colors.WHITE);
 
@@ -109,11 +114,11 @@ public class LineEndPointView extends View {
 			Optional<EditorObject> optionalTarget = TargetTester.getClosestTarget(
 				TargetTester.provider(
 					track.getLines().size() * 2,
-					(i, from, to) -> (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint()).getRenderer().clip(from, to),
+					(i, from, to) -> (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint()).getComponent(EndpointBoxComponent.class).clip(from, to),
 					i -> (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint())),
 				TargetTester.provider(
 					track.getLines().size(),
-					(i, from, to) -> track.getLines().get(i).getRenderer().clip(from, to),
+					(i, from, to) -> track.getLines().get(i).getComponent(LineBoxComponent.class).clip(from, to),
 					i -> track.getLines().get(i)),
 				TargetTester.provider(gizmo != null ? gizmo.getHitboxAmount() : 0,
 					(gizmo != null) ? gizmo::clip : (i, from, to) -> Optional.empty(),
@@ -124,11 +129,11 @@ public class LineEndPointView extends View {
 			target = null;
 		}
 
-		EditorObject selectedObject = getScreen().getSelectedObject();
+		EditorObject selectedObject = getMode().getSelectedObject();
 		track.getLines().forEach(line -> {
-			line.getRenderer().upload(renderContext, target, selectedObject);
-			line.getInputEndPoint().getRenderer().upload(renderContext, target, selectedObject);
-			line.getOutputEndPoint().getRenderer().upload(renderContext, target, selectedObject);
+			line.getComponent(LineBoxComponent.class).upload(renderContext, line == target, getMode().isSelected(line));
+			line.getInputEndPoint().getComponent(EndpointBoxComponent.class).upload(renderContext, line.getInputEndPoint() == target, getMode().isSelected(line.getInputEndPoint()));
+			line.getOutputEndPoint().getComponent(EndpointBoxComponent.class).upload(renderContext, line.getOutputEndPoint() == target, getMode().isSelected(line.getOutputEndPoint()));
 		});
 
 		if (previewPoint != null) {
@@ -139,7 +144,7 @@ public class LineEndPointView extends View {
 				if (selectedObject instanceof EndPoint endPoint) {
 					if (endPoint.equalsCorrespondingEndpoint()) {
 						gizmo.draw(renderContext, target);
-						if (endPoint.getRenderer().isDirty()) {
+						if (endPoint.getComponent(DirtContainer.class).isDirty()) {
 							endPoint.updateCorrespondingEndpoint();
 						}
 					} else {
@@ -149,7 +154,7 @@ public class LineEndPointView extends View {
 					boolean inputEquals = line.getInputEndPoint().equalsCorrespondingEndpoint();
 					boolean outputEquals = line.getOutputEndPoint().equalsCorrespondingEndpoint();
 					gizmo.draw(renderContext, target);
-					if (line.getRenderer().isDirty()) {
+					if (line.getComponent(DirtContainer.class).isDirty()) {
 						if (inputEquals) line.getInputEndPoint().updateCorrespondingEndpoint();
 						if (outputEquals) line.getOutputEndPoint().updateCorrespondingEndpoint();
 					}
@@ -164,7 +169,7 @@ public class LineEndPointView extends View {
 
 	@Override
 	public void renderImGui(ImGuiIO io) {
-		EditorObject object = getScreen().getSelectedObject();
+		EditorObject object = getMode().getSelectedObject();
 		if (isPreviewing) {
 			if (ImGui.begin("Line preview")) {
 				if (ImGui.button("Create")) {
@@ -185,7 +190,7 @@ public class LineEndPointView extends View {
 		}
 		if (ImGui.begin("Builder")) {
 
-			List<Line> lines = getScreen().getTrack().getLabelledLines();
+			List<Line> lines = getMode().getEditedTrack().getLabelledLines();
 			String[] array = lines.stream().map(Line::getLabel).toArray(String[]::new);
 
 			if (array.length > 0) {
@@ -267,7 +272,7 @@ public class LineEndPointView extends View {
 		}
 		ImGui.end();
 		if (object instanceof Line line) {
-			line.getRenderer().renderImGui(io);
+			line.getComponent(LineRenderImGuiComponent.class).renderImGui(io);
 		} else if (object instanceof EndPoint endPoint) {
 			if (ImGui.begin("Endpoint")) {
 				ImGui.text(endPoint.isOutputEndPoint() ? "Output" : "Input");
@@ -361,14 +366,13 @@ public class LineEndPointView extends View {
 	}
 
 	public void createPreviewed() {
-		EditorObject object = getScreen().getSelectedObject();
-		if (object == previewPoint) {
+		if (getMode().isSelected(previewPoint)) {
 			Line previousLine = ((LineExtensionPreviewPoint) previewPoint).getLine();
 			Line newLine = new Line(previousLine.getOutputEndPoint().getPos(), previewPoint.getPos());
 			previousLine.setOutputLine(newLine);
-			getScreen().getTrack().getLines().add(newLine);
+			getMode().addLine(newLine);
 			previewPoint = null;
-			newLine.getRenderer().setDirty(true);
+			newLine.getComponent(DirtContainer.class).setDirty(true);
 			select(newLine);
 		}
 		isPreviewing = false;
@@ -388,21 +392,21 @@ public class LineEndPointView extends View {
 		if (line.getInputLine() != null) line.getInputLine().setOutputLine(lineA);
 		lineA.setOutputLine(lineB);
 		lineB.setOutputLine(line.getOutputLine());
-		getScreen().getTrack().removeLine(line.getId());
-		getScreen().getTrack().getLines().add(lineA);
-		getScreen().getTrack().getLines().add(lineB);
+		getMode().getEditedTrack().removeLine(line.getId());
+		getMode().getEditedTrack().getLines().add(lineA);
+		getMode().getEditedTrack().getLines().add(lineB);
 
 		select(lineA.getOutputEndPoint());
 
 	}
 
 	public void deleteSelectedLine(Line line) {
-		getScreen().getTrack().removeLine(line.getId());
+		getMode().getEditedTrack().removeLine(line.getId());
 		select(null);
 	}
 
 	@Override
 	public void endClientTick() {
-		if (gizmo != null && getScreen().getSelectedObject() == null) gizmo = null;
+		if (gizmo != null && getMode().isNothingSelected()) gizmo = null;
 	}
 }

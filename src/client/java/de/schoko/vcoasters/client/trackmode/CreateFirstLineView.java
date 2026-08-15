@@ -1,14 +1,11 @@
-package de.schoko.vcoasters.client.lines;
+package de.schoko.vcoasters.client.trackmode;
 
-import de.schoko.vcoasters.client.EditorMode;
-import de.schoko.vcoasters.client.EditorScreen;
-import de.schoko.vcoasters.client.TrackEditorMode;
 import de.schoko.vcoasters.client.VCoastersClient;
 import de.schoko.vcoasters.client.core.Colors;
 import de.schoko.vcoasters.client.core.TargetTester;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.editor.EditorStyle;
-import de.schoko.vcoasters.client.points.LineEndPointView;
+import de.schoko.vcoasters.client.trackmode.points.LineEndPointView;
 import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;

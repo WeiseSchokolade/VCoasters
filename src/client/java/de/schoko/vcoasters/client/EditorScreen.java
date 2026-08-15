@@ -1,21 +1,7 @@
 package de.schoko.vcoasters.client;
 
-import de.schoko.vcoasters.TrainMeta;
-import de.schoko.vcoasters.Track;
-import de.schoko.vcoasters.client.core.View;
-import de.schoko.vcoasters.client.export.DefaultExporter;
-import de.schoko.vcoasters.client.lines.CreateFirstLineView;
-import de.schoko.vcoasters.client.points.LineEndPointView;
-import de.schoko.vcoasters.core.EditorObject;
-import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
-import de.schoko.vcoasters.packets.ApplyLineChangesC2S;
-import de.schoko.vcoasters.packets.ApplyTrackMetaChangesC2S;
-import de.schoko.vcoasters.packets.SaveDataC2S;
-import imgui.ImGui;
 import imgui.ImGuiIO;
-import imgui.type.*;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -23,19 +9,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundChangeGameModePacket;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public non-sealed class EditorScreen extends Screen implements EditorDataScreen {
 	private EditorMode<?> editorMode;

@@ -1,9 +1,11 @@
-package de.schoko.vcoasters.client;
+package de.schoko.vcoasters.client.trackmode;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import de.schoko.vcoasters.TrainMeta;
 import de.schoko.vcoasters.Track;
+import de.schoko.vcoasters.client.EditorScreen;
+import de.schoko.vcoasters.client.FloatRecorder;
 import de.schoko.vcoasters.client.core.Colors;
 import de.schoko.vcoasters.codecs.LineCodecs;
 import de.schoko.vcoasters.core.*;

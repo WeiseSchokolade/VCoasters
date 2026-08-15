@@ -1,4 +1,4 @@
-package de.schoko.vcoasters.client.renderer;
+package de.schoko.vcoasters.client.trackmode.renderer;
 
 import de.schoko.vcoasters.client.core.Colors;
 import de.schoko.vcoasters.client.editor.EditorStyle;

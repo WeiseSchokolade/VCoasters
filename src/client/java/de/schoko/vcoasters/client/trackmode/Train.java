@@ -1,4 +1,4 @@
-package de.schoko.vcoasters.client;
+package de.schoko.vcoasters.client.trackmode;
 
 import de.schoko.vcoasters.codecs.LineCodecs;
 import de.schoko.vcoasters.core.InterpolatedPoint;

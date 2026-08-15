@@ -1,14 +1,14 @@
-package de.schoko.vcoasters.client;
+package de.schoko.vcoasters.client.trackmode;
 
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.TrainMeta;
+import de.schoko.vcoasters.client.EditorMode;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.export.DefaultExporter;
-import de.schoko.vcoasters.client.lines.CreateFirstLineView;
-import de.schoko.vcoasters.client.points.LineEndPointView;
-import de.schoko.vcoasters.client.renderer.EndpointBoxComponent;
-import de.schoko.vcoasters.client.renderer.LineBoxComponent;
-import de.schoko.vcoasters.client.renderer.LineRenderImGuiComponent;
+import de.schoko.vcoasters.client.trackmode.points.LineEndPointView;
+import de.schoko.vcoasters.client.trackmode.renderer.EndpointBoxComponent;
+import de.schoko.vcoasters.client.trackmode.renderer.LineBoxComponent;
+import de.schoko.vcoasters.client.trackmode.renderer.LineRenderImGuiComponent;
 import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.InterpolatedPoint;
 import de.schoko.vcoasters.core.Line;

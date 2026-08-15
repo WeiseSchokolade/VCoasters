@@ -4,6 +4,7 @@ import de.schoko.vcoasters.VCoasters;
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.client.core.RenderContextImpl;
 import de.schoko.vcoasters.client.mixininterfaces.ExtendedMouseHandler;
+import de.schoko.vcoasters.client.trackmode.TrackEditorMode;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
 import foundry.imgui.api.ImGuiMCEvents;

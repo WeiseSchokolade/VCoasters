@@ -13,6 +13,10 @@ public final class Geometry {
 		return vector;
 	}
 
+	public static Vector3f getRotatedViewDirection(ValuePoint valuePoint, float length) {
+		return new Vector3f(0f, 0f, length).rotateX(valuePoint.pitch()).rotateY(-valuePoint.yaw());
+	}
+
 	public static Quaternionf getRotationQuaternion(float yaw, float pitch, float roll) {
 		return new Quaternionf().rotationZYX(roll, -yaw, pitch);
 	}

@@ -8,6 +8,10 @@ public record InterpolatedPoint(Vector3f point, float yaw, float pitch, float ro
 		this(new Vector3f(x, y, z), yaw, pitch, roll);
 	}
 
+	public InterpolatedPoint(ValuePoint valuePoint) {
+		this(new Vector3f(valuePoint.x(), valuePoint.y(), valuePoint.z()), valuePoint.yaw(), valuePoint.pitch(), valuePoint.roll());
+	}
+
 	@Override
 	public float x() {
 		return point.x;

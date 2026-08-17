@@ -72,7 +72,7 @@ public abstract class EditorMode<T extends EditorMode<T>> {
 	}
 
 	public boolean handleMouseClicked() {
-		return false;
+		return view.handleAttack();
 	}
 
 	public boolean handleKeyPressed(KeyEvent keyEvent) {
@@ -80,10 +80,10 @@ public abstract class EditorMode<T extends EditorMode<T>> {
 	}
 
 	public boolean handleDraggedMouseClick() {
-		return false;
+		return view.handleDraggedAttack();
 	}
 
 	public void handleLeftClickReleased() {
-
+		view.leftMouseReleased();
 	}
 }

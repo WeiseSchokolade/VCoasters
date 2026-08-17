@@ -1,7 +1,7 @@
 package de.schoko.vcoasters.client.gizmo;
 
 import de.schoko.vcoasters.client.editor.EditorOptions;
-import de.schoko.vcoasters.client.trackmode.points.Point;
+import de.schoko.vcoasters.client.modes.track.points.Point;
 import org.joml.Vector3f;
 
 public class PointTranslationGizmo extends TranslationGizmo {

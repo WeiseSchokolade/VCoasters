@@ -31,6 +31,10 @@ public class Line implements EditorObject {
 		this(getNewRandomId(), a, b);
 	}
 
+	public Line(ValuePoint a, ValuePoint b) {
+		this(getNewRandomId(), a, b);
+	}
+
 	public Line(String id, Vector3f a, Vector3f b) {
 		this(id, new InterpolatedPoint(a, 0, 0, 0), new InterpolatedPoint(b, 0, 0, 0));
 	}
@@ -81,6 +85,10 @@ public class Line implements EditorObject {
 
 	public Vector3f getDirection(float length) {
 		return b.pos().sub(a.pos(), new Vector3f()).normalize(length);
+	}
+
+	public Vector3f getDeltaVector() {
+		return b.pos().sub(a.pos(), new Vector3f());
 	}
 
 	public double getPitch() {

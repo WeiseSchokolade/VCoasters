@@ -1,7 +1,6 @@
-package de.schoko.vcoasters.client.trackmode.renderer;
+package de.schoko.vcoasters.client.modes.track.renderer;
 
 import de.schoko.vcoasters.Track;
-import de.schoko.vcoasters.client.EditorScreen;
 import de.schoko.vcoasters.core.EditorComponent;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.LinePhysicsType;

@@ -1,4 +1,4 @@
-package de.schoko.vcoasters.client.trackmode;
+package de.schoko.vcoasters.client.modes.track;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;

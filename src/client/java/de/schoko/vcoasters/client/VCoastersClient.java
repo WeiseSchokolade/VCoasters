@@ -4,7 +4,9 @@ import de.schoko.vcoasters.VCoasters;
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.client.core.RenderContextImpl;
 import de.schoko.vcoasters.client.mixininterfaces.ExtendedMouseHandler;
-import de.schoko.vcoasters.client.trackmode.TrackEditorMode;
+import de.schoko.vcoasters.client.modes.coaster.CoasterEditorMode;
+import de.schoko.vcoasters.client.modes.track.TrackEditorMode;
+import de.schoko.vcoasters.client.modes.train.TrainEditorMode;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
 import foundry.imgui.api.ImGuiMCEvents;
@@ -31,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class VCoastersClient implements ClientModInitializer {
-	private static final Logger log = LoggerFactory.getLogger(VCoastersClient.class);
+	public static final Logger LOG = LoggerFactory.getLogger(VCoastersClient.class);
 	public static VCoastersClient instance;
 	private static final List<String> debugStrings = new ArrayList<>();
 	public static Vec3 lastResult;
@@ -60,10 +62,7 @@ public class VCoastersClient implements ClientModInitializer {
 				screen.renderImGui(ImGui.getIO());
 				ImGui.popFont();
 			}
-			//ImGui.showDemoWindow();
 		});
-
-		//LevelRenderEvents.COLLECT_SUBMITS.register(context -> context.submitNodeCollector().submitItem());
 
 		LevelExtractionEvents.END_EXTRACTION.register(context -> {
 			if (Minecraft.getInstance().gui.screen() instanceof EditorScreen screen) {
@@ -71,9 +70,6 @@ public class VCoastersClient implements ClientModInitializer {
 				screen.submitWorldModels(context);
 
 				renderCtx.drawAABox(1, 1, 1, 2, 2, 2, 1, 0.5f, 1, 0.25f);
-//				renderCtx.drawRhomboid(new Vector3f(-1, 1, 1), new Vector3f(1, 0, 0), new Vector3f(0, 1, 0), new Vector3f(0, 0, 1), new Vector4f(0, 1, 0, 1));
-				//if (lastResult != null)
-				//	renderCtx.drawAABox(lastResult.x - 0.1, lastResult.y - 0.1, lastResult.z - 0.1, lastResult.x + 0.1, lastResult.y + 0.1, lastResult.z + 0.1, Colors.WHITE);
 			}
 		});
 
@@ -83,7 +79,6 @@ public class VCoastersClient implements ClientModInitializer {
 			if (client.gui.screen() instanceof EditorScreen screen) {
 				screen.endClientTick();
 			}
-			//if (ImGuiMC.isImguiLoaded()) ImGui.showDemoWindow();
 			if (isDraggingCamera()) {
 				if (!grabbedMouse) {
 					grabbedMouse = true;
@@ -119,7 +114,7 @@ public class VCoastersClient implements ClientModInitializer {
 		}
 		EditorScreen screen = new EditorScreen();
 		Minecraft.getInstance().gui.setScreen(screen);
-		screen.setMode(new TrackEditorMode(track));
+		screen.setMode(new TrainEditorMode(track));
 	}
 
 	public static boolean handleAttack() {

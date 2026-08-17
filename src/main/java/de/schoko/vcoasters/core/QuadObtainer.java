@@ -61,11 +61,16 @@ public final class QuadObtainer {
 			o.x + y.x + z.x, o.y + y.y + z.y, o.z + y.z + z.z
 		);
 	}
+
 	public static List<Quad> boxLine(Vector3f from, Vector3f to, float width) {
+		return boxLine(from, to, width, width);
+	}
+
+	public static List<Quad> boxLine(Vector3f from, Vector3f to, float width, float height) {
 		Vector3f direction = to.sub(from, new Vector3f());
 		Vector3f offDirection = direction.cross(new Vector3f(0, 1, 0), new Vector3f()).normalize(width);
 		if (!offDirection.isFinite()) offDirection = new Vector3f(0f, 0f, width);
-		Vector3f downDirection = offDirection.cross(direction, new Vector3f()).normalize(width);
+		Vector3f downDirection = offDirection.cross(direction, new Vector3f()).normalize(height);
 		return rhomboid(from.sub(downDirection, new Vector3f()).sub(offDirection), direction, downDirection.mul(2), offDirection.mul(2));
 	}
 

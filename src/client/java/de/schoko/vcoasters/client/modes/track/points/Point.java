@@ -1,4 +1,4 @@
-package de.schoko.vcoasters.client.trackmode.points;
+package de.schoko.vcoasters.client.modes.track.points;
 
 import de.schoko.vcoasters.client.editor.EditorStyle;
 import de.schoko.vcoasters.core.EditorObject;

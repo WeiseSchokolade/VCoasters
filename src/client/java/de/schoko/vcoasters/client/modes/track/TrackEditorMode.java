@@ -1,14 +1,13 @@
-package de.schoko.vcoasters.client.trackmode;
+package de.schoko.vcoasters.client.modes.track;
 
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.TrainMeta;
 import de.schoko.vcoasters.client.EditorMode;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.export.DefaultExporter;
-import de.schoko.vcoasters.client.trackmode.points.LineEndPointView;
-import de.schoko.vcoasters.client.trackmode.renderer.EndpointBoxComponent;
-import de.schoko.vcoasters.client.trackmode.renderer.LineBoxComponent;
-import de.schoko.vcoasters.client.trackmode.renderer.LineRenderImGuiComponent;
+import de.schoko.vcoasters.client.modes.track.renderer.EndpointBoxComponent;
+import de.schoko.vcoasters.client.modes.track.renderer.LineBoxComponent;
+import de.schoko.vcoasters.client.modes.track.renderer.LineRenderImGuiComponent;
 import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.InterpolatedPoint;
 import de.schoko.vcoasters.core.Line;
@@ -381,7 +380,7 @@ public class TrackEditorMode extends EditorMode<TrackEditorMode> {
 	}
 
 	public void setViewToTrainView() {
-		setView(new View<TrackEditorMode>(this) {
+		setView(new View<>(this) {
 			@Override
 			public void load() {
 

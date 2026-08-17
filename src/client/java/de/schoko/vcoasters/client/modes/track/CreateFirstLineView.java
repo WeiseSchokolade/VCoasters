@@ -1,11 +1,10 @@
-package de.schoko.vcoasters.client.trackmode;
+package de.schoko.vcoasters.client.modes.track;
 
 import de.schoko.vcoasters.client.VCoastersClient;
 import de.schoko.vcoasters.client.core.Colors;
 import de.schoko.vcoasters.client.core.TargetTester;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.editor.EditorStyle;
-import de.schoko.vcoasters.client.trackmode.points.LineEndPointView;
 import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
@@ -51,7 +50,7 @@ public class CreateFirstLineView extends View<TrackEditorMode> {
 			if (ImGui.button("Create")) {
 				Line line = new Line(Line.getNewRandomId(), a, b);
 				line.getComponent(DirtContainer.class).setDirty(true);
-				getMode().getEditedTrack().getLines().add(line);
+				getMode().addLine(line);
 				getMode().setView(new LineEndPointView(getMode()));
 			}
 		}

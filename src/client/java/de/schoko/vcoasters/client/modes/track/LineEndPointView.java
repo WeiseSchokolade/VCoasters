@@ -1,4 +1,4 @@
-package de.schoko.vcoasters.client.trackmode.points;
+package de.schoko.vcoasters.client.modes.track;
 
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.client.*;
@@ -8,10 +8,11 @@ import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.editor.EditorCommands;
 import de.schoko.vcoasters.client.editor.EditorOptions;
 import de.schoko.vcoasters.client.gizmo.*;
-import de.schoko.vcoasters.client.trackmode.TrackEditorMode;
-import de.schoko.vcoasters.client.trackmode.renderer.EndpointBoxComponent;
-import de.schoko.vcoasters.client.trackmode.renderer.LineBoxComponent;
-import de.schoko.vcoasters.client.trackmode.renderer.LineRenderImGuiComponent;
+import de.schoko.vcoasters.client.modes.track.points.LineExtensionPreviewPoint;
+import de.schoko.vcoasters.client.modes.track.points.Point;
+import de.schoko.vcoasters.client.modes.track.renderer.EndpointBoxComponent;
+import de.schoko.vcoasters.client.modes.track.renderer.LineBoxComponent;
+import de.schoko.vcoasters.client.modes.track.renderer.LineRenderImGuiComponent;
 import de.schoko.vcoasters.core.*;
 import imgui.ImGui;
 import imgui.ImGuiIO;

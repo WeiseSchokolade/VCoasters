@@ -1,10 +1,9 @@
-package de.schoko.vcoasters.client.trackmode.renderer;
+package de.schoko.vcoasters.client.modes.track.renderer;
 
 import de.schoko.vcoasters.client.core.Colors;
 import de.schoko.vcoasters.client.editor.EditorOptions;
 import de.schoko.vcoasters.client.editor.EditorStyle;
 import de.schoko.vcoasters.core.EditorComponent;
-import de.schoko.vcoasters.core.EditorObject;
 import de.schoko.vcoasters.core.EndPoint;
 import de.schoko.vcoasters.core.RenderContext;
 import net.minecraft.world.phys.AABB;

@@ -56,15 +56,15 @@ public class Line implements EditorObject {
 		different |= a.merge(line.a);
 		different |= b.merge(line.b);
 
-		if (!this.label.equals(line.getLabel())) {
+		if (!Objects.equals(this.label, line.label)) {
 			this.label = line.getLabel();
 			different = true;
 		}
-		if (!this.onReachFunction.equals(line.onReachFunction)) {
+		if (!Objects.equals(this.onReachFunction, line.onReachFunction)) {
 			this.onReachFunction = line.onReachFunction;
 			different = true;
 		}
-		if (!this.onHaltFunction.equals(line.onHaltFunction)) {
+		if (!Objects.equals(onHaltFunction, line.onHaltFunction)) {
 			this.onHaltFunction = line.onHaltFunction;
 			different = true;
 		}

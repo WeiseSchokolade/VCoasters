@@ -71,7 +71,7 @@ public final class QuadObtainer {
 		Vector3f offDirection = direction.cross(new Vector3f(0, 1, 0), new Vector3f()).normalize(width);
 		if (!offDirection.isFinite()) offDirection = new Vector3f(0f, 0f, width);
 		Vector3f downDirection = offDirection.cross(direction, new Vector3f()).normalize(height);
-		return rhomboid(from.sub(downDirection, new Vector3f()).sub(offDirection), direction, downDirection.mul(2), offDirection.mul(2));
+		return rhomboid(from.sub(new Vector3f(downDirection).mul(0.5f)).sub(new Vector3f(offDirection).mul(0.5f)), direction, downDirection, offDirection);
 	}
 
 	public record Quad(Vector3f a, Vector3f b, Vector3f c, Vector3f d) {

@@ -20,12 +20,13 @@ import java.util.List;
 public class TrainEditorMode extends EditorMode<TrainEditorMode> {
 	private final Track track;
 
-	private float railGauge = 1.6f;
-	private float beamLength = 2.8f;
-	private float beamWidth = 0.2f;
-	private float beamHeight = 0.1f;
-	private float railHeight = 0.15f;
-	private float railThickness = 0.1f;
+
+	private float railGauge = 1.2f;
+	private float beamLength = 2.4f;
+	private float beamWidth = 0.4f;
+	private float beamHeight = 0.2f;
+	private float railHeight = 0.3f;
+	private float railThickness = 0.2f;
 	private float beamSpacing = 1f;
 
 

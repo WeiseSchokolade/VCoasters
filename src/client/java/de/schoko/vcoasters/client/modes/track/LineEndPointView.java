@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class LineEndPointView extends View<TrackEditorMode> {
+public class LineEndPointView extends View<LineEditorMode> {
 	private Gizmo gizmo;
 	private Point previewPoint;
 
@@ -36,7 +36,7 @@ public class LineEndPointView extends View<TrackEditorMode> {
 
 	private ImInt selectedComboItem;
 
-	public LineEndPointView(TrackEditorMode mode) {
+	public LineEndPointView(LineEditorMode mode) {
 		super(mode);
 		this.selectedComboItem = new ImInt();
 	}

@@ -1,11 +1,11 @@
 package de.schoko.vcoasters.client;
 
+import de.schoko.vcoasters.EditorType;
 import de.schoko.vcoasters.VCoasters;
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.client.core.RenderContextImpl;
 import de.schoko.vcoasters.client.mixininterfaces.ExtendedMouseHandler;
-import de.schoko.vcoasters.client.modes.coaster.CoasterEditorMode;
-import de.schoko.vcoasters.client.modes.track.TrackEditorMode;
+import de.schoko.vcoasters.client.modes.track.LineEditorMode;
 import de.schoko.vcoasters.client.modes.train.TrainEditorMode;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
@@ -103,7 +103,7 @@ public class VCoastersClient implements ClientModInitializer {
 		RenderContextImpl.close();
 	}
 
-	public void openTo(Track track) {
+	public void openTo(Track track, EditorType editorType) {
 		String outputLineId;
 		Map<String, Line> idLineMap = new HashMap<>();
 		track.getLines().forEach(line -> idLineMap.put(line.getId(), line));
@@ -114,7 +114,16 @@ public class VCoastersClient implements ClientModInitializer {
 		}
 		EditorScreen screen = new EditorScreen();
 		Minecraft.getInstance().gui.setScreen(screen);
-		screen.setMode(new TrainEditorMode(track));
+		switch (editorType) {
+			case TRAIN_TRACKS:
+				screen.setMode(new TrainEditorMode(track));
+				break;
+			case LINES:
+			case null:
+			default:
+				screen.setMode(new LineEditorMode(track));
+				break;
+		}
 	}
 
 	public static boolean handleAttack() {

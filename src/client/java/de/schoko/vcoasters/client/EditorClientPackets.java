@@ -8,7 +8,9 @@ import org.jetbrains.annotations.NotNull;
 public class EditorClientPackets {
 	public static void registerPackets() {
 		register(OpenEditorToTrackS2C.TYPE, (payload, ctx) -> {
-			VCoastersClient.instance.openTo(payload.track());
+			if (payload.protocolVersion() != OpenEditorToTrackS2C.PROTOCOL_VERSION) return;
+
+			VCoastersClient.instance.openTo(payload.track(), payload.editorType());
 		});
 	}
 

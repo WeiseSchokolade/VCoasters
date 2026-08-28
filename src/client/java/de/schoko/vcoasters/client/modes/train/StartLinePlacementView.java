@@ -5,6 +5,7 @@ import de.schoko.vcoasters.client.core.Colors;
 import de.schoko.vcoasters.client.core.TargetTester;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.editor.EditorStyle;
+import de.schoko.vcoasters.client.modes.train.renderer.TrainLineBoxComponent;
 import de.schoko.vcoasters.core.DirtContainer;
 import de.schoko.vcoasters.core.Line;
 import de.schoko.vcoasters.core.RenderContext;
@@ -41,6 +42,12 @@ public class StartLinePlacementView extends View<TrainEditorMode> {
 		renderContext.drawBoxLine(a, b, EditorStyle.TRACK_LINE_WIDTH, Colors.CYAN);
 		renderContext.drawBoxPoint(a, EditorStyle.END_POINT_RADIUS, Colors.RED);
 		renderContext.drawBoxPoint(b, EditorStyle.END_POINT_RADIUS, Colors.BLUE);
+
+		getMode().getTrack().getLines().forEach(line -> {
+			line.getComponent(TrainLineBoxComponent.class).upload(renderContext, false, false);
+			if (line.getInputLine() == null) renderContext.drawBoxPoint(line.getInputEndPoint().getPos(), 0.05f, Colors.RED);
+			if (line.getOutputLine() == null) renderContext.drawBoxPoint(line.getOutputEndPoint().getPos(), 0.05f, Colors.BLUE);
+		});
 	}
 
 	@Override
@@ -50,6 +57,9 @@ public class StartLinePlacementView extends View<TrainEditorMode> {
 				Line line = new Line(Line.getNewRandomId(), a, b);
 				getMode().addLine(line);
 				line.getComponent(DirtContainer.class).setDirty(true);
+				getMode().setDefaultView();
+			}
+			if (!getMode().getTrack().getLines().isEmpty() && ImGui.button("Cancel")) {
 				getMode().setDefaultView();
 			}
 		}

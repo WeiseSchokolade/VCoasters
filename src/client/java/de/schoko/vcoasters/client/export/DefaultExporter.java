@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.util.*;
 
 public final class DefaultExporter {
-	private static final String RAW_CODE_FOLDER = "/de/schoko/vcoasters/sdasd/";
+	private static final String RAW_CODE_FOLDER = "/de/schoko/vcoasters/raw_code/";
 	private static final String[] RAW_CODE_FILES = {
 		"tick",
 		"tick_train",
@@ -187,7 +187,7 @@ data modify storage train:storage points append from storage train:storage inter
 execute if score #should_calc_total train_math_score matches 1 run function base:namespace/current/physics/get_physics_accel
 scoreboard players operation #total_acceleration train_math_score += #acceleration train_math_score
 
-""".replace("@\\{train_segment_dist}", "" + data.track().getTrainMeta().getCarDistance());
+""".replace("@\\{train_segment_dist}", "" + Math.round(data.track().getTrainMeta().getCarDistance() * 10000));
 
 					StringBuilder updatesBuilder = new StringBuilder();
 

@@ -13,12 +13,12 @@ import imgui.ImGuiIO;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
-public class CreateFirstLineView extends View<TrackEditorMode> {
+public class CreateFirstLineView extends View<LineEditorMode> {
 
 	private Vector3f a;
 	private Vector3f b;
 
-	public CreateFirstLineView(TrackEditorMode mode) {
+	public CreateFirstLineView(LineEditorMode mode) {
 		super(mode);
 	}
 

@@ -25,37 +25,16 @@ public final class TrackManagerCommands {
 
 	public static void register() {
 		CommandRegistrationCallback.EVENT.register((dispatcher, commandBuildContext, selection) -> {
+			var openCommandIdentifierBase = Commands.argument("identifier", IdentifierArgument.id()).suggests(StorageDataAccessor.SUGGEST_STORAGE);
+			openCommandIdentifierBase.executes(ctx -> open(ctx, EditorType.LINES));
+			for (EditorType value : EditorType.values()) {
+				openCommandIdentifierBase.then(Commands.literal(value.name().toLowerCase()).executes(context -> open(context, value)));
+			}
+
 			dispatcher.register(
 				Commands.literal("editor:open")
 					.requires(VCoasters::canUse)
-					.then(
-						Commands.argument("identifier", IdentifierArgument.id()).suggests(StorageDataAccessor.SUGGEST_STORAGE)
-							.executes(ctx -> {
-								Identifier identifier = ctx.getArgument("identifier", Identifier.class);
-								CompoundTag data = ctx.getSource().getServer().getCommandStorage().get(identifier);
-								if (data.isEmpty()) {
-									ctx.getSource().sendFailure(Component.literal("Track " + identifier + " not found!"));
-									return 0;
-								}
-								Optional<Integer> dataVersion = data.getInt("data_version");
-								if (dataVersion.isEmpty()) return fail(ctx, "Track " + identifier + " provides no data version information!");
-								int version = dataVersion.get();
-								if (!EditorCodecs.isDataStorageVersionCompatible(version)) return fail(ctx, "Track " + identifier + " has incompatible data version! (Given: " + version + " / Required: " + TrackCodecs.CURRENT_VERSION + ")");
-
-								try {
-									Track track = EditorCodecs.loadTrack(data, identifier, version);
-									VCoasters.instance.getTrackManager().addTrack(track);
-									ServerPlayer player = ctx.getSource().getPlayer();
-									if (player != null) {
-										ServerPlayNetworking.send(player, new OpenEditorToTrackS2C(track));
-									}
-								} catch (Exception e) {
-									VCoasters.LOGGER.error("Couldn't open track " + identifier, e);
-									return fail(ctx, "An error occurred trying to execute that command");
-								}
-								return 1;
-							})
-					)
+					.then(openCommandIdentifierBase)
 			);
 			dispatcher.register(
 				Commands.literal("editor:create")
@@ -75,7 +54,7 @@ public final class TrackManagerCommands {
 								}
 								Track track = new Track(identifier.toString());
 								VCoasters.instance.getTrackManager().addTrack(track);
-								ServerPlayNetworking.send(player, new OpenEditorToTrackS2C(track));
+								ServerPlayNetworking.send(player, new OpenEditorToTrackS2C(OpenEditorToTrackS2C.PROTOCOL_VERSION, track, EditorType.LINES));
 								return 1;
 							})
 						)
@@ -98,6 +77,32 @@ public final class TrackManagerCommands {
 					)
 			);
 		});
+	}
+
+	public static int open(CommandContext<CommandSourceStack> ctx, EditorType editorType) {
+		Identifier identifier = ctx.getArgument("identifier", Identifier.class);
+		CompoundTag data = ctx.getSource().getServer().getCommandStorage().get(identifier);
+		if (data.isEmpty()) {
+			ctx.getSource().sendFailure(Component.literal("Track " + identifier + " not found!"));
+			return 0;
+		}
+		Optional<Integer> dataVersion = data.getInt("data_version");
+		if (dataVersion.isEmpty()) return fail(ctx, "Track " + identifier + " provides no data version information!");
+		int version = dataVersion.get();
+		if (!EditorCodecs.isDataStorageVersionCompatible(version)) return fail(ctx, "Track " + identifier + " has incompatible data version! (Given: " + version + " / Required: " + TrackCodecs.CURRENT_VERSION + ")");
+
+		try {
+			Track track = EditorCodecs.loadTrack(data, identifier, version);
+			VCoasters.instance.getTrackManager().addTrack(track);
+			ServerPlayer player = ctx.getSource().getPlayer();
+			if (player != null) {
+				ServerPlayNetworking.send(player, new OpenEditorToTrackS2C(OpenEditorToTrackS2C.PROTOCOL_VERSION, track, editorType));
+			}
+		} catch (Exception e) {
+			VCoasters.LOGGER.error("Couldn't open track " + identifier, e);
+			return fail(ctx, "An error occurred trying to execute that command");
+		}
+		return 1;
 	}
 
 	public static int fail(CommandContext<CommandSourceStack> ctx, String message) {

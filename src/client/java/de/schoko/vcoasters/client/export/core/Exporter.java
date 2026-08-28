@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -59,5 +61,24 @@ public class Exporter {
 			out.write(fileDescription.getValue().getBytes(StandardCharsets.UTF_8));
 		}
 		out.close();
+	}
+
+	public void exportToDirectory(Track track, List<String> trainStartLineIds, String majorNamespace, String minorNamespace, File destination) throws IOException {
+		EndStageData.FileListData data = runPipeline(track, trainStartLineIds, majorNamespace, minorNamespace);
+		exportDirectory(data, destination);
+	}
+
+	private void exportDirectory(EndStageData.FileListData data, File destination) throws IOException {
+		if (destination.isFile()) throw new IllegalArgumentException("Destination is not a valid file");
+		Path basePath = destination.toPath();
+		destination.delete();
+		for (var fileDescription : data.fileDataMap().entrySet()) {
+			File file = new File(destination, fileDescription.getKey());
+			file.getParentFile().mkdirs();
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			Files.writeString(basePath.resolve(fileDescription.getKey()), fileDescription.getValue(), StandardCharsets.UTF_8);
+		}
 	}
 }

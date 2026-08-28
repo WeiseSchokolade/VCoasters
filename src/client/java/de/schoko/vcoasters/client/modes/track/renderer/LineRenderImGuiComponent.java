@@ -20,13 +20,15 @@ public record LineRenderImGuiComponent(Line line, Track track) implements Editor
 				Minecraft.getInstance().keyboardHandler.setClipboard(line.getId());
 			}
 
-			ImGui.text("OutputLine: ");
+			ImGui.text("InputLine: ");
 			ImGui.sameLine();
-			ImString string = new ImString();
-			string.set(line.getOutputLineId() == null ? "" : line.getOutputLineId());
-			if (ImGui.inputText("##OutputLineInput", string)) {
-				line.setOutputLine(string.get().isBlank() ? null : track.getLine(string.get()));
+			if (line.getInputLine() == null) {
+				ImGui.text("null");
+			} else {
+				ImGui.text(line.getInputLineId());
 			}
+
+			renderOutputLine(io, line, track);
 
 			ImGui.text("Length (in cb): " + Math.round(line.getLength() * 100));
 			if (line.getLength() > 20) {
@@ -35,6 +37,7 @@ public record LineRenderImGuiComponent(Line line, Track track) implements Editor
 
 			ImGui.text("Label: ");
 			ImGui.sameLine();
+			ImString string = new ImString();
 			string.set(line.getLabel() != null ? line.getLabel() : "");
 			if (ImGui.inputText("##LabelInput", string)) {
 				line.setLabel(string.get().isBlank() ? null : string.get());
@@ -93,5 +96,15 @@ public record LineRenderImGuiComponent(Line line, Track track) implements Editor
 			}
 		}
 		ImGui.end();
+	}
+
+	public static void renderOutputLine(ImGuiIO io, Line line, Track track) {
+		ImGui.text("OutputLine: ");
+		ImGui.sameLine();
+		ImString string = new ImString();
+		string.set(line.getOutputLineId() == null ? "" : line.getOutputLineId());
+		if (ImGui.inputText("##OutputLineInput", string)) {
+			line.setOutputLine(string.get().isBlank() ? null : track.getLine(string.get()));
+		}
 	}
 }

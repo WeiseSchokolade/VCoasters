@@ -25,13 +25,16 @@ public class TrainLineBoxComponent implements EditorComponent {
 	}
 
 	public void upload(RenderContext context, boolean isTarget, boolean isSelected) {
-		updateQuads();
-		Vector4f baseColor = switch (line.getPhysicsType()) {
+		this.upload(context, isTarget, isSelected, switch (line.getPhysicsType()) {
 			case LIFT -> new Vector4f(0.2f, 0.2f, 0.2f, 1.0f);
 			case BRAKE -> new Vector4f(0.8f, 0.8f, 0.2f, 1.0f);
 			case STATION -> new Vector4f(0.8f, 0.2f, 0.8f, 1.0f);
 			case null, default -> EditorStyle.LINE_COLOR;
-		};
+		});
+	}
+
+	public void upload(RenderContext context, boolean isTarget, boolean isSelected, Vector4f baseColor) {
+		updateQuads();
 
 		Vector4f color = isTarget ? Colors.WHITE : isSelected ? new Vector4f(1f).lerp(baseColor, 0.5f) : baseColor;
 		context.drawQuads(renderedQuads, color);
@@ -60,10 +63,10 @@ public class TrainLineBoxComponent implements EditorComponent {
 		EndPoint input = line.getInputEndPoint();
 		renderedQuads.addAll(
 			QuadObtainer.boxLine(
-				new Vector3f(input.pos()).sub(supportDirection).add(deltaVector.div(2, new Vector3f())).sub(0, editorMode.getBeamHeight() + editorMode.getRailHeight(), 0),
-				new Vector3f(input.pos()).add(supportDirection).add(deltaVector.div(2, new Vector3f())).sub(0, editorMode.getBeamHeight() + editorMode.getRailHeight(), 0), editorMode.getBeamWidth(), editorMode.getBeamHeight())
+				new Vector3f(input.pos()).sub(supportDirection).add(deltaVector.div(2, new Vector3f())).sub(0, editorMode.getRailHeight() / 2 + editorMode.getBeamHeight() / 2, 0),
+				new Vector3f(input.pos()).add(supportDirection).add(deltaVector.div(2, new Vector3f())).sub(0, editorMode.getRailHeight() / 2 + editorMode.getBeamHeight() / 2, 0), editorMode.getBeamWidth(), editorMode.getBeamHeight())
 		);
-		supportDirection.normalize(editorMode.getRailGauge() / 2);
+		supportDirection.normalize(editorMode.getRailGauge() / 2 + editorMode.getRailThickness() / 2);
 		renderedQuads.addAll(
 			QuadObtainer.boxLine(
 				new Vector3f(input.pos()).add(supportDirection),

@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class TrackEditorMode extends EditorMode<TrackEditorMode> {
+public class LineEditorMode extends EditorMode<LineEditorMode> {
 	private final Track editedTrack;
 	private TrackRideSimulator simulator;
 
@@ -54,7 +54,7 @@ public class TrackEditorMode extends EditorMode<TrackEditorMode> {
 	private boolean requestSaving;
 	private float[] trackTransformation;
 
-	public TrackEditorMode(Track editedTrack) {
+	public LineEditorMode(Track editedTrack) {
 		this.editedTrack = editedTrack;
 		editedTrack.getLines().forEach(this::addComponentsToLine);
 

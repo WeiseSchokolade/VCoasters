@@ -1,6 +1,7 @@
 package de.schoko.vcoasters.client;
 
 import de.schoko.vcoasters.client.core.View;
+import de.schoko.vcoasters.client.modes.EditGroup;
 import de.schoko.vcoasters.core.EditorObject;
 import de.schoko.vcoasters.core.RenderContext;
 import imgui.ImGuiIO;
@@ -40,6 +41,7 @@ public abstract class EditorMode<T extends EditorMode<T>> {
 	}
 
 	public boolean isSelected(EditorObject object) {
+		if (selectedObject instanceof EditGroup editGroup) return editGroup.isMember(object);
 		return selectedObject == object;
 	}
 

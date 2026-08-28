@@ -1,8 +1,10 @@
 package de.schoko.vcoasters.core;
 
 import de.schoko.vcoasters.TrackLineManager;
-import org.joml.Vector3f;
+import org.joml.*;
+import org.jspecify.annotations.Nullable;
 
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,6 +15,7 @@ public class Line implements EditorObject {
 	private final String id;
 	private final EndPoint a;
 	private final EndPoint b;
+	private String editGroup;
 	private String label;
 	private Line outputLine;
 	private String outputLineId;
@@ -56,6 +59,10 @@ public class Line implements EditorObject {
 		different |= a.merge(line.a);
 		different |= b.merge(line.b);
 
+		if (!Objects.equals(this.editGroup, line.getEditGroup())) {
+			this.editGroup = line.getEditGroup();
+			different = true;
+		}
 		if (!Objects.equals(this.label, line.label)) {
 			this.label = line.getLabel();
 			different = true;
@@ -188,6 +195,14 @@ public class Line implements EditorObject {
 		return id;
 	}
 
+	public String getEditGroup() {
+		return editGroup;
+	}
+
+	public void setEditGroup(String editGroup) {
+		this.editGroup = editGroup;
+	}
+
 	public float getLength() {
 		return b.pos().distance(a.pos());
 	}
@@ -304,5 +319,14 @@ public class Line implements EditorObject {
 
 	public void addComponent(EditorComponent component) {
 		this.editorComponents.add(component);
+	}
+
+	public Quaterniondc getQuaternion() {
+		Quaterniond quaternion = new Quaterniond();
+		Vector3d deltaVector = new Vector3d(getDeltaVector());;
+		double yaw = Math.atan2(deltaVector.x, deltaVector.z);// * 0.5;
+		double pitch = -Math.asin(deltaVector.y);
+		quaternion.rotationYXZ(yaw, pitch,0);
+		return quaternion;
 	}
 }

@@ -4,6 +4,9 @@ import de.schoko.vcoasters.core.EndPoint;
 import de.schoko.vcoasters.core.Line;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EditorCommands {
 	public static Vector3f getAverageDirection(EndPoint endPoint) {
 		Line line = endPoint.getLine();
@@ -91,6 +94,62 @@ public class EditorCommands {
 			double pitch = -Math.asin(direction.y);
 			inputEndPoint.setYaw((float) yaw);
 			inputEndPoint.setPitch((float) pitch);
+		}
+	}
+
+	public static void applyWeightedRotationRecursively(List<Line> lines) {
+		List<Line> remainingLines = new ArrayList<>(lines);
+		int i = 0;
+		while (!remainingLines.isEmpty()) {
+			Line originLine = remainingLines.removeFirst();
+			EndPoint origin = originLine.getOutputEndPoint();
+
+			Line currentLine = originLine;
+
+			Vector3f previousDirection = getWeightedAverageDirection(origin);
+			double previousYaw = Math.atan2(previousDirection.z, previousDirection.x) - Math.PI * 0.5;
+			double previousPitch = -Math.asin(previousDirection.y);
+
+			double accumulatedDYaw = previousYaw;
+			double accumulatedDPitch = previousPitch;
+
+			origin.setYaw((float) accumulatedDYaw);
+			origin.setPitch((float) accumulatedDPitch);
+			origin.updateCorrespondingEndpoint();
+
+			while ((currentLine = currentLine.getOutputLine()) != null && currentLine != originLine && (i++) < 10000 && remainingLines.remove(currentLine)) {
+				EndPoint outputEndPoint = currentLine.getOutputEndPoint();
+				Vector3f direction = getWeightedAverageDirection(outputEndPoint);
+				double yaw = Math.atan2(direction.z, direction.x) - Math.PI * 0.5;
+				double pitch = -Math.asin(direction.y);
+				double dYaw = yaw - previousYaw;
+				if (dYaw < -1 * Math.PI) {
+					dYaw += 2 * Math.PI;
+				}
+				double dPitch = pitch - previousPitch;
+				if (dYaw > 1 * Math.PI) {
+					dYaw -= 2 * Math.PI;
+				}
+				accumulatedDYaw += dYaw;
+				accumulatedDPitch += dPitch;
+
+				previousYaw = yaw;
+				previousPitch = pitch;
+
+				outputEndPoint.setYaw((float) accumulatedDYaw);
+				outputEndPoint.setPitch((float) accumulatedDPitch);
+				outputEndPoint.updateCorrespondingEndpoint();
+			}
+			if (i >= 10000) throw new IllegalArgumentException("Encountered loop (" + i + " iterations!) and applied infinite loop protection.");
+
+			if (currentLine == originLine) {
+				EndPoint inputEndPoint = originLine.getInputEndPoint();
+				Vector3f direction = getWeightedAverageDirection(origin);
+				double yaw = Math.atan2(direction.z, direction.x) - Math.PI * 0.5;
+				double pitch = -Math.asin(direction.y);
+				inputEndPoint.setYaw((float) yaw);
+				inputEndPoint.setPitch((float) pitch);
+			}
 		}
 	}
 }

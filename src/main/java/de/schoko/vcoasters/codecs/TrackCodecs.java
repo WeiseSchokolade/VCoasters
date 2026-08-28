@@ -43,10 +43,14 @@ public enum TrackCodecs {
 		var v11 = v10
 			.replace8(Field.of(TrainMetaCodecs.V11, "train_meta", Track::getTrainMeta));
 		if (dataVersion == 11) return v11.append(getVersion(11)).build((id, exportVersion, trackName, comment, lines , gravity, ticks, trainMeta, friction, _) -> new Track(id, exportVersion, trackName, comment, gravity, friction, ticks, lines.values(), trainMeta));
+		var v12 = v11
+			.replace5(Field.of(Codec.unboundedMap(Codec.STRING, LineCodecs.V12), "lines", track ->
+				track.getLines().stream().collect(Collectors.toMap(line -> line.getLabel() != null ? line.getLabel() : line.getId(), line -> line))));
+		if (dataVersion == 12) return v12.append(getVersion(12)).build((id, exportVersion, trackName, comment, lines , gravity, ticks, trainMeta, friction, _) -> new Track(id, exportVersion, trackName, comment, gravity, friction, ticks, lines.values(), trainMeta));
 
 		return null;
 	}
 
-	public static final int CURRENT_VERSION = 11;
+	public static final int CURRENT_VERSION = 12;
 	public static final Codec<Track> CURRENT_CODEC = getNewCodec(CURRENT_VERSION);
 }

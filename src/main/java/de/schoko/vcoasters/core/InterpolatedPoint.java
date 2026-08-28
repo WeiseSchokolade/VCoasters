@@ -38,6 +38,13 @@ public record InterpolatedPoint(Vector3f point, float yaw, float pitch, float ro
 		);
 	}
 
+	public static InterpolatedPoint getAverage(ValuePoint valuePoint, ValuePoint a, ValuePoint b) {
+		Vector3f delta = new Vector3f(b.posToVector3f()).sub(a.posToVector3f()).normalize();
+		double yaw = Math.atan2(delta.z, delta.x) - Math.PI * 0.5;
+		double pitch = -Math.asin(delta.y);
+		return new InterpolatedPoint(valuePoint.x(), valuePoint.y(), valuePoint.z(), (float) yaw, (float) pitch, valuePoint.roll());
+	}
+
 	private static float lerp(float t, float a, float b) {
 		return (1 - t) * a + b * t;
 	}

@@ -46,3 +46,4 @@ datapack/run_beet.txt
 datapack/__pycache__/
 *.pyc
 /brand
+/.fabric

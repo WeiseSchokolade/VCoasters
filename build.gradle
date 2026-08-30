@@ -46,6 +46,8 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	implementation "foundry.imguimc:imguimc-fabric-26.2:2.0.2"
+
+	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }
 
 processResources {
@@ -76,6 +78,10 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${inputs.properties.archivesName}"}
 	}
+}
+
+test {
+	useJUnitPlatform()
 }
 
 // configure the maven publication

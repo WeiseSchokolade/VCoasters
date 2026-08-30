@@ -1,1 +1,3 @@
 kill @e[tag=train_cart_tag]
+
+@trains function base:namespace/@{tid}/entities/spawn

@@ -1,0 +1,1 @@
+@entities train.tbase execute as @{uuid} run return run data modify entity @s {} merge from storage train:storage points[@{index}]

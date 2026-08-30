@@ -1,0 +1,1 @@
+@entities train.tbase summon item_display ~ ~ ~ {teleport_duration:2,item:{id:"minecraft:paper",count:1,components:{"minecraft:item_model":"@{standardItemModelName}"}},UUID:@{snbt_uuid},Tags:["train_cart_tag","train_cart_tag.tbase","train_cart_tag.cart.@{count}"]}

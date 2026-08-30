@@ -4,9 +4,7 @@ import com.mojang.serialization.DataResult;
 import de.schoko.vcoasters.client.export.core.Exporter;
 import de.schoko.vcoasters.client.export.core.PipelineStageBuilder;
 import de.schoko.vcoasters.client.export.core.Transformer;
-import de.schoko.vcoasters.client.export.stages.EndStageData;
-import de.schoko.vcoasters.client.export.stages.InitStageData;
-import de.schoko.vcoasters.client.export.stages.StringContainer;
+import de.schoko.vcoasters.client.export.stages.*;
 import de.schoko.vcoasters.codecs.TrackCodecs;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -21,7 +19,6 @@ public final class DefaultExporter {
 	private static final String[] RAW_CODE_FILES = {
 		"tick",
 		"tick_train",
-		"tick_entity",
 		"hard_reset",
 		"reset_trains",
 		"load_track_data",
@@ -41,6 +38,9 @@ public final class DefaultExporter {
 		"tbase/leave_line_at_input",
 		"tbase/jump_to_input_line",
 		"tbase/jump_to_output_line",
+		"tbase/entities/spawn",
+		"tbase/entities/tick",
+		"tbase/entities/remove",
 		"tbase/physics/get_physics_accel",
 		"tbase/physics/station_accel",
 		"tbase/physics/station_full_stop"
@@ -61,6 +61,15 @@ public final class DefaultExporter {
 						throw new RuntimeException(e);
 					}
 					return new InitStageData.TrackAndLoadedFileData(data.track(), data.trainStartLineIds().size(), data.trainStartLineIds(), loadedFileData, data.majorNamespace(), data.minorNamespace());
+				})
+				.advanceStage("Specify entities", data -> {
+					List<EntityGroupSpecification> specifications = new ArrayList<>();
+					int segmentAmount = data.track().getTrainMeta().getSegmentAmount();
+					for (int trainId = 1; trainId <= data.trainAmount(); trainId++) {
+						specifications.add(new EntityGroupSpecification("train.t" + trainId, segmentAmount));
+					}
+
+					return new InitStageData.TrackEntitySpecificationsAndLoadedFileData(data.track(), specifications, data.trainAmount(), data.trainStartLineIds(), data.fileDataList(), data.majorNamespace(), data.minorNamespace());
 				})
 				.addTransformer("Add metadata to init", (data, logCollector) -> {
 					var file = data.getFile("hard_reset");
@@ -87,6 +96,17 @@ public final class DefaultExporter {
 
 					return Transformer.Action.CONTINUE;
 				})
+				.addTransformer("Specify item model", (data, logCollector) -> {
+					var file = data.getFile("tbase/entities/spawn");
+					if (file == null) {
+						logCollector.addErrorMessage("Spawn entities file not found!");
+						return Transformer.Action.INTERRUPT;
+					}
+					String itemModelName = data.track().getTrainMeta().getModelId().toString();
+					file.content().replace("@\\{standardItemModelName}", itemModelName);
+
+					return Transformer.Action.CONTINUE;
+				})
 				.addTransformer("Expand trains", (data, logCollector) -> { // ( ! ) Destroys full path information for tbase files
 					int trainAmount = data.trainAmount();
 
@@ -108,7 +128,7 @@ public final class DefaultExporter {
 					newFiles.forEach(data.fileDataList()::add);
 
 					return Transformer.Action.CONTINUE;
-				})
+				})/*
 				.addTransformer("Expand train tick function", (data, logCollector) -> {
 					var tickFile = data.getFile("tick");
 					if (tickFile == null) {
@@ -123,7 +143,7 @@ public final class DefaultExporter {
 					}
 
 					return Transformer.Action.CONTINUE;
-				})
+				})*/
 				.addTransformer("Expand reset_trains function", (data, logCollector) -> {
 					var resetFile = data.getFile("reset_trains");
 					if (resetFile == null) {
@@ -139,14 +159,59 @@ public final class DefaultExporter {
 					}
 					return Transformer.Action.CONTINUE;
 				})
-				.addTransformer("Expand spawn entities function", (data, logCollector) -> {
+				.addTransformer("Train expander", (data, logCollector) -> {
+					for (InitStageData.TrackAndLoadedFileData.LoadedFileData fileData : data.fileDataList()) {
+						String content = fileData.content().get();
+						int indexOfSequence;
+						while ((indexOfSequence = content.indexOf("@trains ")) != -1) {
+							int endIndex = content.indexOf('\n', indexOfSequence);
+							String line = endIndex == -1 ? content.substring(indexOfSequence + "@trains ".length()) : content.substring(indexOfSequence, endIndex);
+							String newLines = "";
+
+							int trainAmount = data.trainAmount();
+							for (int i = 1; i <= trainAmount; i++) {
+								newLines += line.replace("@{id}", "" + i).replace("@{tid}", "t" + i) + "\n";
+							}
+							content = content.substring(0, indexOfSequence) + newLines.trim() + (endIndex != -1 ? content.substring(endIndex) : "");
+						}
+						fileData.content().set(content);
+					}
+					return Transformer.Action.CONTINUE;
+				})
+				.addTransformer("Entity expander", (data, logCollector) -> {
+					for (InitStageData.TrackAndLoadedFileData.LoadedFileData fileData : data.fileDataList()) {
+						String content = fileData.content().get();
+						int indexOfSequence;
+						while ((indexOfSequence = content.indexOf("@entities ")) != -1) {
+							int endIndex = content.indexOf('\n', indexOfSequence);
+							String line = endIndex == -1 ? content.substring(indexOfSequence + "@entities ".length()) : content.substring(indexOfSequence, endIndex);
+							String[] s = line.split(" ", 2);
+							if (s.length != 2) {
+								logCollector.addErrorMessage("Invalid entities pattern");
+								return Transformer.Action.INTERRUPT;
+							}
+							String newLines = "";
+							String group = s[0];
+							String command = s[1];
+							for (EntityGroupSpecification specification : data.specification()) {
+								if (specification.group().equals(group)) {
+									for (EntitySpecification entity : specification.entities()) {
+										newLines += entity.inject(command) + "\n";
+									}
+								}
+							}
+							content = content.substring(0, indexOfSequence) + newLines.trim() + (endIndex != -1 ? content.substring(endIndex) : "");
+						}
+						fileData.content().set(content);
+					}
+					return Transformer.Action.CONTINUE;
+				})
+				/*.addTransformer("Expand spawn entities function", (data, logCollector) -> {
 					var spawnFile = data.getFile("spawn_entities");
 					if (spawnFile == null) {
 						logCollector.addErrorMessage("Spawn entities file not found!");
 						return Transformer.Action.INTERRUPT;
 					}
-
-					String itemModelName = data.track().getTrainMeta().getModelId().toString();
 
 					int trainAmount = data.trainAmount();
 					int segmentAmount = data.track().getTrainMeta().getSegmentAmount();
@@ -171,7 +236,7 @@ public final class DefaultExporter {
 					}
 
 					return Transformer.Action.CONTINUE;
-				})
+				})*/
 				.addTransformer("Expand tick train function", (data, logCollector) -> {
 					var tickFile = data.getFile("tick_train");
 					if (tickFile == null) {
@@ -227,6 +292,10 @@ scoreboard players operation #total_acceleration train_math_score += #accelerati
 						contentMap.put(prefix + file.localPath() + ".mcfunction", file.content().get());
 					});
 					return new EndStageData.FileListData(contentMap);
+				})
+				.addTransformer("File trimming", (data, logCollector) -> {
+					data.fileDataMap().replaceAll((_, value) -> value.trim());
+					return Transformer.Action.CONTINUE;
 				})
 				.addTransformer("Pack.mcmeta generation", (data, logCollector) -> {
 					data.fileDataMap().put("pack.mcmeta", """

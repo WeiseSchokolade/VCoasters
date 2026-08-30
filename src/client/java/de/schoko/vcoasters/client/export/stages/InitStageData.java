@@ -22,6 +22,15 @@ public interface InitStageData {
 		}
 	}
 
+	record TrackEntitySpecificationsAndLoadedFileData(Track track, List<EntityGroupSpecification> specification, int trainAmount, List<String> trainStartLineIds, List<TrackAndLoadedFileData.LoadedFileData> fileDataList, String majorNamespace, String minorNamespace) {
+		public TrackAndLoadedFileData.LoadedFileData getFile(String localPath) {
+			for (TrackAndLoadedFileData.LoadedFileData data : fileDataList) {
+				if (data.localPath.equals(localPath)) return data;
+			}
+			return null;
+		}
+	}
+
 	record TrackParsedDataAndNamespaces(Track track, List<TrackAndLoadedFileData.LoadedFileData> fileDataList, String majorNamespace, String minorNamespace, String trackStorageName, String trainStorageName, String trainDataScore, String trainMathScore, String entityBaseTag) {
 
 	}

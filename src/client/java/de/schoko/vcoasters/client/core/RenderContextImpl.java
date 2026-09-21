@@ -1,14 +1,15 @@
 package de.schoko.vcoasters.client.core;
 
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import de.schoko.vcoasters.VCoasters;
 import de.schoko.vcoasters.core.QuadObtainer;
 import de.schoko.vcoasters.core.RenderContext;
@@ -114,7 +115,7 @@ public class RenderContextImpl implements RenderContext {
 		try (RenderPass renderPass = RenderSystem.getDevice()
 			.createCommandEncoder()
 			.createRenderPass(() -> VCoasters.MOD_ID + " render pipeline pass", colorTexture, Optional.empty(), mainTarget.getDepthTextureView(), OptionalDouble.empty())) {
-			renderPass.setPipeline(renderPipeline);
+			renderPass.setPipeline(RenderSystem.getCompiledPipeline(renderPipeline));
 
 			RenderSystem.bindDefaultUniforms(renderPass);
 			renderPass.setUniform("DynamicTransforms", dynamicTransforms);

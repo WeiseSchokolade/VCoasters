@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.item.MissingItemModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -299,9 +300,9 @@ public class TrackRideSimulator {
 		stack.last().rotateAround(Axis.YP.rotation(-point.yaw() + trainMeta.getYawOffset()), trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z);
 		stack.last().rotateAround(Axis.XP.rotation(point.pitch() + trainMeta.getPitchOffset()), trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z);
 		stack.last().rotateAround(Axis.ZP.rotation(point.roll() + trainMeta.getRollOffset()), trainMeta.getPivot().x, trainMeta.getPivot().y, trainMeta.getPivot().z);
-		List<BakedQuad> quads = null;
-		if (itemModel instanceof CuboidItemModelWrapper wrapper) quads = wrapper.quads.getAll();
-		else if (itemModel instanceof MissingItemModel missing) quads = missing.quads;
+		ItemQuads quads = null;
+		if (itemModel instanceof CuboidItemModelWrapper wrapper) quads = wrapper.itemQuads;
+		else if (itemModel instanceof MissingItemModel missing) quads = missing.itemQuads;
 		if (quads != null) {
 			context.levelRenderer().submitNodeStorage.submitItem(stack, ItemDisplayContext.NONE, 0xFFFFFF, OverlayTexture.NO_OVERLAY, 0, new int[0], quads, ItemStackRenderState.FoilType.NONE);
 		}

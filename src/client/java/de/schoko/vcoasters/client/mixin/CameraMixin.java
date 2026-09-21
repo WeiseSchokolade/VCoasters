@@ -2,6 +2,7 @@ package de.schoko.vcoasters.client.mixin;
 
 import de.schoko.vcoasters.client.VCoastersClient;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.Projection;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import org.joml.Matrix4f;
@@ -19,7 +20,7 @@ public class CameraMixin {
 	private Projection projection;
 
 	@Inject(at = @At("RETURN"), method = "extractRenderState")
-	public void vcoasters$extractRenderState(CameraRenderState cameraState, float cameraEntityPartialTicks, CallbackInfo ci) {
+	public void vcoasters$extractRenderState(CameraRenderState cameraState, DeltaTracker deltaTracker, CallbackInfo ci) {
 		VCoastersClient.setLastProjectionMatrix(this.projection.getMatrix(new Matrix4f()));
 		VCoastersClient.setLastCamera((Camera) ((Object) this));
 	}

@@ -1,11 +1,11 @@
 package de.schoko.vcoasters.client.mixin;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import de.schoko.vcoasters.client.VCoastersClient;
 import de.schoko.vcoasters.client.mixininterfaces.ExtendedMouseHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.input.MouseButtonInfo;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,9 +34,9 @@ public abstract class MouseHandlerMixin implements ExtendedMouseHandler {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;simulateRightClick(Lnet/minecraft/client/input/MouseButtonInfo;Z)Lnet/minecraft/client/input/MouseButtonInfo;"), method = "onButton")
+	@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/FramerateLimitTracker;onInputReceived()V"), method = "onButton")
 	public void mouseReleased(long handle, MouseButtonInfo rawButtonInfo, int i, CallbackInfo ci) {
-		if (i == 0 && rawButtonInfo.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+		if (i == 0 && rawButtonInfo.button() == InputConstants.MOUSE_BUTTON_LEFT) {
 			VCoastersClient.setDraggingCamera(false);
 			VCoastersClient.leftMouseReleased();
 		}
@@ -48,7 +48,10 @@ public abstract class MouseHandlerMixin implements ExtendedMouseHandler {
 		this.xpos = x;
 		this.ypos = y;
 
-		GLFW.glfwSetInputMode(this.minecraft.getWindow().handle(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
-		GLFW.glfwSetCursorPos(this.minecraft.getWindow().handle(), x, y);
+		InputConstants.releaseMouse(this.minecraft.getWindow(), x, y);
+		InputConstants.grabMouse(this.minecraft.getWindow(), x, y);
+
+//		GLFW.glfwSetInputMode(this.minecraft.getWindow().handle(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+//		GLFW.glfwSetCursorPos(this.minecraft.getWindow().handle(), x, y);
 	}
 }

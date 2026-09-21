@@ -3,8 +3,8 @@ accessWidener v1 official
 accessible field net/minecraft/client/gui/screens/Screen children Ljava/util/List;
 accessible field net/minecraft/client/gui/screens/Screen narratables Ljava/util/List;
 accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
-accessible field net/minecraft/client/renderer/item/CuboidItemModelWrapper quads Lnet/minecraft/client/resources/model/geometry/QuadCollection;
-accessible field net/minecraft/client/renderer/item/MissingItemModel quads Ljava/util/List;
+accessible field net/minecraft/client/renderer/item/CuboidItemModelWrapper itemQuads Lnet/minecraft/client/resources/model/geometry/ItemQuads;
+accessible field net/minecraft/client/renderer/item/MissingItemModel itemQuads Lnet/minecraft/client/resources/model/geometry/ItemQuads;
 accessible field net/minecraft/server/commands/data/StorageDataAccessor SUGGEST_STORAGE Lcom/mojang/brigadier/suggestion/SuggestionProvider;
 accessible field net/minecraft/client/gui/screens/ChatScreen commandSuggestions Lnet/minecraft/client/gui/components/CommandSuggestions;
 

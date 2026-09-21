@@ -3,6 +3,7 @@ package de.schoko.vcoasters.client.modes.track;
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.TrainMeta;
 import de.schoko.vcoasters.client.EditorMode;
+import de.schoko.vcoasters.client.core.FileDialogUtils;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.export.DefaultExporter;
 import de.schoko.vcoasters.client.modes.track.renderer.EndpointBoxComponent;
@@ -28,7 +29,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.File;
 import java.io.IOException;
@@ -189,7 +189,9 @@ public class LineEditorMode extends EditorMode<LineEditorMode> {
 				}
 				ImGui.sameLine();
 				if (ImGui.button("Choose")) {
-					requestedFilePath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedFilePath, PointerBuffer.allocateDirect(0), "This is a description");
+					FileDialogUtils.saveFolderDialog(requestedFilePath).thenAccept(s -> {
+						requestedFilePath = s;
+					});
 				}
 
 				if (majorNamespace == null) majorNamespace = editedTrack.getId().split(":")[0];
@@ -253,9 +255,9 @@ public class LineEditorMode extends EditorMode<LineEditorMode> {
 				if (ImGui.button("Export")) {
 					try {
 						DefaultExporter.getExporter().exportToZip(editedTrack, stationNames, majorNamespace, minorNamespace, new File(requestedFilePath));
-						TinyFileDialogs.tinyfd_messageBox("Export", editedTrack.getTrackName() + " was exported!", "ok", "info", 0);
+						FileDialogUtils.showMessageBox("Export", editedTrack.getTrackName() + " was exported!");
 					} catch (IOException e) {
-						TinyFileDialogs.tinyfd_messageBox("Export", "An error occurred while trying to export your track!\n" + e.getMessage(), "ok", "error", 0);
+						FileDialogUtils.showErrorMessageBox("Export", "An error occurred while trying to export your track!\n" + e.getMessage());
 						e.printStackTrace();
 					}
 				}

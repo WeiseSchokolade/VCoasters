@@ -1,10 +1,12 @@
 package de.schoko.vcoasters.client.modes.train;
 
 import com.google.gson.Gson;
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.math.Transformation;
 import de.schoko.vcoasters.Track;
 import de.schoko.vcoasters.client.VCoastersClient;
 import de.schoko.vcoasters.client.core.Colors;
+import de.schoko.vcoasters.client.core.FileDialogUtils;
 import de.schoko.vcoasters.client.core.TargetTester;
 import de.schoko.vcoasters.client.core.View;
 import de.schoko.vcoasters.client.editor.EditorCommands;
@@ -23,8 +25,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import org.joml.*;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.sdl.SDL;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.File;
 import java.io.IOException;
@@ -174,10 +176,14 @@ public class BasicEditorView extends View<TrainEditorMode> {
 			ImGui.sameLine();
 			if (ImGui.button("Choose##ModelFilePathChooser")) {
 				try (MemoryStack stack = MemoryStack.stackPush()) {
-					PointerBuffer filterPatterns = stack.mallocPointer(1);
-					filterPatterns.put(stack.UTF8("*.json"));
-					filterPatterns.flip();
-					requestedModelFilePath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedModelFilePath != null ? requestedModelFilePath : "", filterPatterns, null);
+					//PointerBuffer filterPatterns = stack.mallocPointer(1);
+					//filterPatterns.put(stack.UTF8("*.json"));
+					//filterPatterns.flip();
+					FileDialogUtils.saveFileDialog(requestedModelFilePath != null ? requestedModelFilePath : "").thenAccept(s -> {
+						if (s != null) requestedModelFilePath = s;
+					});
+					// TODO: Replace with SDL
+					//requestedModelFilePath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedModelFilePath != null ? requestedModelFilePath : "", filterPatterns, null);
 				}
 			}
 
@@ -187,9 +193,9 @@ public class BasicEditorView extends View<TrainEditorMode> {
 				String json = gson.toJson(generateModel());
 				try {
 					Files.writeString(Path.of(requestedModelFilePath), json, StandardCharsets.UTF_8);
-					TinyFileDialogs.tinyfd_messageBox("Export", "Model of " + getMode().getTrack().getTrackName() + " was exported!", "ok", "info", 0);
+					FileDialogUtils.showMessageBox("Export", "Model of " + getMode().getTrack().getTrackName() + " was exported!");
 				} catch (IOException e) {
-					TinyFileDialogs.tinyfd_messageBox("Export", "An error occurred while trying to export model!\n" + e.getMessage(), "ok", "error", 0);
+					FileDialogUtils.showErrorMessageBox("Export", "An error occurred while trying to export model!\n" + e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -205,10 +211,13 @@ public class BasicEditorView extends View<TrainEditorMode> {
 			ImGui.sameLine();
 			if (ImGui.button("Choose##DefinitionFileChooser")) {
 				try (MemoryStack stack = MemoryStack.stackPush()) {
-					PointerBuffer filterPatterns = stack.mallocPointer(1);
-					filterPatterns.put(stack.UTF8("*.json"));
-					filterPatterns.flip();
-					requestedDefinitionPath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedDefinitionPath != null ? requestedDefinitionPath : "", filterPatterns, null);
+					// TODO: PointerBuffer filterPatterns = stack.mallocPointer(1);
+					//filterPatterns.put(stack.UTF8("*.json"));
+					//filterPatterns.flip();
+					FileDialogUtils.saveFileDialog(requestedModelFilePath != null ? requestedModelFilePath : "").thenAccept(s -> {
+						if (s != null) requestedModelFilePath = s;
+					});
+					//requestedDefinitionPath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedDefinitionPath != null ? requestedDefinitionPath : "", filterPatterns, null);
 				}
 			}
 			ImGui.text("Model:");
@@ -230,9 +239,9 @@ public class BasicEditorView extends View<TrainEditorMode> {
 				String json = gson.toJson(generateItemModelDefinition(definitionModel));
 				try {
 					Files.writeString(Path.of(requestedDefinitionPath), json, StandardCharsets.UTF_8);
-					TinyFileDialogs.tinyfd_messageBox("Export", "Model of " + getMode().getTrack().getTrackName() + " was exported!", "ok", "info", 0);
+					FileDialogUtils.showMessageBox("Export", "Model of " + getMode().getTrack().getTrackName() + " was exported!");
 				} catch (IOException e) {
-					TinyFileDialogs.tinyfd_messageBox("Export", "An error occurred while trying to export model!\n" + e.getMessage(), "ok", "error", 0);
+					FileDialogUtils.showMessageBox("Export", "An error occurred while trying to export model!\n" + e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -255,8 +264,15 @@ public class BasicEditorView extends View<TrainEditorMode> {
 				}
 				ImGui.sameLine();
 				if (ImGui.button("Choose")) {
-					if (exportToFolderIfTrue) requestedFilePath = TinyFileDialogs.tinyfd_selectFolderDialog("Choose folder", requestedFilePath);
-					else requestedFilePath = TinyFileDialogs.tinyfd_saveFileDialog("Choose file location", requestedFilePath, PointerBuffer.allocateDirect(0), "This is a description");
+					if (exportToFolderIfTrue) {
+						FileDialogUtils.saveFolderDialog(requestedModelFilePath).thenAccept(s -> {
+							if (s != null) requestedModelFilePath = s;
+						});
+					} else {
+						FileDialogUtils.saveFileDialog(requestedModelFilePath).thenAccept(s -> {
+							if (s != null) requestedModelFilePath = s;
+						});
+					}
 				}
 
 				if (majorNamespace == null) majorNamespace = getMode().getTrack().getId().split(":")[0];
@@ -286,9 +302,9 @@ public class BasicEditorView extends View<TrainEditorMode> {
 						} else {
 							DefaultExporter.getExporter().exportToZip(getMode().getTrack(), List.of(getMode().getTrack().getLines().getFirst().getId()), majorNamespace, minorNamespace, new File(requestedFilePath));
 						}
-						TinyFileDialogs.tinyfd_messageBox("Export", getMode().getTrack().getTrackName() + " was exported!", "ok", "info", 0);
+						FileDialogUtils.showMessageBox("Export", getMode().getTrack().getTrackName() + " was exported!");
 					} catch (IOException e) {
-						TinyFileDialogs.tinyfd_messageBox("Export", "An error occurred while trying to export your track!\n" + e.getMessage(), "ok", "error", 0);
+						FileDialogUtils.showErrorMessageBox("Export", "An error occurred while trying to export your track!\n" + e.getMessage());
 						e.printStackTrace();
 					}
 				}

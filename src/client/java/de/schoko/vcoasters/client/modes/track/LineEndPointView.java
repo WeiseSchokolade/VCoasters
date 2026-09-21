@@ -20,7 +20,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.InteractionHand;
 import org.joml.Vector3f;
 
 import java.util.Arrays;
@@ -56,10 +55,8 @@ public class LineEndPointView extends View<LineEditorMode> {
 	@Override
 	public boolean handleAttack() {
 		Track track = getMode().getEditedTrack();
-		Runnable successResponse = (Minecraft.getInstance().player != null) ? () -> Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND) : () -> {};
 		boolean handled = TargetTester.consumeClosestTarget(
 			TargetTester.consumer(previewPoint != null ? 1 : 0, (index, from, to) -> previewPoint.getAABB().clip(from, to), i -> {
-				successResponse.run();
 				gizmo = new PointTranslationGizmo(previewPoint);
 			}),
 			TargetTester.consumer(track.getLines().size() * 2, (i, from, to) -> (((i & 1) == 0) ? track.getLines().get(i / 2).getOutputEndPoint() : track.getLines().get(i / 2).getInputEndPoint()).getComponent(EndpointBoxComponent.class).clip(from, to), i -> {
@@ -69,11 +66,9 @@ public class LineEndPointView extends View<LineEditorMode> {
 					useEndpointRotationGizmo = !useEndpointRotationGizmo;
 				}
 				select(endpoint);
-				successResponse.run();
 			}),
 			TargetTester.consumer(track.getLines().size(), (i, from, to) -> track.getLines().get(i).getComponent(LineBoxComponent.class).clip(from, to), i -> {
 				Line line = track.getLines().get(i);
-				successResponse.run();
 				if (select(line) && previewPoint != null) cancelPreview();
 			}),
 			TargetTester.consumer(gizmo != null ? gizmo.getHitboxAmount() : 0, (i, from, to) -> gizmo.clip(i, from, to), i -> {

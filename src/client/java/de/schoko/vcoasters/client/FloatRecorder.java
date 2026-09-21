@@ -3,7 +3,7 @@ package de.schoko.vcoasters.client;
 import java.util.ArrayList;
 import java.util.List;
 
-public record 	FloatRecorder(List<Float> values, int maxValues) {
+public record FloatRecorder(List<Float> values, int maxValues) {
 	public FloatRecorder(int maxValues) {
 		this(new ArrayList<>(maxValues), maxValues);
 	}

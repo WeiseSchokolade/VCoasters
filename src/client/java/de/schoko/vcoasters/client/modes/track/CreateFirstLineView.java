@@ -49,8 +49,8 @@ public class CreateFirstLineView extends View<LineEditorMode> {
 		if (ImGui.begin("Preview")) {
 			if (ImGui.button("Create")) {
 				Line line = new Line(Line.getNewRandomId(), a, b);
-				line.getComponent(DirtContainer.class).setDirty(true);
 				getMode().addLine(line);
+				line.getComponent(DirtContainer.class).setDirty(true);
 				getMode().setView(new LineEndPointView(getMode()));
 			}
 		}

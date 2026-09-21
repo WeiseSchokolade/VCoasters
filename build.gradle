@@ -45,7 +45,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	implementation "foundry.imguimc:imguimc-fabric-26.2:2.0.2"
+	implementation "foundry.imguimc:imguimc-fabric-26.2:2.0.5"
 
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }

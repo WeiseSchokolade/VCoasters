@@ -285,8 +285,12 @@ public class LineEndPointView extends View<LineEditorMode> {
 				ImGui.sameLine();
 				float[] floats = new float[] {endPoint.getX(), endPoint.getY(), endPoint.getZ()};
 				if (ImGui.inputScalarN("##PositionInput", floats, 3)) {
-					endPoint.setPos(floats[0], floats[1], floats[2]);
-					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) {
+						endPoint.setPos(floats[0], floats[1], floats[2]);
+						endPoint.updateCorrespondingEndpoint();
+					} else {
+						endPoint.setPos(floats[0], floats[1], floats[2]);
+					}
 				}
 
 				ImGui.text("Rotation: ");
@@ -295,10 +299,16 @@ public class LineEndPointView extends View<LineEditorMode> {
 				floats[1] = (float) Math.toDegrees(endPoint.getPitch());
 				floats[2] = (float) Math.toDegrees(endPoint.getRoll());
 				if (ImGui.inputScalarN("##RotationInput", floats, 3)) {
-					endPoint.setYaw((float) Math.toRadians(floats[0]));
-					endPoint.setPitch((float) Math.toRadians(floats[1]));
-					endPoint.setRoll((float) Math.toRadians(floats[2]));
-					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) endPoint.updateCorrespondingEndpoint();
+					if (EditorOptions.autoSnap && endPoint.equalsCorrespondingEndpoint()) {
+						endPoint.setYaw((float) Math.toRadians(floats[0]));
+						endPoint.setPitch((float) Math.toRadians(floats[1]));
+						endPoint.setRoll((float) Math.toRadians(floats[2]));
+						endPoint.updateCorrespondingEndpoint();
+					} else {
+						endPoint.setYaw((float) Math.toRadians(floats[0]));
+						endPoint.setPitch((float) Math.toRadians(floats[1]));
+						endPoint.setRoll((float) Math.toRadians(floats[2]));
+					}
 				}
 
 				if (ImGui.button("Reset rotation")) {
@@ -410,5 +420,21 @@ public class LineEndPointView extends View<LineEditorMode> {
 	@Override
 	public void endClientTick() {
 		if (gizmo != null && getMode().isNothingSelected()) gizmo = null;
+		getMode().getEditedTrack().getLines().forEach(line -> {
+			EndPoint endPoint = line.getInputEndPoint();
+			boolean lineDirty = false;
+			if (endPoint.getComponent(DirtContainer.class).isDirty()) {
+				endPoint.getComponent(EndpointBoxComponent.class).updateHitbox();
+				endPoint.getComponent(DirtContainer.class).setDirty(false);
+				lineDirty = true;
+			}
+			endPoint = line.getOutputEndPoint();
+			if (endPoint.getComponent(DirtContainer.class).isDirty()) {
+				endPoint.getComponent(EndpointBoxComponent.class).updateHitbox();
+				endPoint.getComponent(DirtContainer.class).setDirty(false);
+				lineDirty = true;
+			}
+			if (lineDirty) line.getComponent(DirtContainer.class).setDirty(true);
+		});
 	}
 }

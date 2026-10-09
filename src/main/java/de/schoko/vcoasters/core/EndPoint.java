@@ -32,9 +32,9 @@ public final class EndPoint implements EditorObject, ValuePoint {
 	}
 
 	private void clampPos() {
-		this.pos.x = Math.round(pos.x * 1000d) / 1000f;
-		this.pos.y = Math.round(pos.y * 1000d) / 1000f;
-		this.pos.z = Math.round(pos.z * 1000d) / 1000f;
+		this.pos.x = (float) (Math.round(pos.x * 1000d) / 1000d);
+		this.pos.y = (float) (Math.round(pos.y * 1000d) / 1000d);
+		this.pos.z = (float) (Math.round(pos.z * 1000d) / 1000d);
 	}
 
 	public EndPoint getCorrespondingEndpoint() {

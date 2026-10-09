@@ -192,11 +192,11 @@ public enum LineCodecs {;
 		}
 
 		private InterpolatedPoint getA() {
-			return new InterpolatedPoint(aX / COORDINATE_SCALE, aY / COORDINATE_SCALE, aZ / COORDINATE_SCALE, (float) Math.toRadians(aYaw / SCALE), (float) Math.toRadians(aPitch / SCALE), aRoll / SCALE);
+			return new InterpolatedPoint(((float) aX) / COORDINATE_SCALE, ((float) aY) / COORDINATE_SCALE, ((float) aZ) / COORDINATE_SCALE, (float) Math.toRadians(aYaw / SCALE), (float) Math.toRadians(aPitch / SCALE), aRoll / SCALE);
 		}
 
 		private InterpolatedPoint getB() {
-			return new InterpolatedPoint(bX / COORDINATE_SCALE, bY / COORDINATE_SCALE, bZ / COORDINATE_SCALE, (float) Math.toRadians(bYaw / SCALE), (float) Math.toRadians(bPitch / SCALE), bRoll / SCALE);
+			return new InterpolatedPoint(((float) bX) / COORDINATE_SCALE, ((float) bY) / COORDINATE_SCALE, ((float) bZ) / COORDINATE_SCALE, (float) Math.toRadians(bYaw / SCALE), (float) Math.toRadians(bPitch / SCALE), bRoll / SCALE);
 		}
 
 		private static final Codec<V8DeltaChange> V8_CODEC = RecordCodecBuilder.create(instance -> instance.group(
